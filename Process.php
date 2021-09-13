@@ -5,6 +5,11 @@
 class Process
 {
 
+	/**
+	 * @str
+	 */
+	public $page;
+
 	/*
 	* @array
 	* @str
@@ -45,6 +50,12 @@ class Process
 	* @array
 	* @str
 	*/
+	protected $standard_currency = 'RUB';
+
+	/*
+	* @array
+	* @str
+	*/
 	protected $template;
 
 	/*
@@ -57,13 +68,13 @@ class Process
 	* @array
 	* @string
 	*/
-	protected $product_db;
+	protected $product_db = 'product';
 
 	/*
 	* @array
 	* @string
 	*/
-	protected $session_name = 'logged_user';
+	public $session_name = 'logged_user';
 
 	/*
 	* Русский текст
@@ -83,7 +94,28 @@ class Process
 	 * Наименование страницы
 	 * @string
 	 */
-	 protected $namePage;
+	 public $namePage;
+
+		// <-start debug param->
+		// временная мера, пока нет модуля licence и install
+	 /**
+	  * версия
+		* !debug
+	  */
+		public $version = '0.4.10';
+
+		/**
+ 	  * глобальная версия
+ 		* !debug
+ 	  */
+		public $global_version = '0.4';
+
+		/**
+ 	  * версия
+		* !debug
+ 	  */
+ 		public $build_date = '12.09.2021';
+		// <-end debug param->
 
 	/*
 	* Конструктор класса
@@ -94,7 +126,10 @@ class Process
 		$this->dblogin = $dblogin;
 		$this->dbpassword = $dbpassword;
 
+		$this->pageFix();
 		$this->sessionStart();
+		$this->debugMode();
+		$this->logout();
 
 		if (empty($_SESSION[$this->session_name])) {
 			$this->guestid();
@@ -105,6 +140,31 @@ class Process
 		}
 	}
 
+	/**
+	 * Дебаг мод
+	 */
+	public function debugMode()
+	{
+		if ($_GET['__DEBUG_MODE'] == 'IGNORE') {
+			$this->build = substr(md5($this->version), 7, -17);
+			$this->reference = substr(md5($global_version), 7, -17);
+
+			print(
+				'Версия vEngine: ' . $this->version . '<br>' .
+				'Сборка: ' . $this->build . '<br>' .
+				'Референс сборки: ' . $this->reference . '<br>' .
+				'Дата сборки: ' . $this->build_date
+			);
+		}
+	}
+
+	/**
+	 * возвращает таблицу DB
+	 */
+	public function returnSringDB()
+	{
+			return $this->dbtables;
+	}
 
 	/*
 	* Запуск сессии
@@ -121,27 +181,21 @@ class Process
 	*/
 	public function error404()
 	{
-		exit(include $_SERVER['DOCUMENT_ROOT'] . '/template/error404.tpl.php');
+		exit(include 'template/tpl.error404.php');
 	}
 
 	/*
 	* редиректы!
 	*/
-	public function redirect($url, $die = 0)
+	public function redirect($url = '')
 	{
-		if ($die == 0) {
-			ob_start();
-			$redirect = header("Location:" . $url);
-			ob_end_flush();
-		}
+		// exit('<meta http-equiv="refresh" content="0;url=' . $url . '">'); //Исправить это недоразумение
 
-		if ($die == 1) {
 			ob_start();
-			$redirect = header("Location:" . $url);
+			header("Location:" . $url);
 			ob_end_flush();
-		}
 
-		return $redirect;
+			// http_redirect($url, NULL, NULL, HTTP_REDIRECT_PERM);
 	}
 
 	/*
@@ -150,7 +204,7 @@ class Process
 	 */
 	 public function redirectToAnotherUrl($value='')
 	 {
-	 	// к 0.4 сделать
+	 	// к 0.5 сделать
 	 }
 
 	/*
@@ -174,21 +228,65 @@ class Process
 	{
 		#Исправление ссылок
 		if ($_SERVER['REQUEST_URI'] == '/') {
-			$page = 'home';
+			$this->page = 'home';
 		}else{
-			$page = substr($_SERVER['REQUEST_URI'], 1);
+			$this->page = substr($_SERVER['REQUEST_URI'], 1);
+		}
 
-			if ( !preg_match('/^[A-z0-9]{3,60}$/', $page) )
-			{
-				$this->error404();
+		// Исправление $_GET запросов
+		if ($_GET) {
+			$getString = substr($this->page, strrpos($_SERVER['REQUEST_URI'], '?'), 1000);
+			$leghtFix = strlen($getString);
+			$leghtFullPage = strlen($this->page);
+
+			$getResult = $leghtFullPage - ( $leghtFix + 1 );
+
+			$result = mb_substr($this->page, 0, $getResult);
+
+			if (empty($result)) {
+				$this->page = 'home';
+			}else{
+				$this->page = $result;
 			}
 		}
 
-		return $page;
+			return $this->page;
+	}
+
+	/**
+	 * @return $page
+	 */
+	public function returnPage()
+	{
+		return $this->page;
 	}
 
 	/*
-	* Поиск файлов в указанной папке
+	* Поиск и только поиск файлов в указанной папке
+	*/
+	public function returnFolderContents($dir, $print = false)
+	{
+		$pageDir = $_SERVER['DOCUMENT_ROOT'] . '/' . $dir . '/';
+		$pageRoad = scandir($pageDir);
+
+		#Удаление не нужных элементов
+		$f = array_slice($pageRoad, 3);
+
+			foreach ($f as $i) {
+				$fix = substr($i, strrpos($i, '.') + 1);
+
+				if ($fix == 'php' && $i != '_helpers.php' && $i != 'Install.php') {
+					if (file_exists($pageDir . $i) && $print == false) {
+						return $i;
+					}elseif ($print === true) {
+						print substr($i, 0, -4) . '<br>';
+					}
+				}
+			}
+		}
+
+	/*
+	* Поиск и подключение файлов в указанной папке
 	*/
 	public function findFiles($page, $dir)
 	{
@@ -228,14 +326,49 @@ class Process
 					}
 				}
 			}
+		}
+
+	/**
+	 * Подключение сервисов
+	 */
+	public function serviceConnect($services)
+	{
+		if (!$services) {
+			return;
+		}
+
+		while ($name = current($services)) {
+			$key = key($services);
+
+			$file = array_shift($services[$key]);
+
+			$dir[] = 'modules/services/' . $key;
+
+			foreach ($dir as $value) {
+				foreach ([$file] as $connect) {
+					if (file_exists($_SERVER['DOCUMENT_ROOT'] . '/' . $value . '/' . $connect . '/' . $connect . '.php')) {
+						include $_SERVER['DOCUMENT_ROOT'] . '/' . $value . '/' . $connect . '/' . $connect . '.php';
+					}
+				}
+			}
+
+		  next($services);
+		}
 	}
 
 	/*
 	* Навигация страниц
 	*/
-	public function pageNavigation($page)
+	public function pageNavigation()
 	{
-		return $this->findFiles($page, '_pages');
+		if ($this->page == 'admin') {
+			include 'Admin/admin.tpl.php';
+		}elseif (file_exists($_SERVER['DOCUMENT_ROOT'] . '/install.init') && $this->page == 'install') {
+			$this->moduleConnect(['Install']);
+			returnMethod('Install', $this->page);
+		}else{
+			$this->renderPage($this->page);
+		}
 	}
 
 	/**
@@ -243,9 +376,63 @@ class Process
 	 */
 	public function navigationButton()
 	{
-		##Сначала перенести все настройки в бд, потом писать метод
-	}
+		$countAll = R::count('pages');
+		$getPage = R::findAll('pages');
 
+		switch (true) {
+			case $countAll > 5:
+				for ($i=0; $i < $countAll; $i++) {
+					if ($i != 5) {
+						foreach ($getPage as $value) {
+							if (
+							$value['module'] != 'autch'
+							&& $value['module'] != 'Profile'
+							&& $value['custom_url'] != '#%api%#'
+						) {
+								print '<li class="hover-menu"><a href="' . $value['page'] . '" class="nav-link px-2 text-white">' . $value['name'] . '</a></li>';
+							}
+						}
+					}
+
+					if ($i >= 5) {
+						print '<div class="dropdown show">
+						  <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						    '. $this->tr('Ещё', 'More') .'
+						  </a>
+
+						  <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">';
+
+							foreach ($getPage as $value) {
+								if (
+								$value['module'] != 'autch'
+								&& $value['module'] != 'Profile'
+								&& $value['custom_url'] != '#%api%#'
+							)	{
+									print '<a class="dropdown-item" href="' . $value['page'] . '">' . $value['name'] . '</a>';
+								}
+							}
+							print '</div>
+						</div>';
+					}
+				}
+				break;
+			case $countAll <= 5:
+				foreach ($getPage as $value) {
+					if (
+					$value['module'] != 'autch'
+					&& $value['module'] != 'Profile'
+					&& $value['custom_url'] != '#%api%#'
+				) {
+						print '<li class="hover-menu"><a href="' . $value['page'] . '" class="nav-link px-2 text-white">' . $value['name'] . '</a></li>';
+					}
+				}
+				break;
+
+			default:
+				print '<li class="hover-menu"><a href="" class="nav-link px-2 text-white">ERROR</a></li>';
+				break;
+		}
+	}
 
 	/*
 	* Выводит сообщения об ошибках
@@ -290,15 +477,14 @@ class Process
 	/*
 	* Подключение к базе данных
 	*/
-	protected function databaseConnect($connect_string, $dblogin, $dbpassword)
+	public function databaseConnect($connect_string, $dblogin, $dbpassword)
 	{
-		if (!empty($this->connect_string)) {
-			R::setup( $this->connect_string, $this->dblogin, $this->dbpassword );
+		if (!empty($connect_string)) {
+			R::setup( $connect_string, $dblogin, $dbpassword );
 		}else{
-			$errors[] = 'Ошибка подключения к базе данных!';
-			#Подготовка к нормальным переводам!
-			$errors[] = $this->tr('Ошибка подключения к базе данных!', 'Error connecting to database!');
-			return $this->renderError($errors);
+			// #Подготовка к нормальным переводам!
+			// $errors[] = $this->tr('Ошибка подключения к базе данных!', 'Error connecting to database!');
+			// return $this->renderError($errors); //переделать
 		}
 	}
 
@@ -308,6 +494,10 @@ class Process
 	*/
 	public function moduleConnect($modules)
 	{
+		$modules[] = [
+			'install' => 'Install'
+		];
+
 		foreach ($modules as $value) {
 			$this->findFiles($value, 'modules');
 		}
@@ -319,16 +509,19 @@ class Process
 	*/
 	public function templateConnect($template)
 	{
-		if (!empty($template)) {
+		if (!empty($template) && !is_array($template)) {
 			$tpl = $_SERVER['DOCUMENT_ROOT'] . '/template/' . $template . '.tpl.php';
 			if (file_exists($tpl)) {
 				include $tpl;
 			}
+		}elseif (!empty($template) && is_array($template)){
+			foreach ($template as $tplArr) {
+				$tpl = $_SERVER['DOCUMENT_ROOT'] . '/template/' . $tplArr . '.tpl.php';
+				if (file_exists($tpl)) {
+					include $tpl;
+				}
+			}
 		}
-
-		// if ($template == 'default') {
-		// 	include '/template/';
-		// }
 	}
 
 	#Создание временного пользователя
@@ -339,8 +532,9 @@ class Process
 			setcookie('guestid', substr(md5(rand(0, 50000)), 25));
 			$this->redirect('/');
 		}
-		if (isset($sess)) {
+		if (!empty($sess)) {
 			unset($_COOKIE['guestid']);
+			// сделать запись в бд, если её нет и находится на регистрации
 		}
 	}
 
@@ -348,81 +542,119 @@ class Process
 	/*
 	* Кастомные модули добавлять аккуратно!
 	*/
-	public function moduleCustom($custom = '')
+	public function moduleCustom($custom, $name)
 	{
-		if (!empty($custom)) {
-			if (file_exists($_SERVER['DOCUMENT_ROOT'] . '/modules_custom/' . $custom . '.module.php') && $custom != '') {
-				require $_SERVER['DOCUMENT_ROOT'] . '/modules_custom/' . $custom . '.module.php';
+		if (!empty($custom) && $name != '') {
+			if (file_exists($_SERVER['DOCUMENT_ROOT'] . '/modules_custom/' . $name . '/' . $custom . '.module.php') && $custom != '') {
+				require $_SERVER['DOCUMENT_ROOT'] . '/modules_custom/' . $name . '/' . $custom . '.module.php';
 			}
 		}
 	}
 
 	/**
 	 *  рендер страниц
-	 *	Использовать в версиях >0.4.*
-	 *	При версии ниже 0.4 (что маловероятно, но всё же) - использовать templateConnect();
+	 * @str name
+	 * @str page
+	 * @str file
+	 * @str class
+	 * @str module
+	 * @str url
+	 * @str path
+	 * @str custom_url
+	 * @arr tpl
+	 * @arr js
+	 * @arr param_cls
+	 * @arr module_cst
+	 * @str design
 	 */
-	public function renderPage(
-	$namePage = '',
-	$page_tpl = [],
-	$js = [],
-	$class = [],
-	$module_custom = [],
-	$section = true
-	) {
-		if ($namePage != '') {
-			$this->namePage = $namePage;
+	public function renderPage($page) {
+
+		$pageArr = findPageDB($page);
+
+		returnMethod('User', 'standart', 'checkReferalLink');
+
+		if ($page == 'logout') {
+			$this->logout($page);
 		}
 
-		include 'tpl.head.php';
+		if (empty($pageArr)) {
+			$this->error404();
+		}
 
-		$this->addScript([
-			'src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"',
-			'src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"',
-			'src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"'
-		], true);
+		if ($pageArr->name == '') {
+	    $this->namePage = $page;
+	  }else{
+			$this->namePage = $pageArr->name;
+		}
 
-		print '<div class="main-container">
-			<div class="container-content">';
+	  include 'template/tpl.head.php';
 
-		#Если не подходит под стандарт
-		#ну или класс сам генерирует страницу
-		if ($class) {
-			$this->funcUse(
-				$class[0],
-				$class[1],
-				$class[2],
-				$class[3],
-				$class[4]
+	  $this->addScript([
+	    'src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"',
+	    'src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"',
+	    'src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"'
+	  ], true);
+
+	  print '<div class="main-container">
+	    <div class="container-content">';
+
+	  if ($pageArr->class) {
+	    returnMethod(
+				$pageArr->class,
+				$pageArr->param_cls,
+				$pageArr->method,
+				$pageArr->param,
+				$pageArr->path,
+				$pageArr->module
 			);
+	  }
+
+
+	  if ($pageArr->module_cst) {
+	    $this->moduleCustom($pageArr->module_cst);
+	  }
+
+		if ($pageArr->tpl != 'generate') {
+			if (is_array($pageArr->tpl) && $pageArr->design == 'section') {
+				foreach ($pageArr->tpl as $tpl) {
+					print '<section>';
+					$this->templateConnect($tpl);
+					print '</section>';
+				}
+				}elseif ($pageArr->tpl) {
+					$this->templateConnect($pageArr->tpl);
+				}
 		}
 
-		if ($module_custom) {
-			$this->moduleCustom($module_custom);
+	  if ($pageArr->js) {
+	    $this->addScript($pageArr->js);
+	  }
+
+	  print '</div>';
+
+		if ($page == 'subscribe') //после решения проблемы со стилями - убрать
+		{}
+		elseif ($page == 'user')
+		{}
+		else{
+			include 'template/tpl.footer.php';
+			print '<footer class="footer">
+				<div class="commercy_footer">
+				<span class="commercy_copyright">
+					<div>
+						Copyright © ' . date("Y") . '
+						vEngine
+						|
+						(<a href="https://nazhariagames.site/subscribe" class="support_footer">' . $this->tr('Купить', 'Buy') . '</a>)
+					</div>
+				</span>
+				</div>
+			</footer>';
 		}
 
-		if ($page_tpl && $section) {
-			foreach ($page_tpl as $tpl) {
-				print '<section>';
-				$this->templateConnect($tpl);
-				print '</section>';
-			}
-		}else{
-			foreach ($page_tpl as $tpl) {
-				$this->templateConnect($tpl);
-			}
-		}
+	  print '</body>
+	  </html>';
 
-		if ($js) {
-			$this->addScript($js);
-		}
-
-		print '</div>';
-
-		include 'tpl.footer.php';
-
-		print '</body>
-		</html>';
 	}
 
 	/**
@@ -432,7 +664,7 @@ class Process
 	 {
 		 if ($js && !$custom) {
 			 foreach ($js as $key) {
-				 print "<script src=" . $key . "></script>";
+				 print '<script src="' . $key . '"></script>';
 			 }
 		 }else{
 			 foreach ($js as $key) {
@@ -441,53 +673,18 @@ class Process
 		 }
 	 }
 
-	/**
-	 * Костыльный метод вызова функций дочерних классов
-	 * Удалить, когда всё будет норм!
-	 */
-	 public function funcUse($func = '', $class = '', $param = [], $module = false, $core_class = false)
-	 {
-	 	require $_SERVER['DOCUMENT_ROOT'] . '/config/config.php';
-
-		// $this->findFiles($class, 'modules');
-
-	 	if ( ($func && $class) != '') {
-				if ($module) {
-
-					if ($core_class) {
-						$tempClass = new $class($this->connect_string, $this->dblogin, $this->dbpassword);
-
-						if ($tempClass && $param) {
-							$tempClass->$func(implode(", ", $param));
-						}else{
-							$tempClass->$func();
-						}
-
-					}
-
-					if ($core_class === FALSE) {
-
-						$tempClass = new $class();
-
-							if ($tempClass && $param) {
-								$tempClass->$func($param);
-							}else{
-								$tempClass->$func();
-							}
-						}
-					}
-		 		}
-		 }
-
-		 public function logout($page)
+		 public function logout()
 		 {
-			 if ($page == 'logout') {
+			 if ($this->page == 'logout') {
 			 	session_destroy();
 			 	$this->redirect('/');
 			}elseif (!empty($_POST['logout'])) {
 			 	session_destroy();
 			 	$this->redirect('/');
-			 }
+			}elseif(!empty($_GET['logout'])) {
+				session_destroy();
+				$this->redirect('/');
+			}
 		 }
 
 }

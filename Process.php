@@ -1,9 +1,17 @@
 <?php
+use ORM\RedBeanClass;
+
 /**
  * Ядро!
  */
 class Process
 {
+
+	/**
+	 * @str
+	 */
+	public $moduleName = 'core';
+
 
 	/**
 	 * @str
@@ -102,7 +110,7 @@ class Process
 	  * версия
 		* !debug
 	  */
-		public $version = '0.4.10';
+		public $version = '0.4.20';
 
 		/**
  	  * глобальная версия
@@ -114,7 +122,7 @@ class Process
  	  * версия
 		* !debug
  	  */
- 		public $build_date = '12.09.2021';
+ 		public $build_date = '08.11.2021';
 		// <-end debug param->
 
 	/*
@@ -126,19 +134,55 @@ class Process
 		$this->dblogin = $dblogin;
 		$this->dbpassword = $dbpassword;
 
+		if (!R::testConnection()) {
+			$this->databaseConnect(
+				$this->connect_string,
+				$this->dblogin,
+				$this->dbpassword
+			);
+		}
+
 		$this->pageFix();
 		$this->sessionStart();
 		$this->debugMode();
 		$this->logout();
 
-		if (empty($_SESSION[$this->session_name])) {
+		if (empty($_SESSION[$this->session_name]) && !stristr($this->page, 'vengine/api/')) {
 			$this->guestid();
 		}
-
-		if ($connect_string && !R::testConnection()) {
-			$this->databaseConnect($this->connect_string, $this->dblogin, $this->dbpassword);
-		}
 	}
+
+	public function init($closed = false)
+	{
+		require _File('settings', 'config');
+
+		$this->moduleConnect($modules);
+		$this->serviceConnect($services);
+
+		if (!R::testConnection() || ($closed && !$_GET['debug:__sys__'])) {
+			print 'На сайте ведутся технические работы, попробуйте вернуться позже!';
+			return;
+		}
+
+		$this->pageNavigation();
+	}
+
+	/**
+	 * Записывает в бд данные!
+	 */
+	 public function dbSave($table, array $fields)
+	 {
+	 		if ($table && $fields) {
+						$db = R::dispense($table);
+
+						foreach ($fields as $keyField => $fieldValue) {
+							$db->$keyField = $fieldValue;
+							continue;
+						}
+
+						!empty($db->$keyField) ? R::store($db) : '';
+	 		}
+	 }
 
 	/**
 	 * Дебаг мод
@@ -181,7 +225,7 @@ class Process
 	*/
 	public function error404()
 	{
-		exit(include 'template/tpl.error404.php');
+		exit(include 'template/error404.tpl.php');
 	}
 
 	/*
@@ -189,13 +233,7 @@ class Process
 	*/
 	public function redirect($url = '')
 	{
-		// exit('<meta http-equiv="refresh" content="0;url=' . $url . '">'); //Исправить это недоразумение
-
-			ob_start();
-			header("Location:" . $url);
-			ob_end_flush();
-
-			// http_redirect($url, NULL, NULL, HTTP_REDIRECT_PERM);
+		print "<script>self.location='".$_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['HTTP_HOST'].'/'.$url."';</script>";
 	}
 
 	/*
@@ -207,21 +245,23 @@ class Process
 	 	// к 0.5 сделать
 	 }
 
+	 public function returnSettigns()
+	 {
+	 	require $_SERVER['DOCUMENT_ROOT'] . '/config/settings.php';
+
+		$setting['modules'] = $modules;
+		$setting['services'] = $services;
+		$setting['settings'] = $settings;
+
+		return $setting;
+	 }
+
 	/*
-	* Переводы
+	* @deprecated
 	*/
 	public function tr($text = '', $translate = '')
 	{
-		// if ($this->tr_ru) {
-		// 	return $text;
-		// }
-		// if ($this->tr_en) {
-		// 	if (core::$translate == '') {
-		// 		return $text;
-		// 	}
-		// 	return $translate;
-		// }
-		return $text;
+		tr($text, $translate);
 	}
 
 	public function pageFix()
@@ -260,30 +300,6 @@ class Process
 	{
 		return $this->page;
 	}
-
-	/*
-	* Поиск и только поиск файлов в указанной папке
-	*/
-	public function returnFolderContents($dir, $print = false)
-	{
-		$pageDir = $_SERVER['DOCUMENT_ROOT'] . '/' . $dir . '/';
-		$pageRoad = scandir($pageDir);
-
-		#Удаление не нужных элементов
-		$f = array_slice($pageRoad, 3);
-
-			foreach ($f as $i) {
-				$fix = substr($i, strrpos($i, '.') + 1);
-
-				if ($fix == 'php' && $i != '_helpers.php' && $i != 'Install.php') {
-					if (file_exists($pageDir . $i) && $print == false) {
-						return $i;
-					}elseif ($print === true) {
-						print substr($i, 0, -4) . '<br>';
-					}
-				}
-			}
-		}
 
 	/*
 	* Поиск и подключение файлов в указанной папке
@@ -361,8 +377,10 @@ class Process
 	*/
 	public function pageNavigation()
 	{
-		if ($this->page == 'admin') {
-			include 'Admin/admin.tpl.php';
+		if ($this->page == stristr($this->page, 'vengine/api/')) {
+			api();
+		}elseif ($this->page == stristr($this->page, 'admin')) {
+			include 'Admin/load.php';
 		}elseif (file_exists($_SERVER['DOCUMENT_ROOT'] . '/install.init') && $this->page == 'install') {
 			$this->moduleConnect(['Install']);
 			returnMethod('Install', $this->page);
@@ -371,121 +389,12 @@ class Process
 		}
 	}
 
-	/**
-	 * Метод генерации кнопок навигации в шапке
-	 */
-	public function navigationButton()
-	{
-		$countAll = R::count('pages');
-		$getPage = R::findAll('pages');
-
-		switch (true) {
-			case $countAll > 5:
-				for ($i=0; $i < $countAll; $i++) {
-					if ($i != 5) {
-						foreach ($getPage as $value) {
-							if (
-							$value['module'] != 'autch'
-							&& $value['module'] != 'Profile'
-							&& $value['custom_url'] != '#%api%#'
-						) {
-								print '<li class="hover-menu"><a href="' . $value['page'] . '" class="nav-link px-2 text-white">' . $value['name'] . '</a></li>';
-							}
-						}
-					}
-
-					if ($i >= 5) {
-						print '<div class="dropdown show">
-						  <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-						    '. $this->tr('Ещё', 'More') .'
-						  </a>
-
-						  <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">';
-
-							foreach ($getPage as $value) {
-								if (
-								$value['module'] != 'autch'
-								&& $value['module'] != 'Profile'
-								&& $value['custom_url'] != '#%api%#'
-							)	{
-									print '<a class="dropdown-item" href="' . $value['page'] . '">' . $value['name'] . '</a>';
-								}
-							}
-							print '</div>
-						</div>';
-					}
-				}
-				break;
-			case $countAll <= 5:
-				foreach ($getPage as $value) {
-					if (
-					$value['module'] != 'autch'
-					&& $value['module'] != 'Profile'
-					&& $value['custom_url'] != '#%api%#'
-				) {
-						print '<li class="hover-menu"><a href="' . $value['page'] . '" class="nav-link px-2 text-white">' . $value['name'] . '</a></li>';
-					}
-				}
-				break;
-
-			default:
-				print '<li class="hover-menu"><a href="" class="nav-link px-2 text-white">ERROR</a></li>';
-				break;
-		}
-	}
-
-	/*
-	* Выводит сообщения об ошибках
-	* Модальное окно либо починить, либо кильнуть
-	*/
-	public function renderError($errors = [], $modal = true)
-	{
-		if ($errors && $modal == false) {
-		    foreach ($errors as $value) {
-
-			      echo '<div class="alert alert-danger" role="alert">
-			      <label>';
-			      echo $value . '<br>';
-			      echo '</label>
-			      </div>';
-
-		    }
-		} else if ($errors && $modal == true) {
-			print '<div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="modalError" aria-hidden="true">
-						<div class="modal-dialog modal-lg">
-						<div class="modal-content">
-
-									<div class="modal-header">
-										<h4 class="modal-title" id="myLargeModalLabel">' . $this->tr('Ошибка', 'Error') . '</h4>
-										<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-											<span aria-hidden="true">×</span>
-										</button>
-									</div>
-									<div class="modal-body">';
-
-			foreach ($errors as $value) {
-				print '<div class="alert alert-danger" role="alert">';
-					echo $value . '<br>';
-				print '</div>';
-			}
-
-			print '</div></div></div></div>';
-		}
-	}
-
-
 	/*
 	* Подключение к базе данных
 	*/
 	public function databaseConnect($connect_string, $dblogin, $dbpassword)
 	{
-		if (!empty($connect_string)) {
-			R::setup( $connect_string, $dblogin, $dbpassword );
-		}else{
-			// #Подготовка к нормальным переводам!
-			// $errors[] = $this->tr('Ошибка подключения к базе данных!', 'Error connecting to database!');
-			// return $this->renderError($errors); //переделать
-		}
+		RedBeanClass::connect($connect_string, $dblogin, $dbpassword);
 	}
 
 
@@ -494,10 +403,6 @@ class Process
 	*/
 	public function moduleConnect($modules)
 	{
-		$modules[] = [
-			'install' => 'Install'
-		];
-
 		foreach ($modules as $value) {
 			$this->findFiles($value, 'modules');
 		}
@@ -512,7 +417,7 @@ class Process
 		if (!empty($template) && !is_array($template)) {
 			$tpl = $_SERVER['DOCUMENT_ROOT'] . '/template/' . $template . '.tpl.php';
 			if (file_exists($tpl)) {
-				include $tpl;
+				return include $tpl;
 			}
 		}elseif (!empty($template) && is_array($template)){
 			foreach ($template as $tplArr) {
@@ -530,7 +435,7 @@ class Process
 		$sess = $_SESSION[$this->session_name]->login;
 		if (empty($_COOKIE['guestid']) && empty($sess)) {
 			setcookie('guestid', substr(md5(rand(0, 50000)), 25));
-			$this->redirect('/');
+			$this->redirect('');
 		}
 		if (!empty($sess)) {
 			unset($_COOKIE['guestid']);
@@ -545,10 +450,27 @@ class Process
 	public function moduleCustom($custom, $name)
 	{
 		if (!empty($custom) && $name != '') {
-			if (file_exists($_SERVER['DOCUMENT_ROOT'] . '/modules_custom/' . $name . '/' . $custom . '.module.php') && $custom != '') {
-				require $_SERVER['DOCUMENT_ROOT'] . '/modules_custom/' . $name . '/' . $custom . '.module.php';
+			if (file_exists($_SERVER['DOCUMENT_ROOT'] . '/www/_modules/' . $name . '/' . $custom . '.module.php') && $custom != '') {
+				require $_SERVER['DOCUMENT_ROOT'] . '/www/_modules/' . $name . '/' . $custom . '.module.php';
 			}
 		}
+	}
+
+	//Переделать под массовое присвоение и перенести в либы
+	protected function setVar()
+	{
+		TemplateVar::set([
+			'activeAutch' => isActiveModule('Autch'),
+			'userLogin' => $_SESSION[$this->session_name]->login,
+			'guestid' => $_COOKIE['guestid']
+		]);
+	}
+
+	protected function getVars()
+	{
+		$this->setVar();
+
+		return TemplateVar::getAll();
 	}
 
 	/**
@@ -567,9 +489,15 @@ class Process
 	 * @arr module_cst
 	 * @str design
 	 */
-	public function renderPage($page) {
 
-		$pageArr = findPageDB($page);
+	 // Проброс данных из выполняемых классов --> составление head (html) --
+	 // -> подключение шаблонов --> подключение js (и/или до подключения шаблона) --
+	 // -> Должен только выводить и содержать минимум логики (должны приходить максимально чистые данные)
+	public function renderPage($page)
+	{
+		$pageArr = controller('page', $page);
+
+		$var = $this->getVars();
 
 		returnMethod('User', 'standart', 'checkReferalLink');
 
@@ -587,16 +515,26 @@ class Process
 			$this->namePage = $pageArr->name;
 		}
 
-	  include 'template/tpl.head.php';
+		print '<!DOCTYPE html>
+		<html>
+		<head>
+			<title>'. $this->namePage .'</title>
+			<link rel="stylesheet" type="text/css" href="/../template/style.css">
+		  <link rel="stylesheet" type="text/css" href="/../template/_custom_style.css">
+			<link rel="shortcut icon" href="images/favicon.png">
+		</head>
+		<body style="height: auto;">';
 
-	  $this->addScript([
-	    'src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"',
-	    'src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"',
-	    'src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"'
-	  ], true);
+		require _File('head.tpl', 'core/template');
 
-	  print '<div class="main-container">
-	    <div class="container-content">';
+		$this->addScript([
+			'src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"',
+			'src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"',
+			'src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"'
+		], true);
+
+		print '<div class="main-container">
+			<div class="container-content">';
 
 	  if ($pageArr->class) {
 	    returnMethod(
@@ -609,12 +547,11 @@ class Process
 			);
 	  }
 
-
 	  if ($pageArr->module_cst) {
 	    $this->moduleCustom($pageArr->module_cst);
 	  }
 
-		if ($pageArr->tpl != 'generate') {
+		if ($pageArr->custom_url != '#%tpl_generate%#') {
 			if (is_array($pageArr->tpl) && $pageArr->design == 'section') {
 				foreach ($pageArr->tpl as $tpl) {
 					print '<section>';
@@ -632,25 +569,7 @@ class Process
 
 	  print '</div>';
 
-		if ($page == 'subscribe') //после решения проблемы со стилями - убрать
-		{}
-		elseif ($page == 'user')
-		{}
-		else{
-			include 'template/tpl.footer.php';
-			print '<footer class="footer">
-				<div class="commercy_footer">
-				<span class="commercy_copyright">
-					<div>
-						Copyright © ' . date("Y") . '
-						vEngine
-						|
-						(<a href="https://nazhariagames.site/subscribe" class="support_footer">' . $this->tr('Купить', 'Buy') . '</a>)
-					</div>
-				</span>
-				</div>
-			</footer>';
-		}
+		require _File('footer.tpl', 'core/template');
 
 	  print '</body>
 	  </html>';
@@ -676,14 +595,14 @@ class Process
 		 public function logout()
 		 {
 			 if ($this->page == 'logout') {
-			 	session_destroy();
-			 	$this->redirect('/');
+			 	unset($_SESSION[$this->session_name]);
+			 	$this->redirect('');
 			}elseif (!empty($_POST['logout'])) {
-			 	session_destroy();
-			 	$this->redirect('/');
+			 	unset($_SESSION[$this->session_name]);
+			 	$this->redirect('');
 			}elseif(!empty($_GET['logout'])) {
-				session_destroy();
-				$this->redirect('/');
+				unset($_SESSION[$this->session_name]);
+				$this->redirect('');
 			}
 		 }
 

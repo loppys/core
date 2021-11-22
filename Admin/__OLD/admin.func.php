@@ -50,7 +50,7 @@
   <form action="" method="POST" name="logs" class="logs">
     <p>LOG</p>
     <?= $admin->read_log($post['button_lg']) ?>
-    <input type="submit" name="button_lg" value='<?= $_SESSION[$this->session_name]->info_log ?>'>
+    <input type="submit" name="button_lg" value='login'>
   </form>
   <hr>
   <form action="" method="POST" name="setbalance" class="setbalance">

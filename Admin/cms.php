@@ -1,4 +1,22 @@
 <?php
+
+/**
+ * CMS
+ */
+class CMS extends Process
+{
+  public function initCMS()
+  {
+    $post = $_POST;
+    $get = $_GET;
+    $page = $this->page;
+    $chapter = substr($page, strrpos($page, '/') + 1, 100);
+    $setting = $this->returnSettigns();
+    $admin = new Admin($setting['settings']['database']['dbtables']);
+    include 'template/tpl.php';
+  }
+}
+
 /**
  * Админка)
  */
@@ -17,7 +35,7 @@ class Admin
   $load = R::findAll($this->dbtables);
   foreach ($load as $show) {
     if ($show->access >= 4) {
-      echo '|ID-' . $show->id . '| |LOGIN-' . $show->login . '| |LEVEL_ACCESS-' . $show->access . '| |BALANCE-' . $show->balance . '<br>';
+      echo '|ID-' . $show->id . '| |LOGIN-' . $show->login . '| |LEVEL_ACCESS-' . $show->access . '| |BALANCE-' . $show->balance . '<br><br>';
       }
     }
   }
@@ -28,7 +46,7 @@ class Admin
   $load = R::findAll($this->dbtables);
   foreach ($load as $show) {
     if ($show->access >= 2 && $show->access < 4) {
-      echo '|ID-' . $show->id . '| |LOGIN-' . $show->login . '| |LEVEL_ACCESS-' . $show->access . '| |BALANCE-' . $show->balance . '<br>';
+      echo '|ID-' . $show->id . '| |LOGIN-' . $show->login . '| |LEVEL_ACCESS-' . $show->access . '| |BALANCE-' . $show->balance . '<br><br>';
     }
     }
   }
@@ -37,14 +55,14 @@ class Admin
   {
   include $_SERVER['DOCUMENT_ROOT'] . '/config/settings.php';
   $load = R::load($this->dbtables, $id);
-  return $load;
+  return $load . '<br>';
   }
 
   public function usercount()
   {
   include $_SERVER['DOCUMENT_ROOT'] . '/config/settings.php';
   $count = R::count($this->dbtables);
-  return $count;
+  return $count .'<br>';
   }
 
   public function productlist($button)
@@ -53,7 +71,7 @@ class Admin
   $load = R::findAll($settings['database']['dbproduct']);
   if (isset($button)) {
     foreach ($load as $product) {
-      echo $product . '<br>';
+      echo $product . '<br><br>';
       }
     }
   }
@@ -89,7 +107,7 @@ class Admin
       $load->release = date("Y-m-d H:i:s");
       $load->market = $market;
       R::store($load);
-      print 'Last add- ' . '{' . $name . ' | ' . $description . ' | ' . $price . ' | ' . $type . ' | ' . $market . '}';
+      print 'Last add- ' . '{' . $name . ' | ' . $description . ' | ' . $price . ' | ' . $type . ' | ' . $market . '} <br>';
       }
     }
   }
@@ -132,17 +150,7 @@ class Admin
   {
     include $_SERVER['DOCUMENT_ROOT'] . '/config/settings.php';
     if (isset($button)) {
-      if ($log_mode == 'TRUE') {
-          exit("<meta http-equiv='refresh' content='0; url= /?_LOG_MODE=REDIR'>");
-      }
-    }
-
-    $info = 'logs';
-
-    if ($log_mode == 'TRUE') {
-      $_SESSION[$this->session_name]->info_log = 'logs on';
-    }else{
-      $_SESSION[$this->session_name]->info_log = 'logs off';
+        exit("<meta http-equiv='refresh' content='0; url= /?_LOG_MODE=REDIR'>");
     }
   }
 
@@ -164,7 +172,7 @@ class Admin
     include $_SERVER['DOCUMENT_ROOT'] . '/config/settings.php';
     $user = $_SESSION[$this->session_name];
     if ($check->access >= 4) { #Access level check
-      echo '<form method="POST"><input type="submit" name="admin_panel" value="Admin panel"></form>';
+      echo '<form method="POST"><input type="submit" name="admin_panel" value="Admin panel"></form><br>';
     }
   }
 

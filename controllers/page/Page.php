@@ -1,10 +1,11 @@
 <?php
-/**
- * Проверяет и возвращает название страницы и параметры для неё
- */
-function findPageDB($page)
-{
 
+function page($page)
+{
+  if (!$page) {
+    return false;
+  }
+  
   $load = R::findOne('pages', 'page = ? OR custom_url = ? OR url = ?', array($page, $page, $page));
 
   if ($load->param_cls) {

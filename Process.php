@@ -1,4 +1,7 @@
 <?php
+
+namespace Vengine;
+
 use ORM\RedBeanClass;
 
 /**

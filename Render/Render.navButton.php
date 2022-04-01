@@ -1,5 +1,7 @@
 <?php
 
+namespace Vengine\Render;
+
 /**
  *  Создание ссылок в шапке для навигации
  */

@@ -2,7 +2,7 @@
 
 namespace Vengine\System\libs\DataBase;
 
-use R;
+use RedBeanPHP\R;
 
 class Adapter extends R
 {

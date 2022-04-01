@@ -1,5 +1,7 @@
 <?php
 
+namespace Vengine;
+
 class Startup
 {
   public static function init()

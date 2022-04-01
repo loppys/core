@@ -1,5 +1,9 @@
 <?php
 
+namespace Vengine\Render;
+
+use Vengine\Process;
+
 class RenderPage extends Process
 {
   protected $pageArr;

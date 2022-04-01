@@ -1,5 +1,4 @@
 <?php
-use System\common\TokenSystem\Token;
 
 /**
  * Все функции, которые нужны и в обычной разметке находятся тут!
@@ -9,52 +8,36 @@ use System\common\TokenSystem\Token;
  */
 
 /**
- * Подключает/вставляет изображение
- */
-function includeImagePath($image, $insert = false)
-{
-  if ($image && !$insert) {
-    include $_SERVER['DOCUMENT_ROOT'] . '/images/' . $image;
-  }else{
-    print '/images/' . $image;
-  }
-}
-
-/**
- * Если нужно, то подключает только этот модуль для каких-либо целей!
- */
-function includeOneModule($module)
-{
-  if ($module) {
-    include $_SERVER['DOCUMENT_ROOT'] . '/modules/' . $module . '.php';
-  }
-}
-
-/**
  * var_dump
  */
-function d($dump, $exit = false)
-{
- if (!$exit) {
-   var_dump($dump);
- }else{
-   var_dump($dump);
-   exit();
- }
-}
+ function d($dump, $die = false)
+ {
+   $dump = [$dump];
 
-/**
- * print_r
- */
-function pr($print, $exit = false)
-{
-  if (!$exit) {
-    print_r($print);
-  }else{
-    print_r($print);
-    exit();
-  }
-}
+   array_push(
+     $dump,
+     date('d-m-Y H:i:s') . ' | hash__' . md5(date('d-m-Y H:i:s'))
+   );
+
+   print '<pre style="
+   background: gray;
+   color:white;
+   font-size: 1.2em;
+   white-space: pre-wrap;
+   ">';
+   print_r(var_dump($dump));
+   print '</pre>';
+
+   if ($die) {
+     die();
+   }
+ }
+
+ function vendorDir(): string
+ {
+   return dirname(dirname(__FILE__));
+ }
+
 
 
 /**
@@ -68,55 +51,49 @@ function tr($text = '', $translate = '')
 /**
  * Возврат метода выбранного класса
  */
+ function returnMethod($class, $param_class = '', $method = '', $param_method = '', $path = '', $module = '')
+ {
+   require _File('settings', 'config');
 
- //Переделать
-function returnMethod($class, $param_class = '', $method = '', $param_method = '', $path = '', $module = '')
-{
-  require _File('settings', 'config');
+   if (empty($class)) {
+     return;
+   }
 
-  if (empty($class)) {
-    return;
-  }
+   if (is_array($param_class) && $module != '$%array%$') {
+     $param_class = implode(', ', $param_class);
+   }
 
-  if (is_array($param_class) && $class != 'Controller' && $module != '$%array%$') {
-    $param_class = implode(', ', $param_class);
-  }
+   if ($path != '') {
+     require $_SERVER['DOCUMENT_ROOT'] . '/' . $path;
+   }
 
-  // if (is_array($param_method)) {
-  //   $param_method = implode(', ', $param_method);
-  // }
+   if (!class_exists($class)) {
+     return include $_SERVER['DOCUMENT_ROOT'] . '/core/template/error.tpl.php';
+   }
 
-  if ($path != '') {
-    require $_SERVER['DOCUMENT_ROOT'] . '/' . $path;
-  }
+   if ($param_class == 'standart') {
+     $tempClass = new $class(
+       $settings['database']['connect_string'],
+       $settings['database']['login'],
+       $settings['database']['password']
+     );
+   } else {
+     if ($param_class) {
+       $tempClass = new $class($param_class);
+     } else {
+       $tempClass = new $class();
+     }
+   }
 
-  // if ($module) {
-  //   require $_SERVER['DOCUMENT_ROOT'] . '/modules/' . $module . '.php';
-  // }
+   if (!empty($method) && !empty($param_method)) {
+     return $tempClass->$method($param_method);
+   } elseif (!empty($method) && empty($param_method)) {
+     return $tempClass->$method();
+   }
 
-  if ($param_class == 'standart') {
-    $tempClass = new $class(
-      $settings['database']['connect_string'],
-      $settings['database']['login'],
-      $settings['database']['password']
-    );
-  } else {
-    if ($param_class) {
-      $tempClass = new $class($param_class);
-    } else {
-      $tempClass = new $class();
-    }
-  }
+   return $tempClass;
 
-  if (!empty($method) && !empty($param_method)) {
-    return $tempClass->$method($param_method);
-  } elseif (!empty($method) && empty($param_method)) {
-    return $tempClass->$method();
-  }
-
-  return $tempClass;
-
-}
+ }
 
 /*
 * Поиск и только поиск файлов в указанной папке

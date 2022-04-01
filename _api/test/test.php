@@ -1,5 +1,7 @@
 <?php
 
+use Vengine\System\libs\Api;
+
 class test extends Api
 {
     public $apiName = 'test';

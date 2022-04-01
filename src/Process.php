@@ -2,7 +2,8 @@
 
 namespace Vengine;
 
-use ORM\RedBeanClass;
+use Vengine\System\libs\DataBase\Adapter;
+use Vengine\System\libs\TemplateVar;
 
 /**
  * Ядро!
@@ -136,7 +137,7 @@ class Process
 		$this->dblogin = $dblogin;
 		$this->dbpassword = $dbpassword;
 
-		if (!R::testConnection()) {
+		if (!Adapter::testConnection()) {
 			$this->databaseConnect(
 				$this->connect_string,
 				$this->dblogin,
@@ -172,7 +173,7 @@ class Process
 		$this->moduleConnect($modules);
 		$this->serviceConnect($services);
 
-		if (!R::testConnection() || ($closed && !$_GET['debug:__sys__'])) {
+		if (!Adapter::testConnection() || ($closed && !$_GET['debug:__sys__'])) {
 			print 'На сайте ведутся технические работы, попробуйте вернуться позже!';
 			return;
 		}
@@ -186,7 +187,7 @@ class Process
 	 public function dbSave($table, array $fields)
 	 {
 	 		if ($table && $fields) {
-						$db = R::dispense($table);
+						$db = Adapter::dispense($table);
 
 						foreach ($fields as $keyField => $fieldValue) {
 							$db->$keyField = $fieldValue;
@@ -390,15 +391,7 @@ class Process
 	*/
 	public function pageNavigation()
 	{
-		if ($this->page == stristr($this->page, 'admin')) {
-			include 'Admin/load.php';
-		}elseif (file_exists($_SERVER['DOCUMENT_ROOT'] . '/install.init') && $this->page == 'install') {
-			$this->moduleConnect(['Install']);
-			returnMethod('Install', $this->page);
-		}else{
-			require _File('Render.page', 'core/Render');
-			new RenderPage($this->page);
-		}
+			new RenderPage($this);
 	}
 
 	/*
@@ -406,7 +399,7 @@ class Process
 	*/
 	public function databaseConnect($connect_string, $dblogin, $dbpassword)
 	{
-		RedBeanClass::connect($connect_string, $dblogin, $dbpassword);
+		Adapter::connect($connect_string, $dblogin, $dbpassword);
 	}
 
 
@@ -424,22 +417,18 @@ class Process
 	/*
 	* Подключение шаблонов
 	*/
-	public function templateConnect($template)
+	public function templateConnect($template, $type = 'template')
 	{
-		if (!empty($template) && !is_array($template)) {
-			$tpl = $_SERVER['DOCUMENT_ROOT'] . '/template/' . $template . '.tpl.php';
-			if (file_exists($tpl)) {
-				return include $tpl;
-			}
-		}elseif (!empty($template) && is_array($template)){
-			foreach ($template as $tplArr) {
-				$tpl = $_SERVER['DOCUMENT_ROOT'] . '/template/' . $tplArr . '.tpl.php';
-				if (file_exists($tpl)) {
-					include $tpl;
-				}
-			}
-		}
+		$path = [
+			'core' => '/core/template/',
+			'template' => '/template/'
+		];
+
+		$template = 'file::' . $path[$type] . $template;
+
+		return $template;
 	}
+
 
 	#Создание временного пользователя
 	public function guestid()
@@ -491,28 +480,47 @@ class Process
 	 public function addScript($js = [], $custom = false)
 	 {
 		 if ($js && !$custom) {
-			 foreach ($js as $key) {
-				 print '<script src="' . $key . '"></script>';
+			 foreach ($js as $value) {
+				 $result[] = '<script src="' . $value . '"></script>';
 			 }
-		 }else{
-			 foreach ($js as $key) {
-				 print "<script " . $key . "></script>";
+		 } else {
+			 foreach ($js as $value) {
+				 $result[] = '<script ' . $value . '></script>';
 			 }
 		 }
+
+		 return $result;
 	 }
 
-		 public function logout()
-		 {
-			 if ($this->page == 'logout') {
-			 	unset($_SESSION[$this->session_name]);
-			 	$this->redirect('');
-			}elseif (!empty($_POST['logout'])) {
-			 	unset($_SESSION[$this->session_name]);
-			 	$this->redirect('');
-			}elseif(!empty($_GET['logout'])) {
-				unset($_SESSION[$this->session_name]);
-				$this->redirect('');
-			}
-		 }
+	 public function logout()
+	 {
+		 if ($this->page == 'logout') {
+		 	unset($_SESSION[$this->session_name]);
+		 	$this->redirect('');
+		}elseif (!empty($_POST['logout'])) {
+		 	unset($_SESSION[$this->session_name]);
+		 	$this->redirect('');
+		}elseif(!empty($_GET['logout'])) {
+			unset($_SESSION[$this->session_name]);
+			$this->redirect('');
+		}
+	 }
+
+	 public function addStandartJS(): array
+	 {
+	 	return $this->addScript(
+			[
+				'src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+			 	integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+			 	crossorigin="anonymous"',
+			 	'src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+			 	integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+			 	crossorigin="anonymous"',
+			 	'src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+			 	integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+			 	crossorigin="anonymous"'
+		 	], true
+		);
+	 }
 
 }

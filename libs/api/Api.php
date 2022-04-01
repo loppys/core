@@ -1,6 +1,6 @@
 <?php
 
-use System\common\Keygen;
+namespace Vengine\System\libs;
 
 abstract class Api
 {

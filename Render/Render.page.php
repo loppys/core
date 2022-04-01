@@ -4,51 +4,34 @@ class RenderPage extends Process
 {
   protected $pageArr;
   protected $var;
+  private $html = array();
+  protected $classObject;
+  private $tmpFile;
 
-  function __construct($page)
+  public $namePage;
+
+  private $process;
+
+  function __construct(Process $processObject)
   {
-    $this->pageArr = controller('page', $page);
-    $this->var = $this->getVars();
+    $this->process = $processObject;
+    $this->tmpFile = $this->process->tmpfile . 'cache-' . $this->process->page . '-' . md5(date('Y-m-d-H')) . '.php';
+    $this->pageArr = returnObject('FindPage')->getPage($this->process->page);
 
-    $this->render($page);
+    requireRenderFile('navButton');
+
+    $this->prepare();
   }
 
-  /**
-   *  рендер страниц
-   * @str name
-   * @str page
-   * @str file
-   * @str class
-   * @str module
-   * @str url
-   * @str path
-   * @str custom_url
-   * @arr tpl
-   * @arr js
-   * @arr param_cls
-   * @arr module_cst
-   * @str design
-   */
-
-   // Проброс данных из выполняемых классов --> составление head (html) --
-   // -> подключение шаблонов --> подключение js (и/или до подключения шаблона) --
-   // -> Должен только выводить и содержать минимум логики (должны приходить максимально чистые данные)
-  public function render($page)
+  public function prepare()
   {
     $pageArr = $this->pageArr;
-    $var = $this->var;
 
-    returnMethod('User', 'standart', 'checkReferalLink');
-
-    if ($this->cache) {
-      if (file_exists($this->tmpfile . 'cache-' . md5(date('Y-m-d')) . '.php')) {
-        include $this->tmpfile . 'cache-' . md5(date('Y-m-d')) . '.php';
+    if ($this->process->cache) {
+      if (file_exists($this->tmpFile)) {
+        include $this->tmpFile;
         return;
       }
-    }
-
-    if ($page == 'logout') {
-      $this->logout($page);
     }
 
     if (empty($pageArr)) {
@@ -56,69 +39,137 @@ class RenderPage extends Process
     }
 
     if ($pageArr->name == '') {
-      $this->namePage = $page;
+      $this->namePage = $pageArr->page;
     }else{
       $this->namePage = $pageArr->name;
     }
 
-    print '<!DOCTYPE html>
-    <html>
-    <head>
-      <title>'. $this->namePage .'</title>
-      <link rel="stylesheet" type="text/css" href="/../template/style.css">
-      <link rel="stylesheet" type="text/css" href="/../template/_custom_style.css">
-      <link rel="shortcut icon" href="images/favicon.png">
-      <meta name="viewport" content="width=device-width, initial-scale=1">
-    </head>
-    <body style="height: auto;">';
+    if ($this->pageArr->type === 'admin') {
+      $this->classObject = returnObject($pageArr->class, $pageArr->param_cls);
 
-    require _File('head.tpl', 'core/template');
+      if (method_exists($this->classObject, 'render')) {
+        $this->html($this->classObject->render());
+      } else {
+        $this->html('Не удалось сгенерировать шаблон');
+      }
 
-    $this->addScript([
-      'src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"',
-      'src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"',
-      'src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"'
-    ], true);
-
-    print '<div class="main-container">
-      <div class="container-content">';
-
-    if ($pageArr->class) {
-      returnMethod(
-        $pageArr->class,
-        $pageArr->param_cls,
-        $pageArr->method,
-        $pageArr->param,
-        $pageArr->path,
-        $pageArr->module
-      );
+      return $this->render();
     }
 
-    if ($pageArr->module_cst) {
-      $this->moduleCustom($pageArr->module_cst);
+    $this->addHead();
+
+    $this->html($this->addStandartJS());
+
+    $this->addHeader();
+
+    $this->html('<body>');
+    $this->html([
+      '<div class="__main-container">',
+      '<div class="container-content">'
+    ]);
+
+    $this->classObject = returnObject($pageArr->class, $pageArr->param_cls);
+
+    if ($pageArr->tpl_custom === 'class') {
+      if (method_exists($this->classObject, 'render')) {
+        $this->html($this->classObject->render());
+      } else {
+        $this->html('Не удалось сгенерировать шаблон');
+      }
     }
 
-    if ($pageArr->custom_url != '#%tpl_generate%#') {
-      if (is_array($pageArr->tpl) && $pageArr->design == 'section') {
+    if ($pageArr->tpl) {
+      if (is_array($pageArr->tpl)) {
         foreach ($pageArr->tpl as $tpl) {
-          print '<section>';
-          $this->templateConnect($tpl);
-          print '</section>';
+          $this->html($this->templateConnect($tpl));
         }
-        }elseif ($pageArr->tpl) {
-          $this->templateConnect($pageArr->tpl);
-        }
+      }else{
+        $this->html($this->templateConnect($pageArr->tpl));
+      }
     }
+
+    $this->html('</div></div>');
+
+    $this->addFooter();
 
     if ($pageArr->js) {
-      $this->addScript($pageArr->js);
+      $this->html(
+        $this->addScript([$pageArr->js])
+       );
     }
 
-    print '</div>';
+    $this->html('</body></html>');
 
-    require _File('footer.tpl', 'core/template');
+    $this->render();
+  }
 
-    print '</body>
-    </html>';
+  public function render()
+  {
+    if ($this->pageArr->method) {
+      $this->classObject->{$this->pageArr->method}();
+    }
+
+    foreach ($this->html as $key => $value) {
+      if (stripos($value, 'file::') !== false) {
+        $replace = [
+          'file::' => ''
+        ];
+
+        $value = strtr($value, $replace);
+
+        $this->html[$key] = file_get_contents($_SERVER['DOCUMENT_ROOT'] . $value . '.tpl.php');
+      }
+    }
+
+    $result = implode('', $this->html);
+
+    if ($this->process->cache && $file = fopen($this->tmpfile, 'w+')) {
+      if (is_writable($this->tmpFile)) {
+        fwrite($file, $result);
+        fclose($file);
+      }
+    }
+
+    print $result;
+  }
+
+  private function addHead()
+  {
+    $this->html[] = '
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <title>'. $this->namePage .'</title>
+    <link rel="stylesheet" type="text/css" href="/../template/style.css">
+    <link rel="stylesheet" type="text/css" href="/../template/_custom_style.css">
+    <link rel="shortcut icon" href="images/favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta itemprop="inLanguage" content="ru-RU">
+    </head>';
+  }
+
+  private function addHeader()
+  {
+    if ($this->pageArr->type === 'page') {
+      $this->html($this->templateConnect('head', 'core'));
+    }
+  }
+
+  private function addFooter()
+  {
+    if ($this->pageArr->type === 'page') {
+      $this->html($this->templateConnect('footer', 'core'));
+    }
+  }
+
+  private function html($html)
+  {
+    if (is_array($html)) {
+      foreach ($html as $key => $value) {
+        $this->html[] = $value;
+      }
+    }else{
+      $this->html[] = $html;
+    }
   }
 }

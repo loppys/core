@@ -10,16 +10,15 @@ class Startup
   {
     self::logWriter();
 
+    $vendorDir = vendorDir();
+
     $URI = explode('/', trim($_SERVER['REQUEST_URI'],'/'));
     $class = $URI[1];
 
     if (strripos($_SERVER['REQUEST_URI'], 'api') && !empty($class)) {
-      require_once 'core/libs/api/Api.php';
-      require_once $_SERVER['DOCUMENT_ROOT'] . '/core/libs/token/token.php';
-
-      $file = 'core/_api/'. $URI[1] .'/'. $URI[1] .'.php';
+      $file = '/_api/'. $URI[1] .'/'. $URI[1] .'.php';
       if (file_exists($file)) {
-        require_once $file;
+        require_once $vendorDir . $file;
       }
 
       if (class_exists($class)) {
@@ -43,8 +42,8 @@ class Startup
 	  $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
 	  $whoops->register();
 
-    require '../interface.php';
-    require '../libs/init.php';
+    require $vendorDir . '/src/interface.php';
+    require $vendorDir . '/libs/init.php';
 
     self::initProcess()->init();
   }

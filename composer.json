@@ -7,7 +7,8 @@
             "Vengine\\": "src/",
             "Vengine\\System\\libs\\": "libs/",
             "Vengine\\System\\libs\\DataBase\\": "libs/",
-            "Vengine\\Controllers\\": "controllers/"
+            "Vengine\\Controllers\\": "controllers/",
+            "Vengine\\Render\\": "Render/"
         },
       "files": [
         "libs/common/common.php"

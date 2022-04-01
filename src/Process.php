@@ -472,7 +472,7 @@ class Process
 		return $this;
 	}
 
-	protected function getVars(): TemplateVar
+	protected function getVars(): array
 	{
 		$this->setVar();
 

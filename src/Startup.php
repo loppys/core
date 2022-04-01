@@ -38,17 +38,13 @@ class Startup
       die();
     }
 
-    require_once $_SERVER['DOCUMENT_ROOT'] . '/vendor/autoload.php';
-
     //обработчик ошибок (переделать вывод)
     $whoops = new \Whoops\Run;
-	$whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
-	$whoops->register();
+	  $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
+	  $whoops->register();
 
-    require_once $_SERVER['DOCUMENT_ROOT'] . '/libs/rb.php';
-    require $_SERVER['DOCUMENT_ROOT'] . '/core/interface.php';
-    require_once $_SERVER['DOCUMENT_ROOT'] . '/core/Process.php';
-    require $_SERVER['DOCUMENT_ROOT'] . '/core/libs/init.php';
+    require '../interface.php';
+    require '../libs/init.php';
 
     self::initProcess()->init();
   }

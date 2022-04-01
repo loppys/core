@@ -2,6 +2,11 @@
     "name": "vengine/core",
     "description": "vengine core",
     "type": "library",
+    "autoload": {
+        "psr-4": {
+            "Vengine\\": "",
+        },
+    },
     "license": "MIT",
     "require": {
         "php": ">=7.1",

@@ -2,6 +2,8 @@
 
 namespace Vengine;
 
+use Vengine\Process;
+
 class Startup
 {
   public static function init()

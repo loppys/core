@@ -3,7 +3,7 @@
 namespace Vengine;
 
 use Vengine\libs\DataBase\Adapter;
-use Vengine\libs\TemplateVar;
+use Vengine\libs\Template\TemplateVar;
 use Vengine\Render\RenderPage;
 
 /**
@@ -420,9 +420,11 @@ class Process
 	*/
 	public function templateConnect($template, $type = 'template')
 	{
+		$dir = dirname(dirname(__FILE__));
+
 		$path = [
-			'core' => '/core/template/',
-			'template' => '/template/'
+			'core' => $dir . '/src/template/',
+			'template' => $_SERVER['DOCUMENT_ROOT'] . '/template/'
 		];
 
 		$template = 'file::' . $path[$type] . $template;
@@ -466,9 +468,11 @@ class Process
 			'userLogin' => $_SESSION[$this->session_name]->login,
 			'guestid' => $_COOKIE['guestid']
 		]);
+
+		return $this;
 	}
 
-	protected function getVars()
+	protected function getVars(): TemplateVar
 	{
 		$this->setVar();
 

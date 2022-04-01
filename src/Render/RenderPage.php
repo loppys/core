@@ -3,7 +3,7 @@
 namespace Vengine\Render;
 
 use Vengine\Process;
-use Vengine\Controllers\FindPage;
+use Vengine\Controllers\FindPage\FindPage;
 
 class RenderPage extends Process
 {
@@ -22,8 +22,6 @@ class RenderPage extends Process
     $this->process = $processObject;
     $this->tmpFile = $this->process->tmpfile . 'cache-' . $this->process->page . '-' . md5(date('Y-m-d-H')) . '.php';
     $this->pageArr = returnObject(FindPage::class)->getPage($this->process->page);
-
-    requireRenderFile('navButton');
 
     $this->prepare();
   }
@@ -122,13 +120,19 @@ class RenderPage extends Process
 
         $value = strtr($value, $replace);
 
-        $this->html[$key] = file_get_contents($_SERVER['DOCUMENT_ROOT'] . $value . '.tpl.php');
+        ob_start();
+        include $value . '.tpl.php';
+        $this->html[$key] = ob_get_contents();
+        ob_clean();
       }
     }
 
     $result = implode('', $this->html);
 
-    if ($this->process->cache && $file = fopen($this->tmpfile, 'w+')) {
+    if (
+      $this->process->cache 
+      && $file = fopen($this->process->tmpfile . 'cache-' . $this->process->page . '-' . md5(date('Y-m-d-H')) . '.php', 'w+')
+    ) {
       if (is_writable($this->tmpFile)) {
         fwrite($file, $result);
         fclose($file);

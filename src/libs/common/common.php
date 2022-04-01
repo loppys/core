@@ -142,7 +142,11 @@ function returnObject($class, $param_class = '')
    }
 
   if (class_exists($class)) {
-    return !empty($param_class) ? new $class($param_class) : new $class();
+  	if (!empty($param_class)) {
+  		return new $class($param_class);
+  	} else {
+  		return new $class();
+  	}
   }
 }
 

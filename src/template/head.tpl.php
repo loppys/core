@@ -1,11 +1,12 @@
 <?php include $_SERVER['DOCUMENT_ROOT'] . '/config/settings.php'; ?>
 
+<?php $var = $this->setVar()->getVars(); ?>
+
 <header class="p-3 bg-dark text-white">
     <div class="container">
       <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
         <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-          <?php  #$this->navigationButton(); ?>
-          <li class="hover-menu"><a href="/" class="nav-link px-2 text-white"> <?= $this->tr('Главная', 'Home') ?> </a></li>
+          <li class="hover-menu"><a href="/" class="nav-link px-2 text-white"> <?php $this->tr('Главная', 'Home') ?> </a></li>
           <li class="hover-menu"><a href="news" class="nav-link px-2 text-white"> <?= $this->tr('Новости', 'News') ?> </a></li>
           <li class="hover-menu"><a href="market" class="nav-link px-2 text-white"> <?= $this->tr('Магазин', 'Store') ?> </a></li>
           <li class="hover-menu"><a href="http://support.<?= $_SERVER['HTTP_HOST'] ?>/" class="nav-link px-2 text-white"> <?= $this->tr('Служба поддержки', 'Support'); ?> </a></li>

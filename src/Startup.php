@@ -38,9 +38,11 @@ class Startup
     }
 
     //обработчик ошибок (переделать вывод)
-    $whoops = new \Whoops\Run;
-	  $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
-	  $whoops->register();
+    if ($_GET['__DEBUG'] === 'INFO') {
+      $whoops = new \Whoops\Run;
+      $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
+      $whoops->register();
+    }
 
     self::initProcess()->init();
   }

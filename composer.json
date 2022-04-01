@@ -1,5 +1,6 @@
 {
 	"name": "vengine/core",
+    "description": "vengine core",
 	"type": "library",
 	"autoload": {
       "files": [

@@ -7,7 +7,7 @@
             "Vengine\\": "src/"
         },
         "files": [
-            "libs/common/common.php"
+            "src/libs/common/common.php"
         ]
     },
     "license": "MIT",

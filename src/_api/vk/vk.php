@@ -1,5 +1,7 @@
 <?php
 
+use Vengine\libs\Api;
+
 class vk extends Api
 {
     public $apiName = 'vk';

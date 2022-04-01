@@ -4,15 +4,11 @@
     "type": "library",
     "autoload": {
         "psr-4": {
-            "Vengine\\": "src/",
-            "Vengine\\System\\libs\\": "libs/",
-            "Vengine\\System\\libs\\DataBase\\": "libs/",
-            "Vengine\\Controllers\\": "controllers/",
-            "Vengine\\Render\\": "Render/"
+            "Vengine\\": "src/"
         },
-      "files": [
-        "libs/common/common.php"
-      ]
+        "files": [
+            "libs/common/common.php"
+        ]
     },
     "license": "MIT",
     "require": {

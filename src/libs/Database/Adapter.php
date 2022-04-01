@@ -1,6 +1,6 @@
 <?php
 
-namespace Vengine\System\libs\DataBase;
+namespace Vengine\libs\DataBase;
 
 use RedBeanPHP\R;
 

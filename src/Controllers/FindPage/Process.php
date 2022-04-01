@@ -1,6 +1,6 @@
 <?php
 
-namespace Vengine\Controllers;
+namespace Vengine\Controllers\FindPage;
 
 use Vengine\System\libs\Database\Adapter;
 

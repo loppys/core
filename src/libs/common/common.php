@@ -137,7 +137,11 @@ function returnObject($class, $param_class = '')
 {
   require _File('settings', 'config');
 
-  if (class_exist($class)) {
+   if (is_array($param_class)) {
+     $param_class = implode(', ', $param_class);
+   }
+
+  if (class_exists($class)) {
     return !empty($param_class) ? new $class($param_class) : new $class();
   }
 }

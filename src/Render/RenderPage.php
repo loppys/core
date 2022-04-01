@@ -3,6 +3,7 @@
 namespace Vengine\Render;
 
 use Vengine\Process;
+use Vengine\Controllers\FindPage;
 
 class RenderPage extends Process
 {
@@ -20,7 +21,7 @@ class RenderPage extends Process
   {
     $this->process = $processObject;
     $this->tmpFile = $this->process->tmpfile . 'cache-' . $this->process->page . '-' . md5(date('Y-m-d-H')) . '.php';
-    $this->pageArr = returnObject('FindPage')->getPage($this->process->page);
+    $this->pageArr = returnObject(FindPage::class)->getPage($this->process->page);
 
     requireRenderFile('navButton');
 

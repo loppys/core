@@ -2,8 +2,8 @@
 
 namespace Vengine;
 
-use Vengine\System\libs\DataBase\Adapter;
-use Vengine\System\libs\TemplateVar;
+use Vengine\libs\DataBase\Adapter;
+use Vengine\libs\TemplateVar;
 use Vengine\Render\RenderPage;
 
 /**

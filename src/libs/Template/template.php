@@ -1,6 +1,6 @@
 <?php
 
-namespace Vengine\System\libs;
+namespace Vengine\libs\Template;
 
 /**
  * Хранит переменные для шаблонов

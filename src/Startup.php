@@ -61,10 +61,13 @@ class Startup
   {
     require _File('settings', 'config');
 
-    return new Process(
-      $settings['database']['connect_string'],
-      $settings['database']['login'],
-      $settings['database']['password']
+    return returnObject(
+      Process::class, 
+      [
+        $settings['database']['connect_string'],
+        $settings['database']['login'],
+        $settings['database']['password']
+      ]
     );
   }
 }

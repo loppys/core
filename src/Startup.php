@@ -42,9 +42,6 @@ class Startup
 	  $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
 	  $whoops->register();
 
-    require $vendorDir . '/src/interface.php';
-    require $vendorDir . '/libs/init.php';
-
     self::initProcess()->init();
   }
 

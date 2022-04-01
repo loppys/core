@@ -4,8 +4,8 @@
     "type": "library",
     "autoload": {
         "psr-4": {
-            "Vengine\\": "",
-        },
+            "Vengine\\": "src/"
+        }
     },
     "license": "MIT",
     "require": {

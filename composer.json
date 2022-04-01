@@ -1,6 +1,11 @@
 {
 	"name": "vengine/core",
 	"type": "library",
+	"autoload": {
+      "files": [
+        "Startup.php",
+      ]
+    },
 	"require": {
 		"php": ">=7.1",
         "twbs/bootstrap-sass": "^3.4",

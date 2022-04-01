@@ -4,6 +4,7 @@ namespace Vengine;
 
 use Vengine\System\libs\DataBase\Adapter;
 use Vengine\System\libs\TemplateVar;
+use Vengine\Render\RenderPage;
 
 /**
  * Ядро!
@@ -391,7 +392,7 @@ class Process
 	*/
 	public function pageNavigation()
 	{
-			new RenderPage($this);
+		new RenderPage($this);
 	}
 
 	/*

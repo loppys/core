@@ -27,7 +27,9 @@
         "lavary/crunz": "^3.2",
         "swiftmailer/swiftmailer": "^6.3",
         "mjaschen/phpgeo": "^4.0",
-        "devster/ubench": "^2.1"
+        "devster/ubench": "^2.1",
+        "spatie/menu": "^2.10",
+        "symfony/routing": "^5.4"
     },
     "minimum-stability": "dev"
 }

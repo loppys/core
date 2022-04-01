@@ -2,6 +2,7 @@
 	"name": "vengine/core",
 	"type": "library",
 	"require": {
+		"php": ">=7.1",
         "twbs/bootstrap-sass": "^3.4",
         "firebase/php-jwt": "^6.0",
         "gabordemooij/redbean": "^5.7",

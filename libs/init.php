@@ -1,9 +1,9 @@
 <?php
 
 $init = [
+	'token',
 	'common',
 	'licence',
-	'api',
 	'html',
 	'template',
 	'database'
@@ -12,7 +12,7 @@ $init = [
 function init_libs($file)
 {
 	foreach ($file as $value) {
-		if ($value == 'api' || $value == 'database') {
+		if ($value == 'database') {
 			require $_SERVER['DOCUMENT_ROOT'] . '/core/libs/' . $value . '/process.php';
 		}else{
 			require $_SERVER['DOCUMENT_ROOT'] . '/core/libs/' . $value . '/' . $value . '.php';

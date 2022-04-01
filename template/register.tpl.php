@@ -1,3 +1,4 @@
+<section>
 <form class="form-signin" method="POST" style="width: 39%; text-align: center;">
       <div class="text-center mb-4">
         <h1 class="h3 mb-3 font-weight-normal"><?= $this->tr('Регистрация', 'Registration'); ?></h1>
@@ -23,7 +24,8 @@
         <label for="inputPassword"></label>
       </div>
 
-      <?php include 'error.tpl.php'; ?>
+      <?= !empty($errors) ? errorRender($errors) : '' ?>
 
       <input class="btn btn-lg btn-primary btn-block" type="submit" name="register_button" value='<?= $this->tr('Регистрация', 'Register'); ?>'>
     </form>
+</section>

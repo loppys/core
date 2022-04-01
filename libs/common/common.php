@@ -1,4 +1,5 @@
 <?php
+use System\common\TokenSystem\Token;
 
 /**
  * Все функции, которые нужны и в обычной разметке находятся тут!
@@ -81,9 +82,9 @@ function returnMethod($class, $param_class = '', $method = '', $param_method = '
     $param_class = implode(', ', $param_class);
   }
 
-  if (is_array($param_method)) {
-    $param_method = implode(', ', $param_method);
-  }
+  // if (is_array($param_method)) {
+  //   $param_method = implode(', ', $param_method);
+  // }
 
   if ($path != '') {
     require $_SERVER['DOCUMENT_ROOT'] . '/' . $path;
@@ -207,4 +208,9 @@ function errorRender($errors = [])
   if ($errors) {
     new ErrorDisplay($errors);
   }
+}
+
+function getTokenClass($class)
+{
+  return TokenClass::get(md5($class));
 }

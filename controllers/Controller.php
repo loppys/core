@@ -13,11 +13,4 @@ class Controller
     return page($param);
   }
 
-  public function api($param)
-  {
-    require _File('api', 'core/controllers/api');
-
-    return transfer($param);
-  }
-
 }

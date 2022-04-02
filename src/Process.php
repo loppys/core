@@ -98,32 +98,11 @@ class Process
 	 * Наименование страницы
 	 * @string
 	 */
-	 public $namePage;
+	public $namePage;
 
-		// <-start debug param->
-		// временная мера, пока нет модуля licence и install
-	 /**
-	  * версия
-		* !debug
-	  */
-		public $version = '0.5.0';
+	public $cache;
 
-		/**
- 	  * глобальная версия
- 		* !debug
- 	  */
-		public $global_version = '0.5';
-
-		/**
- 	  * версия
-		* !debug
- 	  */
- 		public $build_date = '16.02.2022';
-		// <-end debug param->
-
-		public $cache;
-
-		public $tmpfile;
+	public $tmpfile;
 
 	/*
 	* Конструктор класса
@@ -204,15 +183,28 @@ class Process
 	 */
 	public function debugMode()
 	{
-		if ($_GET['__DEBUG_MODE'] == 'IGNORE') {
-			$this->build = substr(md5($this->version), 7, -17);
-			$this->reference = substr(md5($global_version), 7, -17);
+		if ($_GET['__DEBUG_MODE'] == 'V') {
+			$info = json_decode(file_get_contents($_SERVER['DOCUMENT_ROOT'] . '/composer.lock'));
+
+			foreach ($info->packages as $key => $value) {
+				if ($value->name === 'vengine/core') {
+					$info = $info->packages[$key];
+				}
+			}
+
+			$date = date_create($info->time);
+
+
+			$cutVer = explode('.', $info->version);
 
 			print(
-				'Версия vEngine: ' . $this->version . '<br>' .
-				'Сборка: ' . $this->build . '<br>' .
-				'Референс сборки: ' . $this->reference . '<br>' .
-				'Дата сборки: ' . $this->build_date
+				'Версия ядра: ' . $info->version . '<br>' .
+				'Major: ' . $cutVer[0] . '<br>' .
+				'Minor: ' . $cutVer[1] . '<br>' .
+				'Patch: ' . $cutVer[2] . '<br>' .
+				'<br>' .
+				'Референс: ' . $info->source->reference . '<br>' .
+				'Дата установки: ' . date_format($date, "Y/m/d H:i:s")
 			);
 		}
 	}

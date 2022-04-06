@@ -23,7 +23,6 @@
         "symfony/dotenv": "^5.4",
         "gregwar/captcha": "^1.1",
         "teamtnt/tntsearch": "^2.9",
-        "lavary/crunz": "^3.2",
         "swiftmailer/swiftmailer": "^6.3",
         "mjaschen/phpgeo": "^4.0",
         "devster/ubench": "^2.1",

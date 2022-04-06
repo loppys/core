@@ -28,7 +28,7 @@
         "swiftmailer/swiftmailer": "^6.3",
         "mjaschen/phpgeo": "^4.0",
         "devster/ubench": "^2.1",
-        "spatie/menu": "^2.10",
+        "spatie/menu": "^2.10"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.5",

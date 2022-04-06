@@ -2,4 +2,4 @@
 
 use Vengine\Startup;
 
-Startup::init();
+(new Startup())->init();

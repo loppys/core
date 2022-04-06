@@ -8,7 +8,6 @@ use Vengine\Controllers\FindPage\FindPage;
 class RenderPage extends Process
 {
   protected $pageArr;
-  protected $var;
   private $html = array();
   protected $classObject;
   private $tmpFile;
@@ -17,10 +16,10 @@ class RenderPage extends Process
 
   private $process;
 
-  function __construct(Process $processObject)
+  function __construct(PageController $page)
   {
-    $this->process = $processObject;
-    $this->tmpFile = $this->process->tmpfile . 'cache-' . $this->process->page . '-' . md5(date('Y-m-d-H')) . '.php';
+    parent::__construct();
+    
     $this->pageArr = returnObject(FindPage::class)->getPage($this->process->page);
 
     $this->prepare();
@@ -130,7 +129,7 @@ class RenderPage extends Process
     $result = implode('', $this->html);
 
     if (
-      $this->process->cache 
+      $this->process->cache
       && $file = fopen($this->process->tmpfile . 'cache-' . $this->process->page . '-' . md5(date('Y-m-d-H')) . '.php', 'w+')
     ) {
       if (is_writable($this->tmpFile)) {

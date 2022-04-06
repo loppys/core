@@ -2,135 +2,29 @@
 
 namespace Vengine;
 
-use Vengine\libs\DataBase\Adapter;
 use Vengine\libs\Template\TemplateVar;
-use Vengine\Render\RenderPage;
+use Vengine\AbstractModule;
+use Vengine\Controllers\Routing\PageController;
+use Vengine\libs\Exception\HttpException;
 
-/**
- * Ядро!
- */
-class Process
+class Process extends AbstractModule
 {
-
-	/**
-	 * @str
-	 */
-	public $moduleName = 'core';
-
-
-	/**
-	 * @str
-	 */
-	public $page;
-
-	/*
-	* @array
-	* @str
-	*/
-	protected $errors = [];
-
-	/*
-	* @array
-	* @str
-	*/
-	protected $connect_string;
-
-	/*
-	* @array
-	* @str
-	*/
-	protected $dblogin;
-
-	/*
-	* @array
-	* @str
-	*/
-	protected $dbpassword;
-
-	/*
-	* @array
-	* @str
-	*/
-	protected $dbname;
-
-	/*
-	* @array
-	* @str
-	*/
-	protected $dbtables = 'users';
-
-	/*
-	* @array
-	* @str
-	*/
-	protected $standard_currency;
-
-	/*
-	* @bool
-	*/
-	public $engineApi;
-
-	/*
-	* @array
-	* @str
-	*/
-	protected $template;
-
-	/*
-	* @array
-	* @int
-	*/
-	protected $level_access;
-
-	/*
-	* @array
-	* @string
-	*/
-	protected $product_db = 'product';
-
-	/*
-	* @array
-	* @string
-	*/
-	public $session_name = 'logged_user';
-
-	/*
-	 * Наименование страницы
-	 * @string
-	 */
-	public $namePage;
-
-	public $cache;
-
-	public $tmpfile;
-
 	/*
 	* Конструктор класса
 	*/
-	function __construct($connect_string, $dblogin, $dbpassword)
+	function __construct()
 	{
+		parent::__construct();
+
+		$this->interface->closed = false;
+
 		$this->setConfig();
-
-		$this->tmpfile = $_SERVER['DOCUMENT_ROOT'] . '/_tmp/';
-
-		$this->connect_string = $connect_string;
-		$this->dblogin = $dblogin;
-		$this->dbpassword = $dbpassword;
-
-		if (!Adapter::testConnection()) {
-			$this->databaseConnect(
-				$this->connect_string,
-				$this->dblogin,
-				$this->dbpassword
-			);
-		}
-
-		$this->pageFix();
 		$this->sessionStart();
 		$this->debugMode();
-		$this->logout();
 
-		if (empty($_SESSION[$this->session_name]) && !stristr($this->page, 'vengine/api/')) {
+		$this->pageFix();
+
+		if (empty($_SESSION['user']) && !stristr($this->interface->page, 'vengine/api/')) {
 			$this->guestid();
 		}
 	}
@@ -140,20 +34,13 @@ class Process
 		require _File('config', 'config');
 
 		foreach ($config as $key => $value) {
-			if (property_exists(__CLASS__, $key)) {
-				$this->$key = $value;
-			}
+			$this->interface->$key = $value;
 		}
 	}
 
-	public function init($closed = false)
+	public function run()
 	{
-		require _File('settings', 'config');
-
-		$this->moduleConnect($modules);
-		$this->serviceConnect($services);
-
-		if (!Adapter::testConnection() || ($closed && !$_GET['debug:__sys__'])) {
+		if (!$this->adapter->testConnection() || ($this->interface->closed && !$this->request['debug:__sys__'])) {
 			print 'На сайте ведутся технические работы, попробуйте вернуться позже!';
 			return;
 		}
@@ -162,28 +49,11 @@ class Process
 	}
 
 	/**
-	 * Записывает в бд данные!
-	 */
-	 public function dbSave($table, array $fields)
-	 {
-	 		if ($table && $fields) {
-						$db = Adapter::dispense($table);
-
-						foreach ($fields as $keyField => $fieldValue) {
-							$db->$keyField = $fieldValue;
-							continue;
-						}
-
-						!empty($db->$keyField) ? R::store($db) : '';
-	 		}
-	 }
-
-	/**
 	 * Дебаг мод
 	 */
 	public function debugMode()
 	{
-		if ($_GET['__DEBUG_MODE'] == 'V') {
+		if ($this->request['__DEBUG_MODE'] == 'V') {
 			$info = json_decode(file_get_contents($_SERVER['DOCUMENT_ROOT'] . '/composer.lock'));
 
 			foreach ($info->packages as $key => $value) {
@@ -194,14 +64,8 @@ class Process
 
 			$date = date_create($info->time);
 
-
-			$cutVer = explode('.', $info->version);
-
 			print(
 				'Версия ядра: ' . $info->version . '<br>' .
-				'Major: ' . $cutVer[0] . '<br>' .
-				'Minor: ' . $cutVer[1] . '<br>' .
-				'Patch: ' . $cutVer[2] . '<br>' .
 				'<br>' .
 				'Референс: ' . $info->source->reference . '<br>' .
 				'Дата установки: ' . date_format($date, "Y/m/d H:i:s")
@@ -209,21 +73,14 @@ class Process
 		}
 	}
 
-	/**
-	 * возвращает таблицу DB
-	 */
-	public function returnSringDB()
-	{
-			return $this->dbtables;
-	}
-
 	/*
 	* Запуск сессии
 	*/
 	public function sessionStart()
 	{
-		if (empty($_SESSION[$this->session_name])) {
+		if (empty($_SESSION['_start'])) {
 			session_start();
+			$_SESSION['_start'] = true;
 		}
 	}
 
@@ -232,7 +89,10 @@ class Process
 	*/
 	public function error404()
 	{
-		exit(include 'template/error404.tpl.php');
+		$code = http_response_code();
+		if ($code === 404) {
+			exit(include 'template/error404.tpl.php');
+		}
 	}
 
 	/*
@@ -244,26 +104,6 @@ class Process
 	}
 
 	/*
-	 * Редирект с задержкой на другие Url (Не этого сайта)
-	 * Задел на будущее
-	 */
-	 public function redirectToAnotherUrl($value='')
-	 {
-	 	// к 0.5 сделать
-	 }
-
-	 public function returnSettigns()
-	 {
-	 	require $_SERVER['DOCUMENT_ROOT'] . '/config/settings.php';
-
-		$setting['modules'] = $modules;
-		$setting['services'] = $services;
-		$setting['settings'] = $settings;
-
-		return $setting;
-	 }
-
-	/*
 	* @deprecated
 	*/
 	public function tr($text = '', $translate = '')
@@ -271,112 +111,33 @@ class Process
 		tr($text, $translate);
 	}
 
-	public function pageFix()
+	public function pageFix(): void
 	{
 		#Исправление ссылок
 		if ($_SERVER['REQUEST_URI'] == '/') {
-			$this->page = 'home';
+			$page = 'home';
 		}else{
-			$this->page = substr($_SERVER['REQUEST_URI'], 1);
+			$page = substr($_SERVER['REQUEST_URI'], 1);
 		}
 
 		// Исправление $_GET запросов
 		if ($_GET) {
-			$getString = substr($this->page, strrpos($_SERVER['REQUEST_URI'], '?'), 1000);
+			$getString = substr($page, strrpos($_SERVER['REQUEST_URI'], '?'), 1000);
 			$leghtFix = strlen($getString);
-			$leghtFullPage = strlen($this->page);
+			$leghtFullPage = strlen($page);
 
 			$getResult = $leghtFullPage - ( $leghtFix + 1 );
 
-			$result = mb_substr($this->page, 0, $getResult);
+			$result = mb_substr($page, 0, $getResult);
 
 			if (empty($result)) {
-				$this->page = 'home';
+				$page = 'home';
 			}else{
-				$this->page = $result;
+				$page = $result;
 			}
 		}
 
-			return $this->page;
-	}
-
-	/**
-	 * @return $page
-	 */
-	public function returnPage()
-	{
-		return $this->page;
-	}
-
-	/*
-	* Поиск и подключение файлов в указанной папке
-	*/
-	public function findFiles($page, $dir)
-	{
-		$pageDir = $_SERVER['DOCUMENT_ROOT'] . '/' . $dir . '/';
-		$pageRoad = scandir($pageDir);
-
-		#Удаление не нужных элементов
-		$f = array_slice($pageRoad, 3);
-
-			foreach ($f as $i) {
-				$fix = substr($i, strrpos($i, '.') + 1);
-
-				#Если нашёл в основной папке, то подключает
-				if ($fix == 'php' && $i == $page . '.php') {
-					if (file_exists($pageDir . $i)) {
-						$s = true;
-						return include $pageDir . $i;
-					}
-				}
-
-				#Если скрипт не обнаружил файлов.
-				#Начнёт искать в подпапках
-				if (!$s && $fix != 'php') {
-					$folder = $pageDir . $i . '/';
-					$pageRoad = scandir($folder);
-					$f = array_slice($pageRoad, 3);
-
-					foreach ($f as $i) {
-						$fix = substr($i, strrpos($i, '.') + 1);
-
-						if ($fix == 'php' && $i == $page . '.php') {
-							if (file_exists($folder . $i)) {
-								$s = true;
-								return include $folder . $i;
-							}
-						}
-					}
-				}
-			}
-		}
-
-	/**
-	 * Подключение сервисов
-	 */
-	public function serviceConnect($services)
-	{
-		if (!$services) {
-			return;
-		}
-
-		while ($name = current($services)) {
-			$key = key($services);
-
-			$file = array_shift($services[$key]);
-
-			$dir[] = 'modules/services/' . $key;
-
-			foreach ($dir as $value) {
-				foreach ([$file] as $connect) {
-					if (file_exists($_SERVER['DOCUMENT_ROOT'] . '/' . $value . '/' . $connect . '/' . $connect . '.php')) {
-						include $_SERVER['DOCUMENT_ROOT'] . '/' . $value . '/' . $connect . '/' . $connect . '.php';
-					}
-				}
-			}
-
-		  next($services);
-		}
+		$this->interface->page = $page;
 	}
 
 	/*
@@ -384,28 +145,8 @@ class Process
 	*/
 	public function pageNavigation()
 	{
-		new RenderPage($this);
+		new PageController($this);
 	}
-
-	/*
-	* Подключение к базе данных
-	*/
-	public function databaseConnect($connect_string, $dblogin, $dbpassword)
-	{
-		Adapter::connect($connect_string, $dblogin, $dbpassword);
-	}
-
-
-	/*
-	* Подключение стандартных модулей
-	*/
-	public function moduleConnect($modules)
-	{
-		foreach ($modules as $value) {
-			$this->findFiles($value, 'modules');
-		}
-	}
-
 
 	/*
 	* Подключение шаблонов
@@ -428,7 +169,7 @@ class Process
 	#Создание временного пользователя
 	public function guestid()
 	{
-		$sess = $_SESSION[$this->session_name]->login;
+		$sess = $this->session['user']->login;
 		if (empty($_COOKIE['guestid']) && empty($sess)) {
 			setcookie('guestid', substr(md5(rand(0, 50000)), 25));
 			$this->redirect('');
@@ -436,19 +177,6 @@ class Process
 		if (!empty($sess)) {
 			unset($_COOKIE['guestid']);
 			// сделать запись в бд, если её нет и находится на регистрации
-		}
-	}
-
-
-	/*
-	* Кастомные модули добавлять аккуратно!
-	*/
-	public function moduleCustom($custom, $name)
-	{
-		if (!empty($custom) && $name != '') {
-			if (file_exists($_SERVER['DOCUMENT_ROOT'] . '/www/_modules/' . $name . '/' . $custom . '.module.php') && $custom != '') {
-				require $_SERVER['DOCUMENT_ROOT'] . '/www/_modules/' . $name . '/' . $custom . '.module.php';
-			}
 		}
 	}
 
@@ -487,20 +215,6 @@ class Process
 		 }
 
 		 return $result;
-	 }
-
-	 public function logout()
-	 {
-		 if ($this->page == 'logout') {
-		 	unset($_SESSION[$this->session_name]);
-		 	$this->redirect('');
-		}elseif (!empty($_POST['logout'])) {
-		 	unset($_SESSION[$this->session_name]);
-		 	$this->redirect('');
-		}elseif(!empty($_GET['logout'])) {
-			unset($_SESSION[$this->session_name]);
-			$this->redirect('');
-		}
 	 }
 
 	 public function addStandartJS(): array

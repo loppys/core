@@ -4,12 +4,17 @@ namespace Vengine;
 
 use Vengine\Process;
 
-class Startup
+class Startup extends Process
 {
-  public static function init()
+  public function __construct()
   {
-    self::logWriter();
+    $this->logWriter();
+    
+    parent::__construct();
+  }
 
+  public function init()
+  {
     $vendorDir = vendorDir();
 
     $URI = explode('/', trim($_SERVER['REQUEST_URI'],'/'));
@@ -44,10 +49,10 @@ class Startup
       $whoops->register();
     }
 
-    self::initProcess()->init();
+    $this->run();
   }
 
-  public static function logWriter()
+  public function logWriter()
   {
     require $_SERVER['DOCUMENT_ROOT'].'/config/config.php';
 
@@ -57,16 +62,5 @@ class Startup
       ini_set('log_errors', 'On');
       ini_set('error_log', $_SERVER['DOCUMENT_ROOT'] . '/logs/errors.log');
     }
-  }
-
-  public static function initProcess()
-  {
-    require _File('settings', 'config');
-
-    return new Process(
-      $settings['database']['connect_string'],
-      $settings['database']['login'],
-      $settings['database']['password']
-    );
   }
 }

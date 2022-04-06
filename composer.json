@@ -15,8 +15,9 @@
     "license": "MIT",
     "require": {
         "php": ">=7.1",
-        "vengine/routing": "*",
-        "vengine/database": "*",
+        "symfony/routing": "^5.4",
+        "doctrine/annotations": "^1.13",
+        "gabordemooij/redbean": "^5.7",
         "twbs/bootstrap-sass": "^3.4",
         "jwage/purl": "^1.0",
         "imagine/imagine": "^1.3",

@@ -9,9 +9,8 @@
         "files": [
             "src/libs/common/common.php",
             "src/libs/Template/Template.php",
-            "Loader.php"
-        ],
-        "classmap": ["Loader.php"]
+            "up.php"
+        ]
     },
     "license": "MIT",
     "require": {

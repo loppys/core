@@ -1,5 +1,7 @@
 <?php
 
+use Vengine\Startup;
+
 class Loader
 {
   public const TYPE_GLOBAL = 'Global';
@@ -13,14 +15,6 @@ class Loader
   {
     $modules = self::getModules();
 
-    if ($name === 'core') {
-      self::addModule(
-        'core',
-        self::TYPE_SYSTEM,
-        \Vengine\Startup::class
-      );
-    }
-
     if (array_key_exists($name, $modules)) {
       $module = $modules[$name];
 
@@ -33,15 +27,15 @@ class Loader
       }
 
       try {
-          $object = self::getObject($module);
+        return self::getObject($module);
       } catch (Exception $e) {
-          print_r([
-            'module_' . $name => $e->getMessage();
-          ]);
+        print($e->getMessage());
       }
     }
 
-    return $object;
+    print('Module Not Found - ("' . $name . '")');
+
+    return null;
   }
 
   public static function addModule(
@@ -75,8 +69,8 @@ class Loader
 
   public static function getObject(array $module): ?object
   {
-    if ($module['type'] !== self::TYPE_EMPTY) {
-      throw new RuntimeException('Module not found', 500);
+    if ($module['type'] === self::TYPE_EMPTY) {
+      throw new RuntimeException('Type not found', 500);
     }
 
     if (!empty($module['type'])) {
@@ -106,5 +100,16 @@ class Loader
   public static function getModule(string $name): array
   {
     return self::$modules[$name];
+  }
+
+  public static function core(): ?Startup
+  {
+    self::addModule(
+      'core',
+      // self::TYPE_SYSTEM,
+      Startup::class
+    );
+
+    return Loader::callModule('core');
   }
 }

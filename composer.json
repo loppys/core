@@ -7,9 +7,9 @@
             "Vengine\\": "src/"
         },
         "files": [
+            "src/libs/Loader.php",
             "src/libs/common/common.php",
-            "src/libs/Template/Template.php",
-            "up.php"
+            "src/libs/Template/Template.php"
         ]
     },
     "license": "MIT",

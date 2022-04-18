@@ -7,10 +7,11 @@
             "Vengine\\": "src/"
         },
         "files": [
-            "src/libs/Loader.php",
             "src/libs/common/common.php",
-            "src/libs/Template/Template.php"
-        ]
+            "src/libs/Template/Template.php",
+            "Loader.php"
+        ],
+        "classmap": ["Loader.php"]
     },
     "license": "MIT",
     "require": {

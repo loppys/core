@@ -37,10 +37,24 @@ abstract class AbstractModule extends LegacyConfig
   function __construct()
   {
     $this->interface = new \stdClass();
-    $this->adapter = new Adapter();
+
+    if (!Loader::getModule('Adapter')) {
+      Loader::addModule(
+        'Adapter',
+        Loader::TYPE_SYSTEM,
+        Adapter::class
+      );
+    }
+
+    $this->adapter = Loader::callModule('Adapter');
+    
     $this->request = $_REQUEST;
     $this->session = $_SESSION;
-    $this->api = Api::class;
+
+    if (class_exists(Api::class)) {
+      $this->api = Api::class;
+    }
+
   }
 
 }

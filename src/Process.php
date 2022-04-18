@@ -6,6 +6,7 @@ use Vengine\libs\Template\TemplateVar;
 use Vengine\AbstractModule;
 use Vengine\Controllers\Routing\PageController;
 use Vengine\libs\Exception\HttpException;
+use System\modules\Api;
 
 class Process extends AbstractModule
 {
@@ -17,6 +18,7 @@ class Process extends AbstractModule
 		parent::__construct();
 
 		$this->interface->closed = false;
+		$this->interface->project = require $_SERVER['DOCUMENT_ROOT'] . '/config/project.config.php';
 
 		$this->setConfig();
 		$this->sessionStart();
@@ -53,7 +55,7 @@ class Process extends AbstractModule
 	 */
 	public function debugMode()
 	{
-		if ($this->request['__DEBUG_MODE'] == 'V') {
+		if ($this->request['__DEBUG_MODE'] == 'INFO') {
 			$info = json_decode(file_get_contents($_SERVER['DOCUMENT_ROOT'] . '/composer.lock'));
 
 			foreach ($info->packages as $key => $value) {
@@ -64,11 +66,34 @@ class Process extends AbstractModule
 
 			$date = date_create($info->time);
 
+			$key = $this->interface->project['key'];
+
+			if ($key) {
+				$key = preg_replace("/[^\d]/", '*', $key);
+			} else {
+				$key = 'EMPTY';
+			}
+
 			print(
-				'Версия ядра: ' . $info->version . '<br>' .
+				'<div style="
+				position:fixed;
+				border: 5px solid rgba(0,0,0,0.12);
+				border-radius: 2px;
+				background: white;
+				padding: 4px;
+				">
+				Версия ядра: ' . $info->version . '<br>' .
+				'База данных: ' . ($this->adapter->testConnection() ? 'Подключена' : 'Подключение отсутствует') .
 				'<br>' .
+				'Временная папка: ' . $this->interface->tmpDir . '<br>' .
+				'Папка проекта: ' . $this->interface->projectDir . '<br>' .
+				'<hr>' .
+				'Ключ: ' . $key . '<br>' .
+				'Название проекта: ' . $this->interface->project['nameProject'] . '<br>' .
+				'<hr>' .
 				'Референс: ' . $info->source->reference . '<br>' .
 				'Дата установки: ' . date_format($date, "Y/m/d H:i:s")
+				. '</div>'
 			);
 		}
 	}

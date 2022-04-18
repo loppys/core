@@ -160,42 +160,7 @@ function _File($file, $path = '')
   }
 }
 
-function init_controller()
-{
-	return $_SERVER['DOCUMENT_ROOT'] . '/core/controllers/Controller.php';
-}
-
-function api()
-{
-  if (!$_GET) {
-    return tr('Отсутствуют парметры!');
-  }
-
-  return returnMethod('Api_Process', $_GET, '', '', '', '$%array%$');
-}
-
 function errorCode($text, $code, $module)
 {
   return tr($text.' <!--'.'ERR:'.$code.'::'.$module.'-->');
-}
-
-function controller($name, $param)
-{
-  require_once init_controller();
-
-  return returnMethod('Controller', '', $name, $param);
-}
-
-function errorRender($errors = [])
-{
-  require _File('Render.error', 'core/Render');
-
-  if ($errors) {
-    new ErrorDisplay($errors);
-  }
-}
-
-function getTokenClass($class)
-{
-  return TokenClass::get(md5($class));
 }

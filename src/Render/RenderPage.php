@@ -3,51 +3,48 @@
 namespace Vengine\Render;
 
 use Vengine\Process;
-use Vengine\Controllers\FindPage\FindPage;
+use Vengine\Controllers\Routing\PageController;
 
 class RenderPage extends Process
 {
+  public $namePage;
+  public $type;
+
   protected $pageArr;
   private $html = array();
-  protected $classObject;
-  private $tmpFile;
-
-  public $namePage;
 
   private $process;
 
   function __construct(PageController $page)
   {
     parent::__construct();
-    
-    $this->pageArr = returnObject(FindPage::class)->getPage($this->process->page);
 
-    $this->prepare();
+    $this->prepare($page->page);
   }
 
-  public function prepare()
+  public function prepare($page)
   {
-    $pageArr = $this->pageArr;
-
-    if ($this->process->cache) {
+    if ($this->interface->cache) {
       if (file_exists($this->tmpFile)) {
         include $this->tmpFile;
         return;
       }
     }
 
-    if (empty($pageArr)) {
+    $this->type = $page->type;
+
+    if (empty($page)) {
       $this->error404();
     }
 
-    if ($pageArr->name == '') {
-      $this->namePage = $pageArr->page;
+    if ($page->name == '') {
+      $this->namePage = $page->page;
     }else{
-      $this->namePage = $pageArr->name;
+      $this->namePage = $page->name;
     }
 
-    if ($this->pageArr->type === 'admin') {
-      $this->classObject = returnObject($pageArr->class, $pageArr->param_cls);
+    if ($page->type === 'admin') {
+      $this->classObject = returnObject($page->class, $page->param_cls);
 
       if (method_exists($this->classObject, 'render')) {
         $this->html($this->classObject->render());
@@ -70,9 +67,9 @@ class RenderPage extends Process
       '<div class="container-content">'
     ]);
 
-    $this->classObject = returnObject($pageArr->class, $pageArr->param_cls);
+    $this->classObject = returnObject($page->class, $page->param_cls);
 
-    if ($pageArr->tpl_custom === 'class') {
+    if ($page->tpl_custom === 'class') {
       if (method_exists($this->classObject, 'render')) {
         $this->html($this->classObject->render());
       } else {
@@ -80,13 +77,13 @@ class RenderPage extends Process
       }
     }
 
-    if ($pageArr->tpl) {
-      if (is_array($pageArr->tpl)) {
-        foreach ($pageArr->tpl as $tpl) {
-          $this->html($this->templateConnect($tpl));
+    if ($page->tpl) {
+      if (is_array($page->tpl)) {
+        foreach ($page->tpl as $tpl) {
+          $this->html($this->templateConnect($tpl, $page->type_tpl));
         }
       }else{
-        $this->html($this->templateConnect($pageArr->tpl));
+        $this->html($this->templateConnect($page->tpl, $page->type_tpl));
       }
     }
 
@@ -94,21 +91,21 @@ class RenderPage extends Process
 
     $this->addFooter();
 
-    if ($pageArr->js) {
+    if ($page->js) {
       $this->html(
-        $this->addScript([$pageArr->js])
+        $this->addScript([$page->js])
        );
     }
 
     $this->html('</body></html>');
 
-    $this->render();
+    $this->render($page);
   }
 
-  public function render()
+  public function render($page)
   {
-    if ($this->pageArr->method) {
-      $this->classObject->{$this->pageArr->method}();
+    if ($page->method) {
+      $this->classObject->{$page->method}();
     }
 
     foreach ($this->html as $key => $value) {
@@ -129,8 +126,8 @@ class RenderPage extends Process
     $result = implode('', $this->html);
 
     if (
-      $this->process->cache
-      && $file = fopen($this->process->tmpfile . 'cache-' . $this->process->page . '-' . md5(date('Y-m-d-H')) . '.php', 'w+')
+      $this->interface->cache
+      && $file = fopen($this->interface->tmpfile . 'cache-' . $page->page . '-' . md5(date('Y-m-d-H')) . '.php', 'w+')
     ) {
       if (is_writable($this->tmpFile)) {
         fwrite($file, $result);
@@ -158,14 +155,14 @@ class RenderPage extends Process
 
   private function addHeader()
   {
-    if ($this->pageArr->type === 'page') {
+    if ($this->type === 'page') {
       $this->html($this->templateConnect('head', 'core'));
     }
   }
 
   private function addFooter()
   {
-    if ($this->pageArr->type === 'page') {
+    if ($this->type === 'page') {
       $this->html($this->templateConnect('footer', 'core'));
     }
   }

@@ -1,7 +1,5 @@
 <?php
 
-use Vengine\Startup;
-
 class Loader
 {
   public const TYPE_GLOBAL = 'Global';
@@ -14,6 +12,7 @@ class Loader
   public static function callModule(string $name, array $param = [], bool $merge = false): ?object
   {
     $modules = self::getModules();
+    $module = ['name' => $name];
 
     if (array_key_exists($name, $modules)) {
       $module = $modules[$name];
@@ -25,17 +24,19 @@ class Loader
           $module['param'] = $param;
         }
       }
-
-      try {
-        return self::getObject($module);
-      } catch (Exception $e) {
-        print($e->getMessage());
-      }
     }
 
-    print('Module Not Found - ("' . $name . '")');
+    return self::getObject($module, $name);
+  }
 
-    return null;
+  private static function isSystem(string $type): bool
+  {
+    return $type === self::TYPE_SYSTEM;
+  }
+
+  private static function isGlobal(string $type): bool
+  {
+    return $type === self::TYPE_GLOBAL;
   }
 
   public static function addModule(
@@ -67,11 +68,17 @@ class Loader
     self::$modules = $modules;
   }
 
-  public static function getObject(array $module): ?object
+  public static function getObject(array $module, string $name): ?object
   {
-    if ($module['type'] === self::TYPE_EMPTY) {
-      throw new RuntimeException('Type not found', 500);
+    if (!empty($module['object'])) {
+      if (self::isSystem($module['type'])) {
+        return null;
+      }
+
+      return $module['object'];
     }
+
+    $object = null;
 
     if (!empty($module['type'])) {
       $class = $module['handler'];
@@ -81,35 +88,28 @@ class Loader
           $param = $module['param'];
 
           if ($param) {
-            return new $class(...$param);
+            $object = new $class(...$param);
+          } else {
+            $object = new $class();
           }
-
-          return new $class();
         }
       }
     }
 
-    return null;
+    if (!$module['object']) {
+      self::$modules[$name]['object'] = $object;
+    }
+
+    return $object;
   }
 
-  public static function getModules(): array
+  public static function getModules(): ?array
   {
     return self::$modules;
   }
 
-  public static function getModule(string $name): array
+  public static function getModule(string $name): ?array
   {
     return self::$modules[$name];
-  }
-
-  public static function core(): ?Startup
-  {
-    self::addModule(
-      'core',
-      // self::TYPE_SYSTEM,
-      Startup::class
-    );
-
-    return Loader::callModule('core');
   }
 }

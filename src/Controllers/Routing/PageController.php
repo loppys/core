@@ -9,6 +9,7 @@ use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
+use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 
 class PageController
 {
@@ -17,11 +18,13 @@ class PageController
   protected $interface;
   protected $adapter;
   protected $process;
+  protected $request;
 
   function __construct(Process $object)
   {
     $this->interface = $object->interface;
     $this->adapter = $object->adapter;
+    $this->request = $object->request;
     $this->process = $object;
 
     $this->page = $this->getPage($this->interface->page);
@@ -38,27 +41,49 @@ class PageController
 
   public function route()
   {
-    $url = $this->page->url;
+    if ($this->page->url) {
+      $url = $this->page->url;
+    } else {
+      $url = $this->page->page;
+    }
+
+    if (empty($this->page->param)) {
+      $param = json_encode([]);
+    } else {
+      $param = $this->page->param;
+    }
 
     switch (true) {
       case $this->page->type === 'page':
-        $route = new Route($url, ['_controller' => RenderPage::class]);
+        $route = new Route(
+          $url,
+          [
+            'controller' => RenderPage::class
+          ],
+          json_decode($param, 1)
+        );
 
         if ($route) {
           $routes = new RouteCollection();
           $context = new RequestContext();
 
+          if ($this->interface->uri['path'] === '/') {
+            return header('Location: /' . $url, true, 301);
+          }
+
+          $context->fromRequest($this->request);
+
           $routes->add('page', $route);
 
-          // d($routes);
-
           $matcher = new UrlMatcher($routes, $context);
-          $parameters = $matcher->match($url);
+          $parameters = $matcher->match($context->getPathInfo());
 
-          $generator = new UrlGenerator($routes, $context);
-          $url = $generator->generate('page');
-          d($generator);
-          //доделать
+          if (!empty($parameters['controller'])) {
+            return new RenderPage($this);
+          } else {
+            print('empty page controller');
+            die();
+          }
         }
         break;
       case $this->page->type === 'api':

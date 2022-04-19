@@ -1,9 +1,5 @@
 <?php
 
-namespace Vengine;
-
-use Vengine\Startup;
-
 class Loader
 {
   public const TYPE_GLOBAL = 'Global';
@@ -93,16 +89,5 @@ class Loader
   public static function getModule(string $name): array
   {
     return self::$modules[$name];
-  }
-
-  public static function core(): ?Startup
-  {
-    self::addModule(
-      'core',
-      self::TYPE_SYSTEM,
-      Startup::class
-    );
-
-    return Loader::callModule('core');
   }
 }

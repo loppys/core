@@ -48,8 +48,6 @@ abstract class AbstractModule extends LegacyConfig
 
     $this->adapter = Loader::callModule('Adapter');
 
-    d($this->adapter);
-
     $this->request = $_REQUEST;
     $this->session = $_SESSION;
 

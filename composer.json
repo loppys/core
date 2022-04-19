@@ -11,7 +11,7 @@
             "src/libs/Template/Template.php",
             "up.php"
         ],
-        "classmap": ["Loader.php"]
+        "classmap": ["src/Loader.php"]
     },
     "license": "MIT",
     "require": {

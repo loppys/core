@@ -41,11 +41,7 @@ class PageController
 
   public function route()
   {
-    if ($this->page->url) {
-      $url = $this->page->url;
-    } else {
-      $url = $this->page->page;
-    }
+    $url = $this->page->url;
 
     if (empty($this->page->param)) {
       $param = json_encode([]);
@@ -68,7 +64,13 @@ class PageController
           $context = new RequestContext();
 
           if ($this->interface->uri['path'] === '/') {
-            return header('Location: /' . $url, true, 301);
+            $defaultPage = $this->getStandartPage();
+
+            if (empty($defaultPage)) {
+              $this->missingPage();
+            }
+            
+            return header('Location: /' . $defaultPage->url, true, 301);
           }
 
           $context->fromRequest($this->request);
@@ -94,6 +96,11 @@ class PageController
         $this->missingPage();
         break;
     }
+  }
+
+  public function getStandartPage()
+  {
+    return $this->adapter->findOne('pages', '`default` = ?', ['1']);
   }
 
   public function getPage($page)

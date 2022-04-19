@@ -1,5 +1,9 @@
 <?php
 
-use Vengine\Startup;
+Loader::addModule(
+  '_startup',
+  Loader::TYPE_SYSTEM,
+  \Vengine\Startup::class
+);
 
-Startup::init();
+Loader::callModule('_startup')->init();

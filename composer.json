@@ -10,7 +10,8 @@
             "src/libs/common/common.php",
             "src/libs/Template/Template.php",
             "up.php"
-        ]
+        ],
+        "classmap": ["Loader.php"]
     },
     "license": "MIT",
     "require": {

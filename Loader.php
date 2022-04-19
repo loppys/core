@@ -1,7 +1,5 @@
 <?php
 
-namespace Vengine;
-
 use Vengine\Startup;
 
 class Loader

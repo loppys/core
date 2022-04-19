@@ -26,7 +26,17 @@ class Loader
       }
     }
 
-    return self::getObject($module);
+    return self::getObject($module, $name);
+  }
+
+  private static function isSystem(string $type): bool
+  {
+    return $type === self::TYPE_SYSTEM;
+  }
+
+  private static function isGlobal(string $type): bool
+  {
+    return $type === self::TYPE_GLOBAL;
   }
 
   public static function addModule(
@@ -58,8 +68,18 @@ class Loader
     self::$modules = $modules;
   }
 
-  public static function getObject(array $module): ?object
+  public static function getObject(array $module, string $name): ?object
   {
+    if (!empty($module['object'])) {
+      if (self::isSystem($module['type'])) {
+        return null;
+      }
+
+      return $module['object'];
+    }
+
+    $object = null;
+
     if (!empty($module['type'])) {
       $class = $module['handler'];
 
@@ -68,25 +88,27 @@ class Loader
           $param = $module['param'];
 
           if ($param) {
-            return new $class(...$param);
+            $object = new $class(...$param);
+          } else {
+            $object = new $class();
           }
-
-          return new $class();
         }
       }
     }
 
-    print('<!--При загрузке модуля {' . $module['name'] . '} возникли трудности-->');
+    if (!$module['object']) {
+      self::$modules[$name]['object'] = $object;
+    }
 
-    return null;
+    return $object;
   }
 
-  public static function getModules(): array
+  public static function getModules(): ?array
   {
     return self::$modules;
   }
 
-  public static function getModule(string $name): array
+  public static function getModule(string $name): ?array
   {
     return self::$modules[$name];
   }

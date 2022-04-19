@@ -5,7 +5,8 @@ namespace Vengine;
 use Vengine\Injectable;
 use Vengine\LegacyConfig;
 use Vengine\libs\Database\Adapter;
-use System\modules\Api;
+use Symfony\Component\HttpFoundation\Request;
+use \Loader;
 
 abstract class AbstractModule extends LegacyConfig
 {
@@ -20,7 +21,7 @@ abstract class AbstractModule extends LegacyConfig
   public $adapter;
 
   /**
-   * @var array
+   * @var object
    */
   public $request;
 
@@ -29,32 +30,35 @@ abstract class AbstractModule extends LegacyConfig
    */
   public $session;
 
-  /**
-   * @var string
-   */
-  public $api;
-
   function __construct()
   {
     $this->interface = new \stdClass();
+    $this->adapter = $this->getAdapter();
+    $this->request = $this->getRequest();
 
-    if (!Loader::getModule('Adapter')) {
-      Loader::addModule(
-        'Adapter',
-        Loader::TYPE_SYSTEM,
-        Adapter::class
-      );
-    }
-
-    $this->adapter = Loader::callModule('Adapter');
-
-    $this->request = $_REQUEST;
-    $this->session = $_SESSION;
-
-    if (class_exists(Api::class)) {
-      $this->api = Api::class;
-    }
-
+    $this->addApiModule();
   }
 
+  public function getAdapter(): Adapter
+  {
+    return new Adapter();
+  }
+
+  public function addApiModule(): void
+  {
+    if (class_exists(\System\modules\Api::class)) {
+      if (!Loader::getModule('Api')) {
+        Loader::addModule(
+          'Api',
+          Loader::TYPE_GLOBAL,
+          \System\modules\Api::class
+        );
+      }
+    }
+  }
+
+  public function getRequest(): Request
+  {
+    return Request::createFromGlobals();
+  }
 }

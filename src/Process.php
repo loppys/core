@@ -20,10 +20,11 @@ class Process extends AbstractModule
 		$this->interface->closed = false;
 		$this->interface->project = require $_SERVER['DOCUMENT_ROOT'] . '/config/project.config.php';
 
+		$this->uriParser();
+
 		$this->setConfig();
 		$this->sessionStart();
 		$this->debugMode();
-
 		$this->pageFix();
 
 		if (empty($_SESSION['user']) && !stristr($this->interface->page, 'vengine/api/')) {
@@ -31,7 +32,20 @@ class Process extends AbstractModule
 		}
 	}
 
-	public function setConfig() //Выделить под это действие отдельный класс и сделать независимую запись свойств
+	public function uriParser(): void
+	{
+		$request = $this->request;
+
+		$this->interface->uri = [
+			'requestUri' => $request->getRequestUri(),
+			'path' => $request->getPathInfo(),
+			'scheme' => $request->getScheme(),
+			'host' => $request->getHttpHost(),
+			'method' => $request->getMethod(),
+		];
+	}
+
+	public function setConfig(): void
 	{
 		require _File('config', 'config');
 
@@ -40,7 +54,7 @@ class Process extends AbstractModule
 		}
 	}
 
-	public function run()
+	public function run(): void
 	{
 		if (!$this->adapter->testConnection() || ($this->interface->closed && !$this->request['debug:__sys__'])) {
 			print 'На сайте ведутся технические работы, попробуйте вернуться позже!';
@@ -53,9 +67,9 @@ class Process extends AbstractModule
 	/**
 	 * Дебаг мод
 	 */
-	public function debugMode()
+	public function debugMode(): void
 	{
-		if ($this->request['__DEBUG_MODE'] == 'INFO') {
+		if ($this->request->get('__DEBUG_MODE') == 'INFO') {
 			$info = json_decode(file_get_contents($_SERVER['DOCUMENT_ROOT'] . '/composer.lock'));
 
 			foreach ($info->packages as $key => $value) {
@@ -101,7 +115,7 @@ class Process extends AbstractModule
 	/*
 	* Запуск сессии
 	*/
-	public function sessionStart()
+	public function sessionStart(): void
 	{
 		if (empty($_SESSION['_start'])) {
 			session_start();
@@ -112,7 +126,7 @@ class Process extends AbstractModule
 	/*
 	* Ошибка 404
 	*/
-	public function error404()
+	public function error404(): void
 	{
 		$code = http_response_code();
 		if ($code === 404) {
@@ -138,28 +152,10 @@ class Process extends AbstractModule
 
 	public function pageFix(): void
 	{
-		#Исправление ссылок
-		if ($_SERVER['REQUEST_URI'] == '/') {
+		if ($this->interface->uri['path'] == '/') {
 			$page = 'home';
 		}else{
-			$page = substr($_SERVER['REQUEST_URI'], 1);
-		}
-
-		// Исправление $_GET запросов
-		if ($_GET) {
-			$getString = substr($page, strrpos($_SERVER['REQUEST_URI'], '?'), 1000);
-			$leghtFix = strlen($getString);
-			$leghtFullPage = strlen($page);
-
-			$getResult = $leghtFullPage - ( $leghtFix + 1 );
-
-			$result = mb_substr($page, 0, $getResult);
-
-			if (empty($result)) {
-				$page = 'home';
-			}else{
-				$page = $result;
-			}
+			$page = substr($this->interface->uri['path'], 1);
 		}
 
 		$this->interface->page = $page;

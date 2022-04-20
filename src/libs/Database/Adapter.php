@@ -2,7 +2,7 @@
 
 namespace Vengine\libs\Database;
 
-use Vengine\libs\Database\AbstractAdapter;
+use Vengine\libs\AbstractClass\AbstractAdapter;
 
 class Adapter extends AbstractAdapter
 {

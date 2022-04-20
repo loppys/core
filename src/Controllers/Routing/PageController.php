@@ -2,8 +2,9 @@
 
 namespace Vengine\Controllers\Routing;
 
-use Vengine\Process;
+use Vengine\Base;
 use Vengine\Render\RenderPage;
+use Vengine\Controllers\Routing\AbstractPageController;
 use Symfony\Component\Routing\Generator\UrlGenerator;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\RequestContext;
@@ -11,32 +12,11 @@ use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 
-class PageController
+class PageController extends AbstractPageController
 {
-  public $page;
-
-  protected $interface;
-  protected $adapter;
-  protected $process;
-  protected $request;
-
-  function __construct(Process $object)
+  function __construct(Base $base)
   {
-    $this->interface = $object->interface;
-    $this->adapter = $object->adapter;
-    $this->request = $object->request;
-    $this->process = $object;
-
-    $this->page = $this->getPage($this->interface->page);
-
-    $this->route();
-  }
-
-  public function missingPage()
-  {
-    header("HTTP/1.0 404 Not Found");
-
-    $this->process->error404();
+    parent::__construct($base);
   }
 
   public function route()
@@ -69,7 +49,7 @@ class PageController
             if (empty($defaultPage)) {
               $this->missingPage();
             }
-            
+
             return header('Location: /' . $defaultPage->url, true, 301);
           }
 
@@ -95,43 +75,6 @@ class PageController
       default:
         $this->missingPage();
         break;
-    }
-  }
-
-  public function getStandartPage()
-  {
-    return $this->adapter->findOne('pages', '`default` = ?', ['1']);
-  }
-
-  public function getPage($page)
-  {
-    if (!$page) {
-      return false;
-    }
-
-    $load = $this->adapter->findOne('pages', 'page = ? OR custom_url = ? OR url = ?', [$page, $page, $page]);
-
-    if ($load->param_cls) {
-      $load->param_cls = explode(", ", $load->param_cls);
-    }
-
-    if ($load->param_method) {
-      $load->param_method = explode(", ", $load->param_method);
-    }
-
-    if ($load->tpl) {
-      $load->tpl = explode(", ", $load->tpl);
-    }
-
-    if ($load->js) {
-      $load->js = explode(", ", $load->js);
-    }
-
-  #Добавить видимость страниц в бд и добавить в проверку
-    if (!empty($load)) {
-      return $load;
-    }else{
-      return false;
     }
   }
 }

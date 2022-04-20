@@ -1,6 +1,6 @@
 <?php
 
-namespace Vengine\libs\Database;
+namespace Vengine\libs\AbstractClass;
 
 use Vengine\Injectable;
 use RedBeanPHP\R;

@@ -2,18 +2,19 @@
 
 namespace Vengine;
 
-use Vengine\Process;
+use Vengine\Base;
+use Vengine\Controllers\Page\LocalPage;
 
-class Startup extends Process
+class Startup extends Base
 {
   public function __construct()
   {
     $this->logWriter();
-    
+
     parent::__construct();
   }
 
-  public function init()
+  public function init(?LocalPage $pages = null): void
   {
     $vendorDir = vendorDir();
 
@@ -52,7 +53,7 @@ class Startup extends Process
     $this->run();
   }
 
-  public function logWriter()
+  public function logWriter(): void
   {
     require $_SERVER['DOCUMENT_ROOT'].'/config/config.php';
 

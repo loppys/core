@@ -2,10 +2,10 @@
 
 namespace Vengine\Render;
 
-use Vengine\Process;
+use Vengine\Base;
 use Vengine\Controllers\Routing\PageController;
 
-class RenderPage extends Process
+class RenderPage extends Base
 {
   public $namePage;
   public $type;

@@ -4,7 +4,8 @@
     "type": "library",
     "autoload": {
         "psr-4": {
-            "Vengine\\": "src/"
+            "Vengine\\": "src/",
+            "Vengine\\CRUD\\": "Install/"
         },
         "files": [
             "src/libs/common/common.php",
@@ -30,6 +31,7 @@
         "mjaschen/phpgeo": "^4.0",
         "devster/ubench": "^2.1",
         "spatie/menu": "^2.10",
+        "firebase/php-jwt": "^6.0",
         "symfony/http-foundation": "^5.4"
     },
     "require-dev": {

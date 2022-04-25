@@ -6,6 +6,9 @@ use Vengine\Base;
 use Vengine\Controllers\Page\LocalPage;
 use Vengine\CRUD\Install;
 
+use Vengine\libs\Migrations\Query;
+use Vengine\libs\Migrations\Collect;
+
 class Startup extends Base
 {
   public function __construct()
@@ -18,8 +21,6 @@ class Startup extends Base
   public function init(?LocalPage $pages = null): void
   {
     $vendorDir = dirname(dirname(__FILE__));
-
-    new \Vengine\libs\Migrations();
     //
     // $URI = explode('/', trim($_SERVER['REQUEST_URI'],'/'));
     // $class = $URI[1];
@@ -58,7 +59,20 @@ class Startup extends Base
       die();
     }
 
-    $this->run();
+    if ($this->checkMigration()) {
+      $this->run();
+    }
+  }
+
+  public function checkMigration(): bool
+  {
+    $collect = new Collect();
+    
+    if (!empty($collect->data)) {
+      new Query($collect);
+    }
+
+    return true;
   }
 
   public function logWriter(): void

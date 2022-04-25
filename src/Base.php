@@ -27,6 +27,10 @@ class Base extends AbstractModule
 		$this->debugMode();
 		$this->pageFix();
 
+		if ($_GET['_DEBUG_MODE'] === 'SQL') {
+			$this->adapter->fancyDebug();
+		}
+
 		if (empty($_SESSION['user']) && !stristr($this->interface->page, 'vengine/api/')) {
 			$this->guestid();
 		}
@@ -97,7 +101,6 @@ class Base extends AbstractModule
 				padding: 4px;
 				">
 				Версия ядра: ' . $info->version . '<br>' .
-				'База данных: ' . ($this->adapter->testConnection() ? 'Подключена' : 'Подключение отсутствует') .
 				'<br>' .
 				'Временная папка: ' . $this->interface->tmpDir . '<br>' .
 				'Папка проекта: ' . $this->interface->projectDir . '<br>' .
@@ -178,7 +181,7 @@ class Base extends AbstractModule
 
 		$path = [
 			'core' => $dir . '/src/template/',
-			'template' => $_SERVER['DOCUMENT_ROOT'] . '/template/'
+			'template' => $_SERVER['DOCUMENT_ROOT'] . '/www/_template/'
 		];
 
 		$template = 'file::' . $path[$type] . $template;

@@ -43,7 +43,7 @@ abstract class AbstractPageController
       return false;
     }
 
-    $load = $this->adapter->findOne('pages', 'page = ? OR custom_url = ? OR url = ?', [$page, $page, $page]);
+    $load = $this->adapter->findOne('pages', 'url = ?', [$page]);
 
     if ($load->param_cls) {
       $load->param_cls = explode(", ", $load->param_cls);

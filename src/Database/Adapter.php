@@ -22,22 +22,6 @@ class Adapter extends ParentAdapter
     }
   }
 
-  public static function staticSave($table = null, array $fields = []): void
-  {
-    if ($table && $fields) {
-          $db = parent::dispense($table);
-
-          foreach ($fields as $keyField => $fieldValue) {
-            if ($fieldValue) {
-              $db->$keyField = $fieldValue;
-            }
-            continue;
-          }
-
-          parent::store($db);
-    }
-  }
-
   public function condition($condition)
   {
     if ($condition) {

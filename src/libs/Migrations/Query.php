@@ -34,21 +34,30 @@ class Query extends Adapter
           unset($data[$key]);
         }
 
-        $db = Adapter::dispense('migration');
-        $db->file = $value['file'];
-        $db->completed = 'Y';
-        $db->query = $query;
-        Adapter::store($db);
+        $this->migrationLog($value['file'], 'Y', $query);
 
       } catch (\Exception $e) {
 
-        $db = Adapter::dispense('migration');
-        $db->file = $value['file'];
-        $db->completed = 'N';
-        $db->text = $e->getMessage();
-        Adapter::store($db);
+        $this->migrationLog($value['file'], 'N', '', $e->getMessage());
 
       }
     }
+  }
+
+  private function migrationLog(string $file, string $completed, string $query, string $error = ''): void
+  {
+    $db = Adapter::dispense('migration');
+    $db->file = $file;
+    $db->completed = $completed;
+
+    if ($query) {
+      $db->query = $query;
+    }
+
+    if ($error) {
+      $db->fail = $error;
+    }
+
+    Adapter::store($db);
   }
 }

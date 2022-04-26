@@ -58,8 +58,10 @@ class Base extends AbstractModule
 		}
 	}
 
-	public function run(): void
+	public function run($localPages = null): void
 	{
+		$this->interface->localPages = $localPages;
+
 		if (!$this->adapter->testConnection() || ($this->interface->closed && !$this->request['debug:__sys__'])) {
 			print 'На сайте ведутся технические работы, попробуйте вернуться позже!';
 			return;

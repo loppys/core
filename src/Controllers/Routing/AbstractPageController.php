@@ -45,13 +45,7 @@ abstract class AbstractPageController
 
     $load = $this->adapter->findOne('pages', 'url = ?', [$page]);
 
-    if ($load->param_cls) {
-      $load->param_cls = explode(", ", $load->param_cls);
-    }
-
-    if ($load->param_method) {
-      $load->param_method = explode(", ", $load->param_method);
-    }
+    //Доделать с нынешней структурой бд
 
     if ($load->tpl) {
       $load->tpl = explode(", ", $load->tpl);

@@ -60,14 +60,14 @@ class Startup extends Base
     }
 
     if ($this->checkMigration()) {
-      $this->run();
+      $this->run($pages);
     }
   }
 
   public function checkMigration(): bool
   {
     $collect = new Collect();
-    
+
     if (!empty($collect->data)) {
       new Query($collect);
     }

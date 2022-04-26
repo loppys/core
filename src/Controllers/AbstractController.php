@@ -21,8 +21,6 @@ abstract class AbstractController
 
       $this->data = $transformer->data;
       $this->transformer = $transformer;
-
-      $this->process($transformer->get());
     }
   }
 

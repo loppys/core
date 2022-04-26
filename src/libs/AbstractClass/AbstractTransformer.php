@@ -34,7 +34,7 @@ abstract class AbstractTransformer implements TranformerInterface
 
   public function dataSet($data)
   {
-    $this->data = $data;
+    $this->data[] = $data;
 
     return $this;
   }

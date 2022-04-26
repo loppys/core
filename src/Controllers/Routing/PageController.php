@@ -21,7 +21,15 @@ class PageController extends AbstractPageController
 
   public function route()
   {
+    $localPage = $this->interface->localPages->getList();
+
     $url = $this->page->url;
+
+    if (array_key_exists($this->interface->page, $localPage) && empty($url)) {
+      $arrayObject = new \ArrayObject($localPage[$this->interface->page]);
+      $arrayObject->setFlags(\ArrayObject::ARRAY_AS_PROPS);
+      $this->page = $arrayObject;
+    }
 
     if (empty($this->page->param)) {
       $param = json_encode([]);
@@ -32,7 +40,7 @@ class PageController extends AbstractPageController
     switch (true) {
       case $this->page->type === 'page':
         $route = new Route(
-          $url,
+          $this->page->url,
           [
             'controller' => RenderPage::class
           ],
@@ -69,7 +77,7 @@ class PageController extends AbstractPageController
         }
         break;
       case $this->page->type === 'api':
-        $route = new Route($url, ['_controller' => RenderPage::class]);
+        $route = new Route($this->page->url, ['_controller' => RenderPage::class]);
         break;
 
       default:

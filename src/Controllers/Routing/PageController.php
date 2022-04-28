@@ -14,6 +14,10 @@ use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 
 class PageController extends AbstractPageController
 {
+  public $controller;
+  public $render;
+  public $parameters;
+
   function __construct(Base $base)
   {
     parent::__construct($base);
@@ -23,6 +27,10 @@ class PageController extends AbstractPageController
   {
     $localPage = $this->interface->localPages->getList();
 
+    $arrayObject = new \ArrayObject($this->page);
+    $arrayObject->setFlags(\ArrayObject::ARRAY_AS_PROPS);
+    $this->page = $arrayObject;
+
     $url = $this->page->url;
 
     if (array_key_exists($this->interface->page, $localPage) && empty($url)) {
@@ -31,20 +39,46 @@ class PageController extends AbstractPageController
       $this->page = $arrayObject;
     }
 
-    if (empty($this->page->param)) {
-      $param = json_encode([]);
+    if ($this->page->render == 'standart') {
+      $this->render = RenderPage::class;
     } else {
-      $param = $this->page->param;
+      $this->render = $this->page->render;
+    }
+
+    if (!$this->page->visible) {
+      $this->missingPage();
+    }
+
+    $param = [];
+
+    if ($this->page->param) {
+      $url = $this->page->url;
+      $param = explode(', ', $this->page->param);
+
+      foreach ($param as $key => $value) {
+        $url .= '/{' . $value . '}';
+      }
+
+      if ($this->page->absolute !== $url) {
+        $this->page->absolute = $url;
+      }
+    } else {
+      $this->page->absolute = $this->page->url;
+    }
+
+    if ($this->page->controller === 'default') {
+      $this->controller = RenderPage::class;
+    } else {
+      $this->controller = $this->page->controller;
     }
 
     switch (true) {
       case $this->page->type === 'page':
         $route = new Route(
-          $this->page->url,
+          $this->page->absolute,
           [
-            'controller' => RenderPage::class
-          ],
-          json_decode($param, 1)
+            'controller' => $this->controller
+          ]
         );
 
         if ($route) {
@@ -65,19 +99,58 @@ class PageController extends AbstractPageController
 
           $routes->add('page', $route);
 
-          $matcher = new UrlMatcher($routes, $context);
-          $parameters = $matcher->match($context->getPathInfo());
+          $urlMatch = substr($this->interface->uri['requestUri'], 1);
 
-          if (!empty($parameters['controller'])) {
-            return new RenderPage($this);
+          $matcher = new UrlMatcher($routes, $context);
+
+          try {
+            $parameters = $matcher->match($this->interface->uri['requestUri']);
+          } catch (\Exception $e) {
+            $this->missingPage();
+          }
+
+          $this->parameters = $parameters;
+
+          if ($this->page->controller === 'default' ) {
+            $parameters['controller'] = $this->controller;
+          }
+
+          if (!empty($parameters['controller']) && class_exists($parameters['controller'])) {
+            return new $parameters['controller']($this);
           } else {
-            print('empty page controller');
+            print('Что-то пошло не так!');
             die();
           }
         }
         break;
       case $this->page->type === 'api':
-        $route = new Route($this->page->url, ['_controller' => RenderPage::class]);
+        $route = new Route(
+          $this->page->absolute,
+          [
+            'controller' => $this->controller
+          ]
+        );
+
+        if ($route) {
+          $routes = new RouteCollection();
+          $context = new RequestContext();
+
+          $context->fromRequest($this->request);
+
+          $routes->add('api', $route);
+
+          $urlMatch = substr($this->interface->uri['requestUri'], 1);
+
+          $matcher = new UrlMatcher($routes, $context);
+          $parameters = $matcher->match($this->interface->uri['requestUri']);
+
+          if (!empty($parameters['controller']) && class_exists($parameters['controller'])) {
+            return new $parameters['controller']($this);
+          } else {
+            print('Контроллер страницы не найден');
+            die();
+          }
+        }
         break;
 
       default:

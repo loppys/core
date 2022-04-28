@@ -5,9 +5,9 @@ namespace Vengine;
 use Vengine\Base;
 use Vengine\Controllers\Page\LocalPage;
 use Vengine\CRUD\Install;
-
 use Vengine\libs\Migrations\Query;
 use Vengine\libs\Migrations\Collect;
+use Vengine\Database\Adapter;
 
 class Startup extends Base
 {
@@ -59,8 +59,32 @@ class Startup extends Base
       die();
     }
 
+    $this->initModules();
+
     if ($this->checkMigration()) {
       $this->run($pages);
+    }
+  }
+
+  public function initModules(): void
+  {
+    $query = <<<SQL
+SELECT *
+FROM `modules`
+SQL;
+
+    $result = $this->adapter->getAll(
+      $query
+    );
+
+    foreach ($result as $key => $value) {
+      $param = explode(', ', $value['module_param']);
+      \Loader::addModule(
+        $value['module_name'],
+        $value['module_type'],
+        $value['handler'],
+        $param,
+      );
     }
   }
 

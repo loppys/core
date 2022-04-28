@@ -15,15 +15,18 @@ class RenderPage extends Base
 
   private $process;
 
-  function __construct(PageController $page)
+  function __construct(PageController $data)
   {
     parent::__construct();
 
-    $this->prepare($page->page);
+    $this->prepare($data);
   }
 
-  public function prepare($page)
+  public function prepare($data)
   {
+    $page = $data->page;
+    $parameters = $data->parameters;
+
     if ($this->interface->cache) {
       if (file_exists($this->tmpFile)) {
         include $this->tmpFile;
@@ -38,12 +41,12 @@ class RenderPage extends Base
     }
 
     if ($page->name == '') {
-      $this->namePage = $page->page;
+      $this->namePage = $page->url;
     }else{
       $this->namePage = $page->name;
     }
 
-    if ($page->type === 'admin') {
+    if ($page->render === 'admin') {
       $this->classObject = returnObject($page->class, $page->param_cls);
 
       if (method_exists($this->classObject, 'render')) {
@@ -52,7 +55,7 @@ class RenderPage extends Base
         $this->html('Не удалось сгенерировать шаблон');
       }
 
-      return $this->render();
+      return $this->render($page);
     }
 
     $this->addHead();
@@ -67,11 +70,15 @@ class RenderPage extends Base
       '<div class="container-content">'
     ]);
 
-    $this->classObject = returnObject($page->class, $page->param_cls);
+    if (!$controller = $parameters['controller']) {
+      $controller = $data->controller;
+    }
 
-    if ($page->tpl_custom === 'class') {
-      if (method_exists($this->classObject, 'render')) {
-        $this->html($this->classObject->render());
+    $this->classObject = \Loader::callModule($controller);
+
+    if ($page->render !== 'standart') {
+      if (method_exists($this->classObject, $page->render)) {
+        $this->html($this->classObject->{$page->render}());
       } else {
         $this->html('Не удалось сгенерировать шаблон');
       }
@@ -80,10 +87,10 @@ class RenderPage extends Base
     if ($page->tpl) {
       if (is_array($page->tpl)) {
         foreach ($page->tpl as $tpl) {
-          $this->html($this->templateConnect($tpl, $page->type_tpl));
+          $this->html($this->templateConnect($tpl, $page->path));
         }
       }else{
-        $this->html($this->templateConnect($page->tpl, $page->type_tpl));
+        $this->html($this->templateConnect($page->tpl, $page->path));
       }
     }
 
@@ -156,14 +163,14 @@ class RenderPage extends Base
   private function addHeader()
   {
     if ($this->type === 'page') {
-      $this->html($this->templateConnect('head', 'core'));
+      $this->html($this->templateConnect('head', 'CORE'));
     }
   }
 
   private function addFooter()
   {
     if ($this->type === 'page') {
-      $this->html($this->templateConnect('footer', 'core'));
+      $this->html($this->templateConnect('footer', 'CORE'));
     }
   }
 

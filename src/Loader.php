@@ -46,7 +46,6 @@ class Loader
     array $param = [],
     string $path = ''
   ): void {
-
     if (empty($type)) {
       $type = self::TYPE_EMPTY;
     }
@@ -63,9 +62,9 @@ class Loader
 
   public static function addModules(array $modules): void
   {
-    $modules = array_merge(self::$modules, $modules);
-
-    self::$modules = $modules;
+    foreach ($modules as $key => $value) {
+      self::addModule(...$value);
+    }
   }
 
   public static function getObject(array $module, string $name): ?object

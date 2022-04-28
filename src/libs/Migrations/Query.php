@@ -19,35 +19,35 @@ class Query extends Adapter
   public function process(): void
   {
     $data = $this->migration->data;
+
     foreach ($data as $key => $value) {
       $type = substr(stristr($value['file'], '.'), 1);
 
       if ($type !== 'sql') {
-        return;
+        continue;
       }
 
       try {
         $query = file_get_contents($value['path']);
 
-        if (count($data) > 0) {
-          Adapter::exec($query);
-          unset($data[$key]);
-        }
+        Adapter::exec($query);
+        unset($data[$key]);
 
-        $this->migrationLog($value['file'], 'Y', $query);
+        $this->migrationLog($value['file'], $value['version'], 'Y', $query);
 
       } catch (\Exception $e) {
 
-        $this->migrationLog($value['file'], 'N', '', $e->getMessage());
+        $this->migrationLog($value['file'], $value['version'], 'N', '', $e->getMessage());
 
       }
     }
   }
 
-  private function migrationLog(string $file, string $completed, string $query, string $error = ''): void
+  private function migrationLog(string $file, string $version, string $completed, string $query, string $error = ''): void
   {
     $db = Adapter::dispense('migration');
     $db->file = $file;
+    $db->version = $version;
     $db->completed = $completed;
 
     if ($query) {

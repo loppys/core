@@ -19,10 +19,22 @@ class Collect
 
   public function set(array $dir, $path): void
   {
+    $info = json_decode(file_get_contents($_SERVER['DOCUMENT_ROOT'] . '/composer.lock'));
+
+    foreach ($info->packages as $key => $value) {
+      if ($value->name === 'vengine/core') {
+        $info = $info->packages[$key];
+        break;
+      }
+    }
+
+    $version = $info->version;
+
     foreach ($dir as $value) {
       $this->data[] = [
         'file' => $value,
-        'path' => $path . $value
+        'path' => $path . $value,
+        'version' => $version
       ];
     }
   }

@@ -75,7 +75,7 @@ class Base extends AbstractModule
 	 */
 	public function debugMode(): void
 	{
-		if ($this->request->get('__DEBUG_MODE') == 'INFO') {
+		if ($this->request->get('__DEBUG_INFO') == 'ENGINE') {
 			$info = json_decode(file_get_contents($_SERVER['DOCUMENT_ROOT'] . '/composer.lock'));
 
 			foreach ($info->packages as $key => $value) {
@@ -101,6 +101,7 @@ class Base extends AbstractModule
 				border-radius: 2px;
 				background: white;
 				padding: 4px;
+				z-index: 999999;
 				">
 				Версия ядра: ' . $info->version . '<br>' .
 				'<br>' .
@@ -177,13 +178,13 @@ class Base extends AbstractModule
 	/*
 	* Подключение шаблонов
 	*/
-	public function templateConnect($template, $type = 'template')
+	public function templateConnect($template, $type = 'WWW')
 	{
 		$dir = dirname(dirname(__FILE__));
 
 		$path = [
-			'core' => $dir . '/src/template/',
-			'template' => $_SERVER['DOCUMENT_ROOT'] . '/www/_template/'
+			'CORE' => $dir . '/src/template/',
+			'WWW' => $_SERVER['DOCUMENT_ROOT'] . '/www/_template/'
 		];
 
 		$template = 'file::' . $path[$type] . $template;

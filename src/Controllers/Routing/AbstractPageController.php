@@ -20,7 +20,9 @@ abstract class AbstractPageController
     $this->request = $base->request;
     $this->base = $base;
 
-    $this->page = $this->getPage($this->interface->page);
+    $url = array_shift(explode('/', $this->interface->page));
+
+    $this->page = $this->getPage($url);
 
     $this->route();
   }
@@ -40,27 +42,37 @@ abstract class AbstractPageController
   public function getPage($page)
   {
     if (!$page) {
-      return false;
+      return [];
     }
 
-    $load = $this->adapter->findOne('pages', 'url = ?', [$page]);
+    $query = <<<SQL
+SELECT *
+FROM `pages` p
+LEFT JOIN `template` t ON t.group = p.template
+LEFT JOIN `modules` m ON m.module_name = p.module
+WHERE p.url = :URL
+SQL;
 
-    //Доделать с нынешней структурой бд
+    $result = $this->adapter->getRow(
+      $query,
+      [
+        ':URL' => $page
+      ]
+    );
 
-    if ($load->tpl) {
-      $load->tpl = explode(", ", $load->tpl);
+    if (empty($result)) {
+      return [];
     }
 
-    if ($load->js) {
-      $load->js = explode(", ", $load->js);
+    if ($result['tpl']) {
+      $result['tpl'] = explode(", ", $result['tpl']);
     }
 
-  #Добавить видимость страниц в бд и добавить в проверку
-    if (!empty($load)) {
-      return $load;
-    }else{
-      return false;
+    if ($result['js']) {
+      $result['js'] = explode(", ", $result['js']);
     }
+
+    return $result;
   }
 
   abstract public function route();

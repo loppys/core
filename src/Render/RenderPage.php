@@ -17,21 +17,18 @@ class RenderPage extends Base
 
   function __construct(PageController $data)
   {
-    parent::__construct();
-
     $this->prepare($data);
   }
 
   public function prepare($data)
   {
+    $this->interface = $this->getInterface();
+
     $page = $data->page;
     $parameters = $data->parameters;
 
     if ($this->interface->cache) {
-      if (file_exists($this->tmpFile)) {
-        include $this->tmpFile;
-        return;
-      }
+      //К 2.0 реализовать
     }
 
     $this->type = $page->type;
@@ -131,16 +128,6 @@ class RenderPage extends Base
     }
 
     $result = implode('', $this->html);
-
-    if (
-      $this->interface->cache
-      && $file = fopen($this->interface->tmpfile . 'cache-' . $page->page . '-' . md5(date('Y-m-d-H')) . '.php', 'w+')
-    ) {
-      if (is_writable($this->tmpFile)) {
-        fwrite($file, $result);
-        fclose($file);
-      }
-    }
 
     print $result;
   }

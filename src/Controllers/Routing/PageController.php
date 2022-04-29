@@ -25,7 +25,9 @@ class PageController extends AbstractPageController
 
   public function route()
   {
-    $localPage = $this->interface->localPages->getList();
+    if (!empty($this->interface->localPages)) {
+      $localPage = $this->interface->localPages->getList();
+    }
 
     $arrayObject = new \ArrayObject($this->page);
     $arrayObject->setFlags(\ArrayObject::ARRAY_AS_PROPS);
@@ -33,10 +35,12 @@ class PageController extends AbstractPageController
 
     $url = $this->page->url;
 
-    if (array_key_exists($this->interface->page, $localPage) && empty($url)) {
-      $arrayObject = new \ArrayObject($localPage[$this->interface->page]);
-      $arrayObject->setFlags(\ArrayObject::ARRAY_AS_PROPS);
-      $this->page = $arrayObject;
+    if ($localPage) {
+      if (array_key_exists($this->interface->page, $localPage) && empty($url)) {
+        $arrayObject = new \ArrayObject($localPage[$this->interface->page]);
+        $arrayObject->setFlags(\ArrayObject::ARRAY_AS_PROPS);
+        $this->page = $arrayObject;
+      }
     }
 
     if ($this->page->render == 'standart') {
@@ -104,14 +108,14 @@ class PageController extends AbstractPageController
           $matcher = new UrlMatcher($routes, $context);
 
           try {
-            $parameters = $matcher->match($this->interface->uri['requestUri']);
+            $parameters = $matcher->match($this->interface->uri['path']);
           } catch (\Exception $e) {
             $this->missingPage();
           }
 
           $this->parameters = $parameters;
 
-          if ($this->page->controller === 'default' ) {
+          if ($this->page->controller === 'default') {
             $parameters['controller'] = $this->controller;
           }
 

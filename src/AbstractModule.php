@@ -61,4 +61,16 @@ abstract class AbstractModule extends LegacyConfig
   {
     return Request::createFromGlobals();
   }
+
+  public function getInterface(): object
+  {
+    if (empty($this->interface)) {
+      $this->interface = new \stdClass();
+      $this->setConfig();
+    }
+
+    return $this->interface;
+  }
+
+  abstract public function setConfig(): void;
 }

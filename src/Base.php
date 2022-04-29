@@ -51,11 +51,59 @@ class Base extends AbstractModule
 
 	public function setConfig(): void
 	{
-		require _File('config', 'config');
+		$config = require _File('config', 'config');
+
+		if (empty($config['structure'])) {
+			$config['structure'] = $this->getStandartFolderStructure();
+		}
+
+		$path = [];
+
+		foreach ($config['structure'] as $sKey => $sValue) {
+			if (stripos($sValue, 'ROOT:') !== false) {
+				$path['ROOT:'] = $_SERVER['DOCUMENT_ROOT'] . '/';
+				$name = strtoupper(stristr($sValue, ':', true)) . ':';
+
+				$replace = [
+					$name => $path[$name]
+				];
+
+				$path[strtoupper($sKey) . ':'] = strtr($name, $replace) . $tempPath;
+
+				$config['structure'][$sKey] = strtr($name, $replace) . $tempPath;
+				continue;
+			}
+
+			$name = strtoupper(stristr($sValue, ':', true)) . ':';
+			$tempPath = substr(stristr($sValue, ':'), 1);
+
+			$parent = array_key_exists($name, $path);
+
+			if ($parent) {
+				$replace = [
+					$name => $path[$name]
+				];
+
+				$path[strtoupper($sKey) . ':'] = strtr($name, $replace) . $tempPath;
+
+				$config['structure'][$sKey] = strtr($name, $replace) . $tempPath;
+			}
+		}
 
 		foreach ($config as $key => $value) {
 			$this->interface->$key = $value;
 		}
+	}
+
+	public function getStandartFolderStructure(): array
+	{
+		return [
+			'project' => 'ROOT:/',
+			'tmp' => 'PROJECT:_tmp/',
+			'www' => 'PROJECT:www/',
+			'migrations' => 'PROJECT:Migrations/',
+			'logs' => 'PROJECT:logs/',
+		];
 	}
 
 	public function run($localPages = null): void
@@ -182,9 +230,15 @@ class Base extends AbstractModule
 	{
 		$dir = dirname(dirname(__FILE__));
 
+		if (!$this->interface->structure['template']) {
+			$templatePath = $this->interface->structure['www'] . '_template/';
+		} else {
+			$templatePath = $this->interface->structure['template'];
+		}
+
 		$path = [
 			'CORE' => $dir . '/src/template/',
-			'WWW' => $_SERVER['DOCUMENT_ROOT'] . '/www/_template/'
+			'WWW' => $templatePath
 		];
 
 		$template = 'file::' . $path[$type] . $template;

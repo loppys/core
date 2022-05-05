@@ -8,18 +8,28 @@ class Collect
 {
   public array $data;
 
-  function __construct()
+  public $path;
+
+  function __construct($path)
   {
-    $path = dirname(dirname(dirname(dirname(__FILE__)))) . '\\Migrations\\';
-    $dir = scandir($path);
+    $this->path = $path;
+    $core = $this->path['core'] . 'Migrations/';
+    $user = $this->path['migrations'];
+
+    $dir = scandir($core);
     unset($dir[0], $dir[1]);
-    $this->set($dir, $path);
+    $this->set($dir, $core);
+
+    $dir = scandir($user);
+    unset($dir[0], $dir[1]);
+    $this->set($dir, $user);
+
     $this->unsetСompleted();
   }
 
   public function set(array $dir, $path): void
   {
-    $info = json_decode(file_get_contents($_SERVER['DOCUMENT_ROOT'] . '/composer.lock'));
+    $info = json_decode(file_get_contents($this->path['project'] . '/composer.lock'));
 
     foreach ($info->packages as $key => $value) {
       if ($value->name === 'vengine/core') {

@@ -33,18 +33,25 @@ class Query extends Adapter
         Adapter::exec($query);
         unset($data[$key]);
 
-        $this->migrationLog($value['file'], $value['version'], 'Y', $query);
+        $this->migrationLog($value['file'], $value['path'], $value['version'], 'Y', $query);
 
       } catch (\Exception $e) {
 
-        $this->migrationLog($value['file'], $value['version'], 'N', '', $e->getMessage());
+        $this->migrationLog($value['file'], $value['path'], $value['version'], 'N', '', $e->getMessage());
 
       }
     }
   }
 
-  private function migrationLog(string $file, string $version, string $completed, string $query, string $error = ''): void
-  {
+  private function migrationLog(
+    string $file,
+    string $fullpath,
+    string $version,
+    string $completed,
+    string $query,
+    string $error = ''
+    ): void {
+
     $db = Adapter::dispense('migration');
     $db->file = $file;
     $db->version = $version;
@@ -57,6 +64,8 @@ class Query extends Adapter
     if ($error) {
       $db->fail = $error;
     }
+
+    $db->fullpath = $fullpath;
 
     Adapter::store($db);
   }

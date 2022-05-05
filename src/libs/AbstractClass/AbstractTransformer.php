@@ -26,10 +26,19 @@ abstract class AbstractTransformer implements TranformerInterface
     }
 
     foreach ($scheme as $value) {
-      $this->scheme[$value] = $value;
+      $this->scheme[$value] = '';
     }
 
     return $this;
+  }
+
+  public function getScheme(): ?array
+  {
+    if (!empty($this->scheme)) {
+      return $this->scheme;
+    }
+
+    return [];
   }
 
   public function dataSet($data)

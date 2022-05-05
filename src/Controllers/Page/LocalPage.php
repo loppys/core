@@ -12,6 +12,9 @@ class LocalPage extends AbstractController implements PageControllerInterface
   protected $pageList = array();
   private $adapter;
 
+  private $tmp = array();
+  private $start = false;
+
   public function __construct(DataPageTransformer $data)
   {
     parent::__construct($data);
@@ -25,7 +28,7 @@ class LocalPage extends AbstractController implements PageControllerInterface
 
   private function standartScheme(): array
   {
-    $load = $this->adapter->getAll('SELECT * FROM `pages` WHERE 1=1');
+    $load = $this->adapter->getAll('SELECT * FROM `pages`');
 
     if (!$load) {
       return [];
@@ -46,13 +49,56 @@ class LocalPage extends AbstractController implements PageControllerInterface
   {
   }
 
-  public function add(array $page): object
+  public function add(array $page): LocalPage
   {
     if ($page) {
       $this->pageList[$page['url']] = $page;
     }
 
     $this->transformer->dataSet($page);
+
+    return $this;
+  }
+
+  public function startPrepare(string $url): LocalPage
+  {
+    $this->tmp = $this->transformer->getScheme();
+
+    if (!empty($url)) {
+      $this->tmp['url'] = $url;
+      $this->start = true;
+    }
+
+    return $this;
+  }
+
+  public function setProperty(string $name, string $value): LocalPage
+  {
+    if (array_key_exists($name, $this->tmp)) {
+      $this->tmp[$name] = $value;
+    }
+
+    return $this;
+  }
+
+  public function setProperties(array $properties): LocalPage
+  {
+    foreach ($properties as $key => $value) {
+      if (array_key_exists($key, $this->tmp)) {
+        $this->tmp[$key] = $value;
+      }
+    }
+
+    return $this;
+  }
+
+  public function create(): LocalPage
+  {
+    if ($this->start) {
+      $this->add($this->tmp);
+
+      unset($this->tmp);
+    }
 
     return $this;
   }

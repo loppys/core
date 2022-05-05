@@ -10,6 +10,8 @@ use System\modules\Api;
 
 class Base extends AbstractModule
 {
+	public $module = 'Core';
+
 	/*
 	* Конструктор класса
 	*/
@@ -17,15 +19,9 @@ class Base extends AbstractModule
 	{
 		parent::__construct();
 
-		$this->interface->closed = false;
-		$this->interface->project = require $_SERVER['DOCUMENT_ROOT'] . '/config/project.config.php';
-
 		$this->uriParser();
-
-		$this->setConfig();
 		$this->sessionStart();
 		$this->debugMode();
-		$this->pageFix();
 
 		if ($_GET['_DEBUG_MODE'] === 'SQL') {
 			$this->adapter->fancyDebug();
@@ -47,70 +43,15 @@ class Base extends AbstractModule
 			'host' => $request->getHttpHost(),
 			'method' => $request->getMethod(),
 		];
-	}
 
-	public function setConfig(): void
-	{
-		$config = require _File('config', 'config');
-
-		if (empty($config['structure'])) {
-			$config['structure'] = $this->getStandartFolderStructure();
-		}
-
-		$path = [];
-
-		foreach ($config['structure'] as $sKey => $sValue) {
-			if (stripos($sValue, 'ROOT:') !== false) {
-				$path['ROOT:'] = $_SERVER['DOCUMENT_ROOT'] . '/';
-				$name = strtoupper(stristr($sValue, ':', true)) . ':';
-
-				$replace = [
-					$name => $path[$name]
-				];
-
-				$path[strtoupper($sKey) . ':'] = strtr($name, $replace) . $tempPath;
-
-				$config['structure'][$sKey] = strtr($name, $replace) . $tempPath;
-				continue;
-			}
-
-			$name = strtoupper(stristr($sValue, ':', true)) . ':';
-			$tempPath = substr(stristr($sValue, ':'), 1);
-
-			$parent = array_key_exists($name, $path);
-
-			if ($parent) {
-				$replace = [
-					$name => $path[$name]
-				];
-
-				$path[strtoupper($sKey) . ':'] = strtr($name, $replace) . $tempPath;
-
-				$config['structure'][$sKey] = strtr($name, $replace) . $tempPath;
-			}
-		}
-
-		foreach ($config as $key => $value) {
-			$this->interface->$key = $value;
-		}
-	}
-
-	public function getStandartFolderStructure(): array
-	{
-		return [
-			'project' => 'ROOT:/',
-			'tmp' => 'PROJECT:_tmp/',
-			'www' => 'PROJECT:www/',
-			'migrations' => 'PROJECT:Migrations/',
-			'logs' => 'PROJECT:logs/',
-		];
+		$this->interface->page = $this->interface->uri['path'];
 	}
 
 	public function run($localPages = null): void
 	{
 		$this->interface->localPages = $localPages;
 
-		if (!$this->adapter->testConnection() || ($this->interface->closed && !$this->request['debug:__sys__'])) {
+		if (!$this->adapter->testConnection() || $this->interface->closed) {
 			print 'На сайте ведутся технические работы, попробуйте вернуться позже!';
 			return;
 		}

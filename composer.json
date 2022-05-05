@@ -4,8 +4,7 @@
     "type": "library",
     "autoload": {
         "psr-4": {
-            "Vengine\\": "src/",
-            "Vengine\\CRUD\\": "Install/"
+            "Vengine\\": "src/"
         },
         "files": [
             "src/libs/common/common.php",

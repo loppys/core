@@ -8,6 +8,7 @@ use Vengine\CRUD\Install;
 use Vengine\libs\Migrations\Query;
 use Vengine\libs\Migrations\Collect;
 use Vengine\Database\Adapter;
+use Vengine\Modules\Api\Route;
 
 class Startup extends Base
 {
@@ -15,48 +16,21 @@ class Startup extends Base
   {
     $this->logWriter();
 
-    parent::__construct();
-  }
-
-  public function init(?LocalPage $pages = null): void
-  {
-    $vendorDir = dirname(dirname(__FILE__));
-    //
-    // $URI = explode('/', trim($_SERVER['REQUEST_URI'],'/'));
-    // $class = $URI[1];
-    //
-    // if (strripos($_SERVER['REQUEST_URI'], 'api') && !empty($class)) {
-    //   $file = '/_api/'. $URI[1] .'/'. $URI[1] .'.php';
-    //   if (file_exists($file)) {
-    //     require_once $vendorDir . $file;
-    //   }
-    //
-    //   if (class_exists($class)) {
-    //     try {
-    //         $api = new $class();
-    //         echo $api->run();
-    //         die();
-    //     } catch (Exception $e) {
-    //         echo json_encode(Array('error' => $e->getMessage()));
-    //     }
-    //   } else {
-    //     header("HTTP/1.1 405 Method Not Allowed");
-    //     print json_encode('Api not found');
-    //   }
-    //
-    //   die();
-    // }
-
-    //обработчик ошибок (переделать вывод)
     if ($_GET['__DEBUG'] === 'INFO') {
       $whoops = new \Whoops\Run;
       $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
       $whoops->register();
     }
 
-    if (file_exists($vendorDir . '/src/install')) {
-      new Install();
-      die();
+    parent::__construct();
+  }
+
+  public function init(?LocalPage $pages = null): void
+  {
+    $uri = explode('/', trim($this->interface->uri['path'],'/'));
+
+    if (array_shift($uri) === 'api') {
+      Route::api($uri, $this->interface->structure);
     }
 
     $this->initModules();
@@ -90,7 +64,7 @@ SQL;
 
   public function checkMigration(): bool
   {
-    $collect = new Collect();
+    $collect = new Collect($this->interface->structure);
 
     if (!empty($collect->data)) {
       new Query($collect);

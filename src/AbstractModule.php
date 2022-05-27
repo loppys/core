@@ -35,6 +35,11 @@ abstract class AbstractModule extends LegacyConfig
    */
   public $module;
 
+  /**
+   * @var string
+   */
+  public $version;
+
   function __construct()
   {
     $this->interface = new \stdClass();

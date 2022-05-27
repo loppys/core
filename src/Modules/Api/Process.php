@@ -7,6 +7,7 @@ use Vengine\AbstractModule;
 abstract class Process extends AbstractModule
 {
   public $module = 'Api';
+  public $version = '1.0.2';
 
   public $route = [];
 

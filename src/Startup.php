@@ -5,8 +5,6 @@ namespace Vengine;
 use Vengine\Base;
 use Vengine\Controllers\Page\LocalPage;
 use Vengine\CRUD\Install;
-use Vengine\libs\Migrations\Query;
-use Vengine\libs\Migrations\Collect;
 use Vengine\Database\Adapter;
 use Vengine\Modules\Api\Route;
 
@@ -27,7 +25,7 @@ class Startup extends Base
 
   public function init(?LocalPage $pages = null): void
   {
-    $uri = explode('/', trim($this->interface->uri['path'],'/'));
+    $uri = explode('/', trim($this->interface->uri['path'], '/'));
 
     if (array_shift($uri) === 'api') {
       Route::api($uri, $this->interface->structure);
@@ -35,9 +33,9 @@ class Startup extends Base
 
     $this->initModules();
 
-    if ($this->checkMigration()) {
-      $this->run($pages);
-    }
+    \Loader::callModule('migrations');
+
+    $this->run($pages);
   }
 
   public function initModules(): void
@@ -60,17 +58,6 @@ SQL;
         $param,
       );
     }
-  }
-
-  public function checkMigration(): bool
-  {
-    $collect = new Collect($this->interface->structure);
-
-    if (!empty($collect->data)) {
-      new Query($collect);
-    }
-
-    return true;
   }
 
   public function logWriter(): void

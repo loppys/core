@@ -20,7 +20,8 @@ abstract class AbstractPageController
     $this->request = $base->request;
     $this->base = $base;
 
-    $url = array_shift(explode('/', $this->interface->page));
+    $url = array_filter(explode('/', $this->interface->page));
+    $url += ['urlPath' => $this->interface->page];
 
     $this->page = $this->getPage($url);
 
@@ -39,9 +40,31 @@ abstract class AbstractPageController
     return $this->adapter->findOne('pages', '`default` = ?', ['1']);
   }
 
+  public function setConfigPage(array $page)
+  {
+
+  }
+
+  public function getConfigPages(): array
+  {
+    $config = [];
+
+    if (file_exists($this->interface->structure['pages'])) {
+      $config = require $this->interface->structure['pages'];
+    }
+
+    return $config;
+  }
+
   public function getPage($page)
   {
-    if (!$page) {
+    $url = array_shift($page);
+
+    if ($url === '/') {
+      $url = 'home';
+    }
+
+    if (!$url) {
       return [];
     }
 
@@ -56,7 +79,7 @@ SQL;
     $result = $this->adapter->getRow(
       $query,
       [
-        ':URL' => $page
+        ':URL' => $url
       ]
     );
 

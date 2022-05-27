@@ -26,7 +26,9 @@ class PageController extends AbstractPageController
   public function route()
   {
     if (!empty($this->interface->localPages)) {
-      $localPage = $this->interface->localPages->getList();
+      $name = substr($this->interface->uri['path'], 1);
+      $localPage = $this->interface->localPages->getList()[$name];
+      unset($name);
     }
 
     $arrayObject = new \ArrayObject($this->page);
@@ -36,8 +38,8 @@ class PageController extends AbstractPageController
     $url = $this->page->url;
 
     if ($localPage) {
-      if (array_key_exists($this->interface->page, $localPage) && empty($url)) {
-        $arrayObject = new \ArrayObject($localPage[$this->interface->page]);
+      if (in_array($this->interface->page, $localPage) && empty($url)) {
+        $arrayObject = new \ArrayObject($localPage);
         $arrayObject->setFlags(\ArrayObject::ARRAY_AS_PROPS);
         $this->page = $arrayObject;
       }
@@ -64,10 +66,10 @@ class PageController extends AbstractPageController
       }
 
       if ($this->page->absolute !== $url) {
-        $this->page->absolute = $url;
+        $this->page->absolute = '/' . $url;
       }
     } else {
-      $this->page->absolute = $this->page->url;
+      $this->page->absolute = '/' . $this->page->url;
     }
 
     if ($this->page->controller === 'default') {
@@ -82,7 +84,8 @@ class PageController extends AbstractPageController
           $this->page->absolute,
           [
             'controller' => $this->controller
-          ]
+          ],
+          $param
         );
 
         if ($route) {
@@ -102,13 +105,10 @@ class PageController extends AbstractPageController
           $context->fromRequest($this->request);
 
           $routes->add('page', $route);
-
-          $urlMatch = substr($this->interface->uri['requestUri'], 1);
-
           $matcher = new UrlMatcher($routes, $context);
 
           try {
-            $parameters = $matcher->match($this->interface->uri['path']);
+            $parameters = $matcher->match($this->page->absolute);
           } catch (\Exception $e) {
             $this->missingPage();
           }

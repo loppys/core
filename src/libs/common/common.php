@@ -1,5 +1,37 @@
 <?php
 
+use Vengine\libs\Dumper;
+
+function _start(): void
+{
+  Loader::addModule(
+    'DataPageTransformer',
+    Loader::TYPE_GLOBAL,
+    \Vengine\Controllers\Page\DataPageTransformer::class
+  );
+
+  Loader::addModules(
+    [
+      [
+        '_startup',
+        Loader::TYPE_SYSTEM,
+        \Vengine\Startup::class
+      ],
+      [
+        'LocalPage',
+        Loader::TYPE_GLOBAL,
+        \Vengine\Controllers\Page\LocalPage::class,
+        [Loader::callModule('DataPageTransformer')]
+      ],
+      [
+        'migrations',
+        Loader::TYPE_GLOBAL,
+        \Vengine\Modules\Migrations\Process::class
+      ],
+    ]
+  );
+}
+
 /**
  * Все функции, которые нужны и в обычной разметке находятся тут!
  *
@@ -10,13 +42,18 @@
 /**
  * var_dump
  */
- function d($dump, $die = false)
+ function d(...$dump)
  {
-   $dump = [$dump];
+   $dump[0] = $dump;
+   $debug = debug_backtrace();
 
-   array_push(
-     $dump,
-     date('d-m-Y H:i:s') . ' | hash__' . md5(date('d-m-Y H:i:s'))
+   $data = array(
+     'data' => $dump,
+     'debug' => array(
+       'file' => $debug[0]['file'] ?? null,
+       'line' => $debug[0]['line'] ?? null,
+       'time' => microtime(true),
+     )
    );
 
    print '<pre style="
@@ -25,12 +62,10 @@
    font-size: 1.2em;
    white-space: pre-wrap;
    ">';
-   print_r(var_dump($dump));
+   print Dumper::dump($data);
    print '</pre>';
 
-   if ($die) {
-     die();
-   }
+   die();
  }
 
  function vendorDir(): string

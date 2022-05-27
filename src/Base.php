@@ -11,6 +11,7 @@ use System\modules\Api;
 class Base extends AbstractModule
 {
 	public $module = 'Core';
+	public $version = '1.0.1';
 
 	/*
 	* Конструктор класса

@@ -159,6 +159,9 @@ function returnFolderContents($dir, $print = false)
  */
 function isActiveModule($moduleName): bool
 {
+  //удалить
+  return false;
+
   require _File('settings', 'config');
 
   if (!$modules[$moduleName] || !class_exists($moduleName)) {

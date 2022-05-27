@@ -14,7 +14,7 @@ abstract class AbstractAdapter extends R implements Injectable
 
   public function __construct()
   {
-    $this->param = require_once($_SERVER['DOCUMENT_ROOT'] . '/config/database.php');
+    $this->param = require_once($_SERVER['DOCUMENT_ROOT'] . '/../config/database.php');
 
     if (!empty($this->param)) {
       $type = $this->param['type'];

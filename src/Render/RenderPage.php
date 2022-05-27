@@ -139,9 +139,9 @@ class RenderPage extends Base
     <html>
     <head>
     <title>'. $this->namePage .'</title>
-    <link rel="stylesheet" type="text/css" href="/../www/_template/style.css">
-    <link rel="stylesheet" type="text/css" href="/../www/_template/_custom_style.css">
-    <link rel="shortcut icon" href="www/images/favicon.png">
+    <link rel="stylesheet" type="text/css" href="/tpl/style.css">
+    <link rel="stylesheet" type="text/css" href="/tpl/_custom_style.css">
+    <link rel="shortcut icon" href="/img/favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta itemprop="inLanguage" content="ru-RU">
     </head>';

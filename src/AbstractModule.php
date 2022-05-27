@@ -98,7 +98,7 @@ abstract class AbstractModule extends LegacyConfig
 
   public function setConfig(): void
   {
-    $config = require _File('config', 'config');
+    $config = require _File('config', '/../config');
     $coreConfig = require('config/config.php');
 
     if (empty($config['structure'])) {
@@ -115,8 +115,11 @@ abstract class AbstractModule extends LegacyConfig
       }
     }
 
+    $dir = $_SERVER['DOCUMENT_ROOT'];
+    $projectDir = stristr($dir, 'www', true);
+
     $path = [
-      'ROOT:' => $_SERVER['DOCUMENT_ROOT']
+      'ROOT:' => $projectDir
     ];
 
     foreach ($config['structure'] as $sKey => $sValue) {
@@ -183,7 +186,7 @@ abstract class AbstractModule extends LegacyConfig
   public function getStandartFolderStructure(): array
   {
     return [
-      'project' => 'ROOT:/',
+      'project' => 'ROOT:',
       'tmp' => 'PROJECT:_tmp/',
       'www' => 'PROJECT:www/',
       'migrations' => 'PROJECT:Migrations/',

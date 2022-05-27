@@ -62,13 +62,13 @@ SQL;
 
   public function logWriter(): void
   {
-    require $_SERVER['DOCUMENT_ROOT'].'/config/config.php';
+    require $_SERVER['DOCUMENT_ROOT'].'/../config/config.php';
 
     if (!isset($config['logs']) || $config['logs'] === true) {
       error_reporting(E_ALL & ~E_NOTICE);
       ini_set('display_errors', 'Off');
       ini_set('log_errors', 'On');
-      ini_set('error_log', $_SERVER['DOCUMENT_ROOT'] . '/logs/errors.log');
+      ini_set('error_log', $_SERVER['DOCUMENT_ROOT'] . '/../logs/errors.log');
     }
   }
 }

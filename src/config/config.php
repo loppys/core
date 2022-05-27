@@ -2,7 +2,7 @@
 
 return [
 	'structure' => [
-		'core' => 'ROOT:/vendor/vengine/core/',
+		'core' => 'PROJECT:vendor/vengine/core/',
 		'pages' => 'CONFIG:pages/routes.php',
 		'coreConfig' => 'CORE:src/config/',
 		'api' => 'CORE:src/_api/',

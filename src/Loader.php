@@ -111,4 +111,29 @@ class Loader
   {
     return self::$modules[$name];
   }
+
+  public static function getInfoModules(): array
+  {
+    $modules = self::$modules;
+
+    foreach ($modules as $key => $value) {
+      if (is_object($value['object'])) {
+        $n = $value['object']->module;
+        $v = $value['object']->version;
+
+        $name = !empty($n) ? $n : $key;
+        $version = !empty($v) ? $v : 'не определена';
+      } else {
+        $name = $key;
+        $version = 'версия не найдена';
+      }
+
+      $info[$key] = [
+        'name' => $name,
+        'version' => $version,
+      ];
+    }
+
+    return $info;
+  }
 }

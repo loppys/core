@@ -40,8 +40,15 @@ abstract class AbstractModule extends LegacyConfig
    */
   public $version;
 
+  /**
+   * @var string
+   */
+  public $url;
+
   function __construct()
   {
+    $this->error404();
+    
     $this->interface = new \stdClass();
     $this->setConfig();
 
@@ -193,5 +200,16 @@ abstract class AbstractModule extends LegacyConfig
       'logs' => 'PROJECT:logs/',
       'config' => 'PROJECT:config/'
     ];
+  }
+
+  /*
+  * Ошибка 404
+  */
+  public function error404(): void
+  {
+    $code = http_response_code();
+    if ($code === 404) {
+      exit(include 'template/error404.tpl.php');
+    }
   }
 }

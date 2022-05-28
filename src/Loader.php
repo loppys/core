@@ -116,13 +116,52 @@ class Loader
   {
     $modules = self::$modules;
 
+    $modules['Api']['handler'] = \Vengine\Modules\Api\Process::class;
+
+    $sysModule = scandir(__DIR__ . '/Modules');
+
     foreach ($modules as $key => $value) {
+      $arr = explode('\\', $value['handler']);
+      unset($arr[array_key_last($arr)]);
+
+      $package = implode('\\', $arr);
+
+      $class = '\\' . $package . '\\Info\\Package';
+
+      if (class_exists($class)) {
+        $object = new $class();
+
+        $name = $object->name;
+        $version = $object->version;
+        $type = 'Package';
+
+        if (in_array($name, $sysModule)) {
+          $type = 'System';
+        }
+
+        $packageInfo[$key] = [
+          'name' => $name,
+          'version' => $version,
+          'type' => $type,
+          'all' => $object
+        ];
+      }
+    }
+
+    foreach ($modules as $key => $value) {
+      if (!empty($packageInfo[$key])) {
+        $info[$key] = $packageInfo[$key];
+        continue;
+      }
+
+      $type = $value['type'];
+
       if (is_object($value['object'])) {
         $n = $value['object']->module;
         $v = $value['object']->version;
 
         $name = !empty($n) ? $n : $key;
-        $version = !empty($v) ? $v : 'не определена';
+        $version = !empty($v) ? $v : 'версия не определена';
       } else {
         $name = $key;
         $version = 'версия не найдена';
@@ -131,6 +170,8 @@ class Loader
       $info[$key] = [
         'name' => $name,
         'version' => $version,
+        'type' => $type,
+        'all' => $object
       ];
     }
 

@@ -44,7 +44,7 @@ class RenderPage extends Base
     }
 
     if ($page->render === 'admin') {
-      $this->classObject = returnObject($page->class, $page->param_cls);
+      $this->classObject = \Loader::callModule('CMS');
 
       if (method_exists($this->classObject, 'render')) {
         $this->html($this->classObject->render());

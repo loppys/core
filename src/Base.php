@@ -11,7 +11,7 @@ use System\modules\Api;
 class Base extends AbstractModule
 {
 	public $module = 'Core';
-	public $version = '1.0.1';
+	public $version = '1.0.0-Alpha';
 
 	/*
 	* Конструктор класса
@@ -116,17 +116,6 @@ class Base extends AbstractModule
 		if (empty($_SESSION['_start'])) {
 			session_start();
 			$_SESSION['_start'] = true;
-		}
-	}
-
-	/*
-	* Ошибка 404
-	*/
-	public function error404(): void
-	{
-		$code = http_response_code();
-		if ($code === 404) {
-			exit(include 'template/error404.tpl.php');
 		}
 	}
 

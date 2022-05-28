@@ -12,19 +12,10 @@ class modules extends AbstractPage
   {
     $modules = \Loader::getInfoModules();
 
-    $this->content[] = $this->title . '<hr><br>';
-    $this->content[] = '<br>Системные:<br>';
     foreach ($modules as $key => $value) {
-      if ($value['type'] === 'System') {
-        $this->content[] = "Название: {$value['name']} (Версия: {$value['version']}) <br>";
-
-        unset($modules[$key]);
-      }
+        $this->data['module'][] = $value;
     }
 
-    $this->content[] = '<br>Другие:<br>';
-    foreach ($modules as $key => $value) {
-      $this->content[] = "Название: {$value['name']} (Версия: {$value['version']}) <br>";
-    }
+    $this->content[] = $this->templateConnect('modules');
   }
 }

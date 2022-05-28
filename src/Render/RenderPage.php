@@ -15,6 +15,8 @@ class RenderPage extends Base
 
   private $process;
 
+  public $_data;
+
   function __construct(PageController $data)
   {
     $this->prepare($data);
@@ -47,7 +49,15 @@ class RenderPage extends Base
       $this->classObject = \Loader::callModule('CMS');
 
       if (method_exists($this->classObject, 'render')) {
+        $this->addHead();
+
+        $this->html($this->addStandartJS());
+        $this->addHeader();
+        $this->html('<body>');
+
         $this->html($this->classObject->render());
+
+        $this->html('</body></html>');
       } else {
         $this->html('Не удалось сгенерировать шаблон');
       }
@@ -113,6 +123,12 @@ class RenderPage extends Base
     }
 
     foreach ($this->html as $key => $value) {
+      if (is_object($value)) {
+        $this->_data = $value;
+        unset($this->html[$key]);
+        continue;
+      }
+
       if (stripos($value, 'file::') !== false) {
         $replace = [
           'file::' => ''
@@ -124,6 +140,12 @@ class RenderPage extends Base
         include $value . '.tpl.php';
         $this->html[$key] = ob_get_contents();
         ob_clean();
+      }
+    }
+
+    foreach ($this->html as $key => $value) {
+      if (stripos($value, 'file::') !== false) {
+        unset($this->html[$key]);
       }
     }
 
@@ -165,6 +187,10 @@ class RenderPage extends Base
   {
     if (is_array($html)) {
       foreach ($html as $key => $value) {
+        if (is_object($value)) {
+          $this->_data = $value;
+          continue;
+        }
         $this->html[] = $value;
       }
     }else{

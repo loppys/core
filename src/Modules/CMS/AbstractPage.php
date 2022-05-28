@@ -13,10 +13,23 @@ abstract class AbstractPage
 
   public $visible = true;
 
+  public $data;
+
   abstract public function index();
 
   public function getRenderData(): array
   {
+    $this->content[] = $this;
+
     return $this->content;
+  }
+
+  public function templateConnect($template)
+  {
+    $dir = dirname(__FILE__);
+
+    $template = 'file::' . $dir . '/Pages/tpl/' . $template;
+
+    return $template;
   }
 }

@@ -123,12 +123,6 @@ class RenderPage extends Base
     }
 
     foreach ($this->html as $key => $value) {
-      if (is_object($value)) {
-        $this->_data = $value;
-        unset($this->html[$key]);
-        continue;
-      }
-
       if (stripos($value, 'file::') !== false) {
         $replace = [
           'file::' => ''
@@ -188,7 +182,7 @@ class RenderPage extends Base
     if (is_array($html)) {
       foreach ($html as $key => $value) {
         if (is_object($value)) {
-          $this->_data = $value;
+          $this->_data = $value->data;
           continue;
         }
         $this->html[] = $value;

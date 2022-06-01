@@ -48,7 +48,6 @@ function _start(): void
  */
  function d(...$dump)
  {
-   $dump[0] = $dump;
    $debug = debug_backtrace();
 
    $data = array(

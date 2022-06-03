@@ -2,9 +2,9 @@
 <html>
 <head>
   <title>404</title>
-  <link rel="stylesheet" href="/libs/bootstrap.min.css">
-  <link rel="stylesheet" type="text/css" href="/template/style.css">
-  <link rel="shortcut icon" href="images/favicon.png">
+  <link rel="stylesheet" href="/systpl/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="/tpl/style.css">
+  <link rel="shortcut icon" href="/img/favicon.png">
 </head>
 <body style="height: auto;">
 <?php include 'head.tpl.php'; ?>

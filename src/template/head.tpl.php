@@ -1,5 +1,3 @@
-<?php include $_SERVER['DOCUMENT_ROOT'] . '/config/settings.php'; ?>
-
 <?php $var = $this->setVar()->getVars(); ?>
 
 <header class="p-3 bg-dark text-white">

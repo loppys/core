@@ -29,6 +29,21 @@ class Loader
     return self::getObject($module, $name);
   }
 
+  public static function recreate(): void
+  {
+    $modules = self::getModules();
+
+    foreach ($modules as $key => $value) {
+      if (!empty($value['object']) && is_object($value['object'])) {
+        unset(self::$modules[$key]['object']);
+
+        self::callModule($key);
+      } else {
+        self::callModule($key);
+      }
+    }
+  }
+
   private static function isSystem(string $type): bool
   {
     return $type === self::TYPE_SYSTEM;
@@ -46,7 +61,6 @@ class Loader
     array $param = [],
     string $path = ''
   ): void {
-
     if (empty($type)) {
       $type = self::TYPE_EMPTY;
     }
@@ -63,9 +77,9 @@ class Loader
 
   public static function addModules(array $modules): void
   {
-    $modules = array_merge(self::$modules, $modules);
-
-    self::$modules = $modules;
+    foreach ($modules as $key => $value) {
+      self::addModule(...$value);
+    }
   }
 
   public static function getObject(array $module, string $name): ?object
@@ -76,6 +90,12 @@ class Loader
       }
 
       return $module['object'];
+    }
+
+    if (!empty($module['path'])) {
+      if (file_exists($module['path'])) {
+        require_once($module['path']);
+      }
     }
 
     $object = null;
@@ -93,6 +113,8 @@ class Loader
             $object = new $class();
           }
         }
+      } else {
+        $object = 'object creation error';
       }
     }
 
@@ -111,5 +133,117 @@ class Loader
   public static function getModule(string $name): ?array
   {
     return self::$modules[$name];
+  }
+
+  public static function getInfoModules(): array
+  {
+    $modules = self::$modules;
+    $loaded = 'нет';
+    $default = false;
+
+    $modules['Api']['handler'] = \Vengine\Modules\Api\Process::class;
+
+    $sysModule = scandir(__DIR__ . '/Modules');
+
+    $info['Loader'] = [
+      'name' => 'Loader',
+      'version' => '---',
+      'type' => 'Загрузчик',
+      'loaded' => 'Всегда и всюду',
+      'description' => 'Лучше не менять.'
+    ];
+
+    foreach ($modules as $key => $value) {
+      if (is_object($value['object'])) {
+        $loaded = 'да';
+      } else {
+        $loaded = 'нет';
+      }
+
+      $arr = explode('\\', $value['handler']);
+      unset($arr[array_key_last($arr)]);
+
+      $package = implode('\\', $arr);
+
+      $class = '\\' . $package . '\\Info\\Package';
+
+      if (class_exists($class)) {
+        $object = new $class();
+
+        $name = $object->name;
+        $version = $object->version;
+        $type = 'Package';
+
+        if (in_array($name, $sysModule)) {
+          $type = 'System';
+          $default = true;
+        }
+
+        if ($default) {
+          $loaded = 'Включен по умолчанию';
+        }
+
+        if (!empty($object->description)) {
+          $description = $object->description;
+        } else {
+          $description = 'Описание отсутствует';
+        }
+
+        if (empty($name)) {
+          $name = 'Название отсутствует';
+        }
+
+        if (empty($version)) {
+          $version = '---';
+        }
+
+        $packageInfo[$key] = [
+          'name' => $name,
+          'version' => $version,
+          'type' => $type,
+          'loaded' => $loaded,
+          'description' => $description,
+          'all' => $object
+        ];
+      }
+    }
+
+    foreach ($modules as $key => $value) {
+      if (!empty($packageInfo[$key])) {
+        $info[$key] = $packageInfo[$key];
+        continue;
+      }
+
+      $description = 'Описание отсутствует';
+
+      $type = $value['type'];
+
+      if (is_object($value['object'])) {
+        $loaded = 'да';
+
+        $n = $value['object']->module;
+        $v = $value['object']->version;
+
+        $name = !empty($n) ? $n : $key;
+        $version = !empty($v) ? $v : '---';
+      } else {
+        $name = $key;
+        $version = '---';
+        $loaded = 'нет';
+      }
+
+      $info[$key] = [
+        'name' => $name,
+        'version' => $version,
+        'type' => $type,
+        'loaded' => $loaded,
+        'description' => $description,
+        'all' => $object
+      ];
+    }
+
+    $info['_startup']['loaded'] = 'Включен по умолчанию';
+
+    return $info;
   }
 }

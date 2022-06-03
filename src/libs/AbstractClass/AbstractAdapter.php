@@ -1,6 +1,6 @@
 <?php
 
-namespace Vengine\libs\Database;
+namespace Vengine\libs\AbstractClass;
 
 use Vengine\Injectable;
 use RedBeanPHP\R;
@@ -14,7 +14,7 @@ abstract class AbstractAdapter extends R implements Injectable
 
   public function __construct()
   {
-    $this->param = require_once($_SERVER['DOCUMENT_ROOT'] . '/config/database.php');
+    $this->param = require_once($_SERVER['DOCUMENT_ROOT'] . '/../config/database.php');
 
     if (!empty($this->param)) {
       $type = $this->param['type'];

@@ -8,8 +8,11 @@ use Vengine\Controllers\Routing\PageController;
 use Vengine\libs\Exception\HttpException;
 use System\modules\Api;
 
-class Process extends AbstractModule
+class Base extends AbstractModule
 {
+	public $module = 'Core';
+	public $version = '1.0.0-Alpha';
+
 	/*
 	* Конструктор класса
 	*/
@@ -17,15 +20,13 @@ class Process extends AbstractModule
 	{
 		parent::__construct();
 
-		$this->interface->closed = false;
-		$this->interface->project = require $_SERVER['DOCUMENT_ROOT'] . '/config/project.config.php';
-
 		$this->uriParser();
-
-		$this->setConfig();
 		$this->sessionStart();
 		$this->debugMode();
-		$this->pageFix();
+
+		if ($_GET['_DEBUG_MODE'] === 'SQL') {
+			$this->adapter->fancyDebug();
+		}
 
 		if (empty($_SESSION['user']) && !stristr($this->interface->page, 'vengine/api/')) {
 			$this->guestid();
@@ -43,20 +44,15 @@ class Process extends AbstractModule
 			'host' => $request->getHttpHost(),
 			'method' => $request->getMethod(),
 		];
+
+		$this->interface->page = $this->interface->uri['path'];
 	}
 
-	public function setConfig(): void
+	public function run($localPages = null): void
 	{
-		require _File('config', 'config');
+		$this->interface->localPages = $localPages;
 
-		foreach ($config as $key => $value) {
-			$this->interface->$key = $value;
-		}
-	}
-
-	public function run(): void
-	{
-		if (!$this->adapter->testConnection() || ($this->interface->closed && !$this->request['debug:__sys__'])) {
+		if (!$this->adapter->testConnection() || $this->interface->closed) {
 			print 'На сайте ведутся технические работы, попробуйте вернуться позже!';
 			return;
 		}
@@ -69,7 +65,7 @@ class Process extends AbstractModule
 	 */
 	public function debugMode(): void
 	{
-		if ($this->request->get('__DEBUG_MODE') == 'INFO') {
+		if ($this->request->get('__DEBUG_INFO') == 'ENGINE') {
 			$info = json_decode(file_get_contents($_SERVER['DOCUMENT_ROOT'] . '/composer.lock'));
 
 			foreach ($info->packages as $key => $value) {
@@ -95,9 +91,9 @@ class Process extends AbstractModule
 				border-radius: 2px;
 				background: white;
 				padding: 4px;
+				z-index: 999999;
 				">
 				Версия ядра: ' . $info->version . '<br>' .
-				'База данных: ' . ($this->adapter->testConnection() ? 'Подключена' : 'Подключение отсутствует') .
 				'<br>' .
 				'Временная папка: ' . $this->interface->tmpDir . '<br>' .
 				'Папка проекта: ' . $this->interface->projectDir . '<br>' .
@@ -120,17 +116,6 @@ class Process extends AbstractModule
 		if (empty($_SESSION['_start'])) {
 			session_start();
 			$_SESSION['_start'] = true;
-		}
-	}
-
-	/*
-	* Ошибка 404
-	*/
-	public function error404(): void
-	{
-		$code = http_response_code();
-		if ($code === 404) {
-			exit(include 'template/error404.tpl.php');
 		}
 	}
 
@@ -172,13 +157,19 @@ class Process extends AbstractModule
 	/*
 	* Подключение шаблонов
 	*/
-	public function templateConnect($template, $type = 'template')
+	public function templateConnect($template, $type = 'WWW')
 	{
 		$dir = dirname(dirname(__FILE__));
 
+		if (!$this->interface->structure['template']) {
+			$templatePath = $this->interface->structure['www'] . '_template/';
+		} else {
+			$templatePath = $this->interface->structure['template'];
+		}
+
 		$path = [
-			'core' => $dir . '/src/template/',
-			'template' => $_SERVER['DOCUMENT_ROOT'] . '/template/'
+			'CORE' => $dir . '/src/template/',
+			'WWW' => $templatePath
 		];
 
 		$template = 'file::' . $path[$type] . $template;

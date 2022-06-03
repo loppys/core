@@ -2,8 +2,9 @@
 
 namespace Vengine\Controllers\Routing;
 
-use Vengine\Process;
+use Vengine\Base;
 use Vengine\Render\RenderPage;
+use Vengine\Controllers\Routing\AbstractPageController;
 use Symfony\Component\Routing\Generator\UrlGenerator;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\RequestContext;
@@ -11,56 +12,80 @@ use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 
-class PageController
+class PageController extends AbstractPageController
 {
-  public $page;
+  public $controller;
+  public $render;
+  public $parameters;
 
-  protected $interface;
-  protected $adapter;
-  protected $process;
-  protected $request;
-
-  function __construct(Process $object)
+  function __construct(Base $base)
   {
-    $this->interface = $object->interface;
-    $this->adapter = $object->adapter;
-    $this->request = $object->request;
-    $this->process = $object;
-
-    $this->page = $this->getPage($this->interface->page);
-
-    $this->route();
-  }
-
-  public function missingPage()
-  {
-    header("HTTP/1.0 404 Not Found");
-
-    $this->process->error404();
+    parent::__construct($base);
   }
 
   public function route()
   {
-    if ($this->page->url) {
-      $url = $this->page->url;
-    } else {
-      $url = $this->page->page;
+    if (!empty($this->interface->localPages)) {
+      $name = substr($this->interface->uri['path'], 1);
+      $localPage = $this->interface->localPages->getList()[$name];
+      unset($name);
     }
 
-    if (empty($this->page->param)) {
-      $param = json_encode([]);
+    $arrayObject = new \ArrayObject($this->page);
+    $arrayObject->setFlags(\ArrayObject::ARRAY_AS_PROPS);
+    $this->page = $arrayObject;
+
+    $url = $this->page->url;
+
+    if ($localPage) {
+      if (in_array($this->interface->page, $localPage) && empty($url)) {
+        $arrayObject = new \ArrayObject($localPage);
+        $arrayObject->setFlags(\ArrayObject::ARRAY_AS_PROPS);
+        $this->page = $arrayObject;
+      }
+    }
+
+    if ($this->page->render == 'standart') {
+      $this->render = RenderPage::class;
     } else {
-      $param = $this->page->param;
+      $this->render = $this->page->render;
+    }
+
+    if (!$this->page->visible) {
+      $this->missingPage();
+    }
+
+    $param = [];
+
+    if ($this->page->param) {
+      $url = $this->page->url;
+      $param = explode(', ', $this->page->param);
+
+      foreach ($param as $key => $value) {
+        $url .= '/{' . $value . '}';
+      }
+
+      if ($this->page->absolute !== $url) {
+        $this->page->absolute = '/' . $url;
+      }
+    } else {
+      $this->page->absolute = '/' . $this->page->url;
+    }
+
+    if ($this->page->controller === 'default') {
+      $this->controller = RenderPage::class;
+    } else {
+      $this->controller = $this->page->controller;
     }
 
     switch (true) {
       case $this->page->type === 'page':
         $route = new Route(
-          $url,
+          $this->page->absolute,
           [
-            'controller' => RenderPage::class
+            'controller' => $this->controller
           ],
-          json_decode($param, 1)
+          $param
         );
 
         if ($route) {
@@ -68,63 +93,73 @@ class PageController
           $context = new RequestContext();
 
           if ($this->interface->uri['path'] === '/') {
-            return header('Location: /' . $url, true, 301);
+            $defaultPage = $this->getStandartPage();
+
+            if (empty($defaultPage)) {
+              $this->missingPage();
+            }
+
+            return header('Location: /' . $defaultPage->url, true, 301);
           }
 
           $context->fromRequest($this->request);
 
           $routes->add('page', $route);
-
           $matcher = new UrlMatcher($routes, $context);
-          $parameters = $matcher->match($context->getPathInfo());
 
-          if (!empty($parameters['controller'])) {
-            return new RenderPage($this);
+          try {
+            $parameters = $matcher->match($this->page->absolute);
+          } catch (\Exception $e) {
+            $this->missingPage();
+          }
+
+          $this->parameters = $parameters;
+
+          if ($this->page->controller === 'default') {
+            $parameters['controller'] = $this->controller;
+          }
+
+          if (!empty($parameters['controller']) && class_exists($parameters['controller'])) {
+            return new $parameters['controller']($this);
           } else {
-            print('empty page controller');
+            print('Что-то пошло не так!');
             die();
           }
         }
         break;
       case $this->page->type === 'api':
-        $route = new Route($url, ['_controller' => RenderPage::class]);
+        $route = new Route(
+          $this->page->absolute,
+          [
+            'controller' => $this->controller
+          ]
+        );
+
+        if ($route) {
+          $routes = new RouteCollection();
+          $context = new RequestContext();
+
+          $context->fromRequest($this->request);
+
+          $routes->add('api', $route);
+
+          $urlMatch = substr($this->interface->uri['requestUri'], 1);
+
+          $matcher = new UrlMatcher($routes, $context);
+          $parameters = $matcher->match($this->interface->uri['requestUri']);
+
+          if (!empty($parameters['controller']) && class_exists($parameters['controller'])) {
+            return new $parameters['controller']($this);
+          } else {
+            print('Контроллер страницы не найден');
+            die();
+          }
+        }
         break;
 
       default:
         $this->missingPage();
         break;
-    }
-  }
-
-  public function getPage($page)
-  {
-    if (!$page) {
-      return false;
-    }
-
-    $load = $this->adapter->findOne('pages', 'page = ? OR custom_url = ? OR url = ?', [$page, $page, $page]);
-
-    if ($load->param_cls) {
-      $load->param_cls = explode(", ", $load->param_cls);
-    }
-
-    if ($load->param_method) {
-      $load->param_method = explode(", ", $load->param_method);
-    }
-
-    if ($load->tpl) {
-      $load->tpl = explode(", ", $load->tpl);
-    }
-
-    if ($load->js) {
-      $load->js = explode(", ", $load->js);
-    }
-
-  #Добавить видимость страниц в бд и добавить в проверку
-    if (!empty($load)) {
-      return $load;
-    }else{
-      return false;
     }
   }
 }

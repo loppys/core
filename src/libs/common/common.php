@@ -1,5 +1,41 @@
 <?php
 
+use Vengine\libs\Dumper;
+
+function _start(): void
+{
+  Loader::addModule(
+    '_startup',
+    Loader::TYPE_SYSTEM,
+    \Vengine\Startup::class
+  );
+
+  Loader::addModule(
+    'CMS',
+    Loader::TYPE_SYSTEM,
+    \Vengine\Modules\CMS\Main::class
+  );
+
+  Loader::addModule(
+    'migrations',
+    Loader::TYPE_GLOBAL,
+    \Vengine\Modules\Migrations\Process::class
+  );
+
+  Loader::addModule(
+    'DataPageTransformer',
+    Loader::TYPE_GLOBAL,
+    \Vengine\Controllers\Page\DataPageTransformer::class
+  );
+
+  Loader::addModule(
+    'LocalPage',
+    Loader::TYPE_GLOBAL,
+    \Vengine\Controllers\Page\LocalPage::class,
+    [Loader::callModule('DataPageTransformer')]
+  );
+}
+
 /**
  * Все функции, которые нужны и в обычной разметке находятся тут!
  *
@@ -10,13 +46,17 @@
 /**
  * var_dump
  */
- function d($dump, $die = false)
+ function d(...$dump)
  {
-   $dump = [$dump];
+   $debug = debug_backtrace();
 
-   array_push(
-     $dump,
-     date('d-m-Y H:i:s') . ' | hash__' . md5(date('d-m-Y H:i:s'))
+   $data = array(
+     'data' => $dump,
+     'debug' => array(
+       'file' => $debug[0]['file'] ?? null,
+       'line' => $debug[0]['line'] ?? null,
+       'time' => microtime(true),
+     )
    );
 
    print '<pre style="
@@ -25,12 +65,10 @@
    font-size: 1.2em;
    white-space: pre-wrap;
    ">';
-   print_r(var_dump($dump));
+   print Dumper::dump($data);
    print '</pre>';
 
-   if ($die) {
-     die();
-   }
+   die();
  }
 
  function vendorDir(): string
@@ -124,6 +162,9 @@ function returnFolderContents($dir, $print = false)
  */
 function isActiveModule($moduleName): bool
 {
+  //удалить
+  return false;
+
   require _File('settings', 'config');
 
   if (!$modules[$moduleName] || !class_exists($moduleName)) {

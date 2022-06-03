@@ -22,7 +22,7 @@ class Adapter extends ParentAdapter
     }
   }
 
-  public function condition($condition): void
+  public function condition($condition)
   {
     if ($condition) {
       parent::exec( $condition );

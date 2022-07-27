@@ -20,7 +20,7 @@ jobs:
     
     steps:
       - name: Create version
-        uses: negz/create-tag@latest
+        uses: negz/create-tag@v1
         with:
           version: ${{ github.event.inputs.version }}
           message: ${{ github.event.inputs.message }}

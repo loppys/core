@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
       inputs:
         version:
-          description: '0.0.1'
+          description: '1.0.0'
           required: true
         message:
           description: 'latest release'
@@ -15,7 +15,7 @@ on:
         
 jobs:
   set_version:
-    name: "push master"
+    name: "auto set verion"
     runs-on: "ubuntu-latest"
     
     steps:

@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
       inputs:
         version:
-          description: 'v1.0.1'
+          description: 'v0.0.0'
           required: true
         message:
           description: 'latest release'
@@ -20,7 +20,7 @@ jobs:
     
     steps:
       - name: Create version
-        uses: negz/create-tag@v1
+        uses: negz/create-tag@latest
         with:
           version: ${{ github.event.inputs.version }}
           message: ${{ github.event.inputs.message }}

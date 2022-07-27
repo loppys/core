@@ -3,9 +3,8 @@ name: master
 on:
   push:
     branches:
-    - hotfix/*
+    - master
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   set_version:
     name: "hotfix"
@@ -13,8 +12,8 @@ jobs:
 
     steps:
       - name: hotfix
-        if: github.event_name == 'push'
-      - uses: "marvinpinto/action-automatic-releases@latest"
+      
+      - uses: "marvinpinto/action-automatic-releases@v1.2.1"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false

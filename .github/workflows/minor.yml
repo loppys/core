@@ -6,8 +6,9 @@ on:
     - master
   pull_request:
     branches:
-    - hotfix/*
-
+    - develop
+    - feature/*
+        
 jobs:
   generate:
     name: auto set verion
@@ -34,5 +35,5 @@ jobs:
       - name: Create
         uses: negz/create-tag@v1
         with:
-          version: ${{ steps.semvers.outputs.patch }}
+          version: ${{ steps.semvers.outputs.minor }}
           token: ${{ secrets.GITHUB_TOKEN }}

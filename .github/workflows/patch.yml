@@ -1,4 +1,4 @@
-name: Generate next version
+name: Generate next patch
 
 on:
   push:

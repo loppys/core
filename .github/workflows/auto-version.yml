@@ -1,0 +1,23 @@
+name: master
+
+on:
+  push:
+    branches:
+    - hotfix/*
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  set_version:
+    name: "hotfix"
+    runs-on: "ubuntu-latest"
+
+    steps:
+      - name: hotfix
+        run: |
+          echo "done!"
+
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: false

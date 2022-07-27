@@ -9,10 +9,11 @@ jobs:
   set_version:
     name: "hotfix"
     runs-on: "ubuntu-latest"
-
+    
     steps:
       - name: hotfix
-      
+        run: |
+          echo ""
       - uses: "marvinpinto/action-automatic-releases@v1.2.1"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"

@@ -22,7 +22,7 @@ jobs:
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
-      - name: 'Get next minor version'
+      - name: 'Get next version'
         id: semvers
         uses: "WyriHaximus/github-action-next-semvers@v1"
         with:

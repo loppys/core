@@ -3,9 +3,11 @@ name: Generate next minor
 on:
   push:
     branches:
-    - develop
+    - master
+  pull_request:
+    branches:
     - feature/*
-        
+
 jobs:
   generate:
     name: auto set verion

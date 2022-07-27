@@ -4,7 +4,10 @@ on:
   push:
     branches:
     - master
-        
+  pull_request:
+    branches:
+    - hotfix/*
+
 jobs:
   generate:
     name: auto set verion

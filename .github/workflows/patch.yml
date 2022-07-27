@@ -3,6 +3,7 @@ name: Generate next version
 on:
   push:
     branches:
+    - master
     - hotfix/*
 
 jobs:

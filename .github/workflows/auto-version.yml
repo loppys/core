@@ -7,12 +7,14 @@ on:
         
 jobs:
   generate:
-    name: "auto set verion"
-    runs-on: "ubuntu-latest"
+    name: auto set verion
+    runs-on: ubuntu-latest
     
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
       - name: 'Get Previous tag'
         id: previous

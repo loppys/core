@@ -28,7 +28,7 @@ jobs:
         with:
           version: ${{ steps.previous.outputs.tag }}
 
-      - name: hotfix
+      - name: minor
         if: ${{ github.ref_name == 'develop' }}
         uses: negz/create-tag@v1
 
@@ -36,7 +36,7 @@ jobs:
           version: ${{ steps.semvers.outputs.minor }}
           token: ${{ secrets.GITHUB_TOKEN }}
           
-      - name: minor
+      - name: patch
         if: ${{ github.ref_name != 'develop' }}
         uses: negz/create-tag@v1
         

@@ -7,4 +7,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Run a one-line script
-        run: echo ${{ github.event.pull_request.head }}
+        run: echo ${{ github.event.pull_request }}

@@ -61,12 +61,12 @@ class Base extends AbstractModule
 	}
 
 	/**
-	 * Дебаг мод
+	 * Переработать
 	 */
 	public function debugMode(): void
 	{
 		if ($this->request->get('__DEBUG_INFO') == 'ENGINE') {
-			$info = json_decode(file_get_contents($_SERVER['DOCUMENT_ROOT'] . '/composer.lock'));
+			$info = json_decode(file_get_contents($_SERVER['DOCUMENT_ROOT'] . '/../composer.lock'));
 
 			foreach ($info->packages as $key => $value) {
 				if ($value->name === 'vengine/core') {

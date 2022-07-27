@@ -29,7 +29,7 @@ class Collect
 
   public function set(array $dir, $path): void
   {
-    $info = json_decode(file_get_contents($this->path['project'] . '/composer.lock'));
+    $info = json_decode(file_get_contents($this->path['project'] . 'composer.lock'));
 
     foreach ($info->packages as $key => $value) {
       if ($value->name === 'vengine/core') {

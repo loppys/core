@@ -1,18 +1,15 @@
 name: Generate next version
 
-on:
-  push:
-    branches:
-    - master
+on: [push, pull_request]
 
 jobs:
   generate:
     name: auto-update
     runs-on: ubuntu-latest
-    
+    if: ${{ github.event_name == 'pull_request' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
@@ -29,7 +26,7 @@ jobs:
           version: ${{ steps.previous.outputs.tag }}
 
       - name: minor
-        if: ${{ github.head_ref == 'develop' }}
+        if: ${{ github.ref == 'refs/heads/develop' }}
         uses: negz/create-tag@v1
 
         with:
@@ -37,7 +34,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           
       - name: patch
-        if: ${{ github.head_ref != 'develop' }}
+        if: ${{ github.ref != 'refs/heads/develop' }}
         uses: negz/create-tag@v1
         
         with:

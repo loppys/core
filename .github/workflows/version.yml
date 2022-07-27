@@ -1,16 +1,13 @@
-name: Generate next patch
+name: Generate next version
 
 on:
   push:
     branches:
     - master
-  pull_request:
-    branches:
-    - hotfix/*
 
 jobs:
   generate:
-    name: auto set verion
+    name: auto-update
     runs-on: ubuntu-latest
     
     steps:
@@ -31,8 +28,18 @@ jobs:
         with:
           version: ${{ steps.previous.outputs.tag }}
 
-      - name: Create
+      - name: hotfix
+        if: ${{ github.head_ref }} == 'master' and ${{ github.ref_name }} == 'develop' and ${{ github.event_name }} == 'push'
         uses: negz/create-tag@v1
+
+        with:
+          version: ${{ steps.semvers.outputs.minor }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: minor
+        if: ${{ github.event_name }} == 'push' and ${{ github.ref_name }} != 'develop'
+        uses: negz/create-tag@v1
+
         with:
           version: ${{ steps.semvers.outputs.patch }}
           token: ${{ secrets.GITHUB_TOKEN }}

@@ -29,7 +29,7 @@ jobs:
           version: ${{ steps.previous.outputs.tag }}
 
       - name: minor
-        if: ${{ github.head_ref == 'develop' }}
+        if: ${{ github.ref == 'refs/heads/develop' }}
         uses: negz/create-tag@v1
 
         with:
@@ -37,7 +37,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           
       - name: patch
-        if: ${{ github.head_ref != 'develop' }}
+        if: ${{ github.ref != 'refs/heads/develop' }}
         uses: negz/create-tag@v1
         
         with:

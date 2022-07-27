@@ -4,18 +4,24 @@ on:
   push:
     branches:
     - master
-
+  workflow_dispatch:
+      inputs:
+        version:
+          description: '1.0.0'
+          required: true
+        message:
+          description: 'latest release'
+          required: true
+        
 jobs:
   set_version:
-    name: "hotfix"
+    name: "push master"
     runs-on: "ubuntu-latest"
     
     steps:
-      - name: hotfix
-        run: |
-          echo ""
-      - uses: "marvinpinto/action-automatic-releases@v1.2.1"
+      - name: Create version
+        uses: negz/create-tag@v1
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          prerelease: false
-          automatic_release_tag: "1.*.*"
+          version: ${{ github.event.inputs.version }}
+          message: ${{ github.event.inputs.message }}
+          token: ${{ secrets.GITHUB_TOKEN }}

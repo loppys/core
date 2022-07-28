@@ -4,4 +4,6 @@
 
 # Документация
 
+`composer require vengine/core`
+
 когда нибудь появится

@@ -1,10 +1,10 @@
 <?php
 
-use Vengine\libs\Api;
+use Vengine\Modules\Api\Process;
 
-class test extends Api
+class action extends Process
 {
-    public $apiName = 'test';
+    public $apiName = 'action';
 
     //Вывод
     public function indexAction()

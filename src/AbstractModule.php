@@ -47,8 +47,6 @@ abstract class AbstractModule extends LegacyConfig
 
   function __construct()
   {
-    $this->error404();
-    
     $this->interface = new \stdClass();
     $this->setConfig();
 
@@ -66,26 +64,11 @@ abstract class AbstractModule extends LegacyConfig
 
     $this->adapter = $this->getAdapter();
     $this->request = $this->getRequest();
-
-    $this->addApiModule();
   }
 
   public function getAdapter(): Adapter
   {
     return new Adapter();
-  }
-
-  public function addApiModule(): void
-  {
-    if (class_exists(\System\modules\Api::class)) {
-      if (!Loader::getModule('Api')) {
-        Loader::addModule(
-          'Api',
-          Loader::TYPE_GLOBAL,
-          \System\modules\Api::class
-        );
-      }
-    }
   }
 
   public function getRequest(): Request
@@ -140,9 +123,10 @@ abstract class AbstractModule extends LegacyConfig
           $name => $path[$name]
         ];
 
-        $path[strtoupper($sKey) . ':'] = strtr($name, $replace) . $tempPath;
+        $result = strtr($name, $replace) . $tempPath;
 
-        $config['structure'][$sKey] = strtr($name, $replace) . $tempPath;
+        $path[strtoupper($sKey) . ':'] = $result;
+        $config['structure'][$sKey] = $result;
       }
     }
 
@@ -155,7 +139,7 @@ abstract class AbstractModule extends LegacyConfig
         foreach ($dv['require'] as $rk => $rv) {
           $requirePath = $this->getRequirePath($rv, $config);
 
-          if (empty($rk)) {
+          if ($requirePath === 'run') {
             require($requirePath);
             continue;
           }

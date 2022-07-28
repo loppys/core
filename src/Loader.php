@@ -114,7 +114,9 @@ class Loader
           }
         }
       } else {
-        $object = 'object creation error';
+        self::$modules[$name]['object'] = 'object creation error';
+
+        return null;
       }
     }
 

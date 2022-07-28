@@ -10,9 +10,13 @@ use Vengine\Modules\Api\Route;
 
 class Startup extends Base
 {
-  public function __construct()
+  private $localPage;
+
+  public function __construct(?LocalPage $pages = null)
   {
     $this->logWriter();
+
+    $this->localPage = $page;
 
     if ($_GET['__DEBUG'] === 'INFO') {
       $whoops = new \Whoops\Run;
@@ -21,9 +25,11 @@ class Startup extends Base
     }
 
     parent::__construct();
+
+    $this->init();
   }
 
-  public function init(?LocalPage $pages = null): void
+  public function init(): void
   {
     $uri = explode('/', trim($this->interface->uri['path'], '/'));
 
@@ -35,7 +41,7 @@ class Startup extends Base
 
     \Loader::callModule('migrations');
 
-    $this->run($pages);
+    $this->run($this->localPage);
   }
 
   public function initModules(): void

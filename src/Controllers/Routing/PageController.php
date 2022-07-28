@@ -66,10 +66,10 @@ class PageController extends AbstractPageController
       }
 
       if ($this->page->absolute !== $url) {
-        $this->page->absolute = '/' . $url;
+        $this->page->absolute = $url;
       }
     } else {
-      $this->page->absolute = '/' . $this->page->url;
+      $this->page->absolute = $this->page->url;
     }
 
     if ($this->page->controller === 'default') {
@@ -99,7 +99,7 @@ class PageController extends AbstractPageController
               $this->missingPage();
             }
 
-            return header('Location: /' . $defaultPage->url, true, 301);
+            return header('Location: /' . substr($defaultPage->url, 1), true, 301);
           }
 
           $context->fromRequest($this->request);

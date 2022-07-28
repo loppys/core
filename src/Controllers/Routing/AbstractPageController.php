@@ -23,7 +23,7 @@ abstract class AbstractPageController
     $url = array_filter(explode('/', $this->interface->page));
     $url += ['urlPath' => $this->interface->page];
 
-    $this->page = $this->getPage($url);
+    $this->page = $this->getPage($url['urlPath']);
 
     $this->route();
   }
@@ -58,13 +58,11 @@ abstract class AbstractPageController
 
   public function getPage($page)
   {
-    $url = array_shift($page);
-
-    if ($url === '/') {
-      $url = 'home';
+    if ($page === '/') {
+      $page = $this->getStandartPage()->url;
     }
 
-    if (!$url) {
+    if (!$page) {
       return [];
     }
 
@@ -79,7 +77,7 @@ SQL;
     $result = $this->adapter->getRow(
       $query,
       [
-        ':URL' => $url
+        ':URL' => $page
       ]
     );
 

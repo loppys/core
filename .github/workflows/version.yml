@@ -55,21 +55,13 @@ jobs:
         with:
           version: ${{ steps.semvers.outputs.patch }}
           token: ${{ secrets.GITHUB_TOKEN }}
-
-  create:
-    name: Release
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+          
+      - name: release
+        uses: CupOfTea696/gh-action-auto-release@v1.0.0
         with:
-          fetch-depth: 0
-
-      - name: Create
-        uses: marvinpinto/action-automatic-releases@latest
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          prerelease: false
-          files: |
-            *
+          title: "Release: $version"
+          tag: "$semver"
+          draft: false
+          regex: "/^Release: #{semver}$/i"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -66,10 +66,10 @@ class PageController extends AbstractPageController
       }
 
       if ($this->page->absolute !== $url) {
-        $this->page->absolute = '/' . $url;
+        $this->page->absolute = $url;
       }
     } else {
-      $this->page->absolute = '/' . $this->page->url;
+      $this->page->absolute = $this->page->url;
     }
 
     if ($this->page->controller === 'default') {
@@ -99,7 +99,7 @@ class PageController extends AbstractPageController
               $this->missingPage();
             }
 
-            return header('Location: /' . $defaultPage->url, true, 301);
+            return header('Location: /' . substr($defaultPage->url, 1), true, 301);
           }
 
           $context->fromRequest($this->request);
@@ -123,35 +123,6 @@ class PageController extends AbstractPageController
             return new $parameters['controller']($this);
           } else {
             print('Что-то пошло не так!');
-            die();
-          }
-        }
-        break;
-      case $this->page->type === 'api':
-        $route = new Route(
-          $this->page->absolute,
-          [
-            'controller' => $this->controller
-          ]
-        );
-
-        if ($route) {
-          $routes = new RouteCollection();
-          $context = new RequestContext();
-
-          $context->fromRequest($this->request);
-
-          $routes->add('api', $route);
-
-          $urlMatch = substr($this->interface->uri['requestUri'], 1);
-
-          $matcher = new UrlMatcher($routes, $context);
-          $parameters = $matcher->match($this->interface->uri['requestUri']);
-
-          if (!empty($parameters['controller']) && class_exists($parameters['controller'])) {
-            return new $parameters['controller']($this);
-          } else {
-            print('Контроллер страницы не найден');
             die();
           }
         }

@@ -16,24 +16,28 @@ jobs:
     
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
       - name: 'Get Previous tag'
         id: previous
-        uses: "WyriHaximus/github-action-get-previous-tag@v1"
+        uses: WyriHaximus/github-action-get-previous-tag@v1
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: 'Get next version'
         id: semvers
-        uses: "WyriHaximus/github-action-next-semvers@v1"
+        uses: WyriHaximus/github-action-next-semvers@v1
         with:
           version: ${{ steps.previous.outputs.tag }}
 
       - name: minor
+        id: minor
         if: ${{ github.ref == 'refs/heads/develop' }}
+        env:
+          ver: ${{ steps.semvers.outputs.minor }}
+
         uses: negz/create-tag@v1
 
         with:
@@ -41,9 +45,23 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           
       - name: patch
+        id: patch
         if: ${{ github.ref != 'refs/heads/develop' }}
+        env:
+          ver: ${{ steps.semvers.outputs.patch }}
+          
         uses: negz/create-tag@v1
         
         with:
           version: ${{ steps.semvers.outputs.patch }}
           token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: release
+        uses: CupOfTea696/gh-action-auto-release@v1.0.2
+        with:
+          title: "$version"
+          tag: "$semver"
+          draft: false
+          regex: "/^#{semver}$/i"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

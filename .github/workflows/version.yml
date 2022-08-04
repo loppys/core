@@ -47,3 +47,13 @@ jobs:
         with:
           version: ${{ steps.semvers.outputs.patch }}
           token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: release
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          automatic_release_tag: ${{ steps.semvers.outputs.tag }}
+          title: ${{ steps.semvers.outputs.tag }}
+          prerelease: false
+          files: |
+            *

@@ -18,7 +18,7 @@ class Startup extends Base
 
     $this->localPage = $page;
 
-    if ($_GET['__DEBUG-------'] === 'INFO') { //Необходимо переделать вывод ошибок
+    if ($_GET['__DEBUG'] === 'INFO') {
       $whoops = new \Whoops\Run;
       $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
       $whoops->register();

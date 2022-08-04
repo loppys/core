@@ -56,24 +56,12 @@ jobs:
           version: ${{ steps.semvers.outputs.patch }}
           token: ${{ secrets.GITHUB_TOKEN }}
           
-      - name: release patch
-        if: ${{ steps.patch.ver == true }}
+      - name: release
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          automatic_release_tag: ${{ steps.semvers.outputs.patch }}
-          title: ${{ steps.semvers.outputs.patch }}
-          prerelease: false
-          files: |
-            *
-
-      - name: release minor
-        if: ${{ steps.minor.ver == true }}
-        uses: "marvinpinto/action-automatic-releases@latest"
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          automatic_release_tag: ${{ steps.semvers.outputs.minor }}
-          title: ${{ steps.semvers.outputs.minor }}
+          automatic_release_tag: ${{ ver }}
+          title: ${{ ver }}
           prerelease: false
           files: |
             *

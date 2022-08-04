@@ -1,9 +1,12 @@
-name: "release"
+name: release
 
 on:
   push:
     tags:
       - "*"
+    paths-ignore:
+    - '**.md'
+    - '**.yml'
 
 jobs:
   create:
@@ -16,7 +19,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: "Create"
+      - name: Create
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"

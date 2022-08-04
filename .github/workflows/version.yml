@@ -16,7 +16,7 @@ jobs:
     
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
@@ -34,6 +34,9 @@ jobs:
 
       - name: minor
         if: ${{ github.ref == 'refs/heads/develop' }}
+        env:
+          ver: ${{ steps.semvers.outputs.minor }}
+
         uses: negz/create-tag@v1
 
         with:
@@ -42,18 +45,33 @@ jobs:
           
       - name: patch
         if: ${{ github.ref != 'refs/heads/develop' }}
+        env:
+          ver: ${{ steps.semvers.outputs.patch }}
+          
         uses: negz/create-tag@v1
         
         with:
           version: ${{ steps.semvers.outputs.patch }}
           token: ${{ secrets.GITHUB_TOKEN }}
           
-      - name: release
+      - name: release patch
+        if: ${{ steps.patch.ver == true }}
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          automatic_release_tag: ${{ steps.semvers.outputs.tag }}
-          title: ${{ steps.semvers.outputs.tag }}
+          automatic_release_tag: ${{ steps.semvers.outputs.patch }}
+          title: ${{ steps.semvers.outputs.patch }}
+          prerelease: false
+          files: |
+            *
+
+      - name: release minor
+        if: ${{ steps.minor.ver == true }}
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          automatic_release_tag: ${{ steps.semvers.outputs.minor }}
+          title: ${{ steps.semvers.outputs.minor }}
           prerelease: false
           files: |
             *

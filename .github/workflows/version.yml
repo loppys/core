@@ -62,5 +62,6 @@ jobs:
           title: "Release: $version"
           tag: "$semver"
           draft: false
+          regex: "/^#{semver}$/i"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

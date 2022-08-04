@@ -33,6 +33,7 @@ jobs:
           version: ${{ steps.previous.outputs.tag }}
 
       - name: minor
+        id: minor
         if: ${{ github.ref == 'refs/heads/develop' }}
         env:
           ver: ${{ steps.semvers.outputs.minor }}
@@ -44,6 +45,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           
       - name: patch
+        id: patch
         if: ${{ github.ref != 'refs/heads/develop' }}
         env:
           ver: ${{ steps.semvers.outputs.patch }}

@@ -13,12 +13,14 @@ class RenderPage extends Base
   protected $pageArr;
   private $html = array();
 
-  private $process;
+  private $tempData = [];
 
   public $_data;
 
   function __construct(PageController $data)
   {
+    parent::__construct();
+
     $this->prepare($data);
   }
 
@@ -107,7 +109,8 @@ class RenderPage extends Base
 
     if ($page->js) {
       $this->html(
-        $this->addScript([$page->js])
+        $this->addScript([$page->js]),
+        $this->interface->jsMove === 'Y'
        );
     }
 
@@ -116,7 +119,7 @@ class RenderPage extends Base
     $this->render($page);
   }
 
-  public function render($page)
+  public function render($page): void
   {
     if ($page->method) {
       $this->classObject->{$page->method}();
@@ -143,12 +146,16 @@ class RenderPage extends Base
       }
     }
 
+    if (!empty($this->tempData)) {
+      $this->html = array_merge($this->html, $this->tempData);
+    }
+
     $result = implode('', $this->html);
 
     print $result;
   }
 
-  private function addHead()
+  private function addHead(): void
   {
     $this->html[] = '
     <!DOCTYPE html>
@@ -163,22 +170,28 @@ class RenderPage extends Base
     </head>';
   }
 
-  private function addHeader()
+  private function addHeader(): void
   {
     if ($this->type === 'page') {
       $this->html($this->templateConnect('head', 'CORE'));
     }
   }
 
-  private function addFooter()
+  private function addFooter(): void
   {
     if ($this->type === 'page') {
       $this->html($this->templateConnect('footer', 'CORE'));
     }
   }
 
-  private function html($html)
+  private function html($html, bool $move = false): void
   {
+    if ($move) {
+      $this->tempData += $html;
+
+      return;
+    }
+
     if (is_array($html)) {
       foreach ($html as $key => $value) {
         if (is_object($value)) {

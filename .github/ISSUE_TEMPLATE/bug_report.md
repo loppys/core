@@ -3,7 +3,7 @@ name: Ошибка
 about: создается при любых ошибках.
 title: ''
 labels: 'hotfix'
-assignees: 'loppysCR'
+assignees: ''
 
 ---
 

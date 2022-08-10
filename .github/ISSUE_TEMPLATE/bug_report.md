@@ -1,6 +1,6 @@
 ---
 name: Ошибка
-about: 
+about: создается при любых ошибках.
 title: ''
 labels: 'hotfix'
 assignees: 'loppysCR'

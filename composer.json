@@ -7,9 +7,7 @@
             "Vengine\\": "src/"
         },
         "files": [
-            "src/libs/common/common.php",
-            "src/libs/Template/Template.php",
-            "up.php"
+            "src/libs/common/common.php"
         ],
         "classmap": ["src/Loader.php"]
     },

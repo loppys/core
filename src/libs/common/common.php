@@ -2,40 +2,6 @@
 
 use Vengine\libs\Dumper;
 
-function _start(): void
-{
-  Loader::addModule(
-    '_startup',
-    Loader::TYPE_SYSTEM,
-    \Vengine\Startup::class
-  );
-
-  Loader::addModule(
-    'CMS',
-    Loader::TYPE_SYSTEM,
-    \Vengine\Modules\CMS\Main::class
-  );
-
-  Loader::addModule(
-    'migrations',
-    Loader::TYPE_GLOBAL,
-    \Vengine\Modules\Migrations\Process::class
-  );
-
-  Loader::addModule(
-    'DataPageTransformer',
-    Loader::TYPE_GLOBAL,
-    \Vengine\Controllers\Page\DataPageTransformer::class
-  );
-
-  Loader::addModule(
-    'LocalPage',
-    Loader::TYPE_GLOBAL,
-    \Vengine\Controllers\Page\LocalPage::class,
-    [Loader::callModule('DataPageTransformer')]
-  );
-}
-
 /**
  * Все функции, которые нужны и в обычной разметке находятся тут!
  *
@@ -60,8 +26,7 @@ function _start(): void
    );
 
    print '<pre style="
-   background: gray;
-   color:white;
+   color:black;
    font-size: 1.2em;
    white-space: pre-wrap;
    ">';

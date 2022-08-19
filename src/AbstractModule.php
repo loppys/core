@@ -48,7 +48,12 @@ abstract class AbstractModule extends LegacyConfig
   function __construct()
   {
     $this->interface = new \stdClass();
+
+    $this->adapter = $this->getAdapter();
+    $this->request = $this->getRequest();
+
     $this->setConfig();
+    $this->setConfigVar();
 
     $defaultConfig = $this->interface->defaults;
 
@@ -61,9 +66,6 @@ abstract class AbstractModule extends LegacyConfig
 
       unset($this->interface->defaults);
     }
-
-    $this->adapter = $this->getAdapter();
-    $this->request = $this->getRequest();
   }
 
   public function getAdapter(): Adapter
@@ -84,6 +86,24 @@ abstract class AbstractModule extends LegacyConfig
     }
 
     return $this->interface;
+  }
+
+  public function setConfigVar(): void
+  {
+    $query = <<<SQL
+SELECT *
+FROM `cfg`
+SQL;
+
+    $result = $this->adapter->getAll(
+      $query
+    );
+
+    foreach ($result as $key => $value) {
+      if (!$this->interface->{$value['cfg_name']}) {
+        $this->interface->{$value['cfg_name']} = $value['cfg_value'];
+      }
+    }
   }
 
   public function setConfig(): void

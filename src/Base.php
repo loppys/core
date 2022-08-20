@@ -11,7 +11,7 @@ use System\modules\Api;
 class Base extends AbstractModule
 {
 	public $module = 'Core';
-	public $version = '1.0.0-Alpha';
+	public $version;
 
 	/*
 	* Конструктор класса
@@ -19,6 +19,8 @@ class Base extends AbstractModule
 	function __construct()
 	{
 		parent::__construct();
+
+		$this->setVersion();
 
 		$this->uriParser();
 		$this->sessionStart();
@@ -46,6 +48,19 @@ class Base extends AbstractModule
 		];
 
 		$this->interface->page = $this->interface->uri['path'];
+	}
+
+	public function setVersion(): void
+	{
+		$info = json_decode(file_get_contents($_SERVER['DOCUMENT_ROOT'] . '/../composer.lock'));
+
+		foreach ($info->packages as $key => $value) {
+			if ($value->name === 'vengine/core') {
+				$info = $info->packages[$key];
+			}
+		}
+
+		$this->version = $info->version;
 	}
 
 	public function run($localPages = null): void

@@ -116,7 +116,7 @@ abstract class AbstractModule extends LegacyConfig
 
       unset($package);
 
-      Loader::add($data['name'], Loader::GROUP_MODULES, $data);
+      Loader::add($data['name'], $data['group'] ?: Loader::GROUP_MODULES, $data);
     }
   }
 

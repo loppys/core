@@ -66,6 +66,8 @@ abstract class AbstractModule extends LegacyConfig
 
       unset($this->interface->defaults);
     }
+
+    $this->autoload('modules');
   }
 
   public function getAdapter(): Adapter
@@ -76,6 +78,46 @@ abstract class AbstractModule extends LegacyConfig
   public function getRequest(): Request
   {
     return Request::createFromGlobals();
+  }
+
+  public function autoload(string $dir): void
+  {
+    $dir = $this->interface->structure[$dir];
+
+    if (!is_dir($dir)) {
+      return;
+    }
+
+    $items = scandir($dir);
+
+    foreach ($items as $item) {
+      $package = $dir . $item . '/Package.php';
+
+      if (!file_exists($package)) {
+        continue;
+      }
+
+      $package = require_once($package);
+
+      if (!is_object($package)) {
+        continue;
+      }
+
+      $data = [
+        'name' => $package->name,
+        'group' => $package->group,
+        'handler' => $package->handler,
+        'param' => $package->param,
+        'path' => $package->path,
+        'call' => $package->call,
+        'version' => $package->version,
+        'description' => $package->description,
+      ];
+
+      unset($package);
+
+      Loader::add($data['name'], Loader::GROUP_MODULES, $data);
+    }
   }
 
   public function getInterface(): object

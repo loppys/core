@@ -1,9 +1,7 @@
 <?php
 
-namespace Vengine\Modules\Api\Info;
-
-class Package
+return new class()
 {
   public $name = 'Api';
   public $version = '1.0.2';
-}
+};

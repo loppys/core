@@ -15,11 +15,11 @@ class LocalPage extends AbstractController implements PageControllerInterface
   private $tmp = array();
   private $start = false;
 
-  public function __construct(DataPageTransformer $data)
+  public function __construct(DataPageTransformer $data, Adapter $adapter)
   {
     parent::__construct($data);
 
-    $this->adapter = new Adapter();
+    $this->adapter = $adapter;
 
     if (empty($data->scheme)) {
       $this->transformer->addScheme($this->standartScheme());

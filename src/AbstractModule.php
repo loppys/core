@@ -114,6 +114,8 @@ abstract class AbstractModule extends LegacyConfig
         'description' => $package->description,
       ];
 
+      unset($package);
+
       Loader::add($data['name'], $data['group'] ?: Loader::GROUP_MODULES, $data);
     }
   }
@@ -200,11 +202,11 @@ SQL;
           $requirePath = $this->getRequirePath($rv, $config);
 
           if ($requirePath === 'run') {
-            require($requirePath);
+            require_once($requirePath);
             continue;
           }
 
-          $config['defaults'][$dk][$rk] = require($requirePath);
+          $config['defaults'][$dk][$rk] = require_once($requirePath);
         }
       }
     }

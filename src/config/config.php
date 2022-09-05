@@ -2,9 +2,10 @@
 
 return [
 	'structure' => [
+		'vendor' => 'PROJECT:vendor/',
+		'loader' => 'PROJECT:vendor/vengine/loader/',
 		'core' => 'PROJECT:vendor/vengine/core/',
 		'modules' => 'CORE:src/Modules/',
-		'pages' => 'CONFIG:pages/routes.php',
 		'coreConfig' => 'CORE:src/config/',
 		'api' => 'CORE:src/_api/',
 		'uApi' => 'WWW:_api/'

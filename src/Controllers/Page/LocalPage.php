@@ -10,20 +10,13 @@ use Vengine\Database\Adapter;
 class LocalPage extends AbstractController implements PageControllerInterface
 {
   protected $pageList = array();
-  private $adapter;
 
   private $tmp = array();
   private $start = false;
 
   public function __construct(DataPageTransformer $data, Adapter $adapter)
   {
-    parent::__construct($data);
-
-    $this->adapter = $adapter;
-
-    if (empty($data->scheme)) {
-      $this->transformer->addScheme($this->standartScheme());
-    }
+    parent::__construct($adapter);
   }
 
   private function standartScheme(): array
@@ -45,7 +38,7 @@ class LocalPage extends AbstractController implements PageControllerInterface
     return $result;
   }
 
-  public function process(?array $data)
+  public function process()
   {
   }
 

@@ -72,7 +72,7 @@ abstract class AbstractModule extends LegacyConfig
 
   public function getAdapter(): Adapter
   {
-    return new Adapter();
+    return Loader::getComponent(Adapter::class);
   }
 
   public function getRequest(): Request

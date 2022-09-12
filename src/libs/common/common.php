@@ -36,13 +36,6 @@ use Vengine\libs\Dumper;
    die();
  }
 
- function vendorDir(): string
- {
-   return dirname(dirname(__FILE__));
- }
-
-
-
 /**
  * Переводы))
  */
@@ -98,64 +91,6 @@ function tr($text = '', $translate = '')
 
  }
 
-/*
-* Поиск и только поиск файлов в указанной папке
-*/
-function returnFolderContents($dir, $print = false)
-{
-  $pageDir = $_SERVER['DOCUMENT_ROOT'] . '/' . $dir . '/';
-  $pageRoad = scandir($pageDir);
-
-  #Удаление не нужных элементов
-  $f = array_slice($pageRoad, 3);
-
-  foreach ($f as $i) {
-    $fix = substr($i, strrpos($i, '.') + 1);
-
-    if ($fix == 'php' && $i != '_helpers.php' && $i != 'Install.php') {
-      if (file_exists($pageDir . $i) && $print == false) {
-        return $f;
-      }elseif ($print === true) {
-        print substr($i, 0, -4) . '<br>';
-      }
-    }
-  }
-}
-
-/**
- * Проверка активности модуля
- */
-function isActiveModule($moduleName): bool
-{
-  //удалить
-  return false;
-
-  require _File('settings', 'config');
-
-  if (!$modules[$moduleName] || !class_exists($moduleName)) {
-    return false;
-  }
-
-  return true;
-}
-
-function returnObject($class, $param_class = '')
-{
-  require _File('settings', 'config');
-
-   if (is_array($param_class)) {
-     $param_class = implode(', ', $param_class);
-   }
-
-  if (class_exists($class)) {
-  	if (!empty($param_class)) {
-  		return new $class($param_class);
-  	} else {
-  		return new $class();
-  	}
-  }
-}
-
 function _File($file, $path = '')
 {
   if (!empty($path)) {
@@ -164,9 +99,4 @@ function _File($file, $path = '')
   }else{
     return $file.'.php';
   }
-}
-
-function errorCode($text, $code, $module)
-{
-  return tr($text.' <!--'.'ERR:'.$code.'::'.$module.'-->');
 }

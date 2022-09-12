@@ -12,11 +12,11 @@ class Startup extends Base
 {
   private $localPage;
 
-  public function __construct(?LocalPage $pages = null)
+  public function __construct(LocalPage $pages)
   {
     $this->logWriter();
 
-    $this->localPage = $page;
+    $this->localPage = $pages;
 
     if ($_GET['__DEBUG'] === 'INFO') {
       $whoops = new \Whoops\Run;

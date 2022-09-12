@@ -2,27 +2,18 @@
 
 namespace Vengine\Controllers;
 
-use Vengine\libs\AbstractClass\AbstractTransformer;
+use Vengine\Database\Adapter;
 
 abstract class AbstractController
 {
-  protected $scheme;
+  protected $adapter;
+
   protected $data;
 
-  protected $transformer;
-
-  function __construct($transformer)
+  function __construct(Adapter $adapter)
   {
-    if ($transformer instanceof AbstractTransformer) {
-
-      if (empty($this->scheme)) {
-        $this->scheme = $transformer->scheme;
-      }
-
-      $this->data = $transformer->data;
-      $this->transformer = $transformer;
-    }
+    $this->adapter = $adapter;
   }
 
-  abstract public function process(?array $transformer);
+  abstract public function process();
 }

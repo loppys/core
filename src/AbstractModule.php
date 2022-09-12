@@ -72,7 +72,7 @@ abstract class AbstractModule extends LegacyConfig
 
   public function getAdapter(): Adapter
   {
-    return new Adapter();
+    return Loader::getComponent(Adapter::class);
   }
 
   public function getRequest(): Request
@@ -113,8 +113,6 @@ abstract class AbstractModule extends LegacyConfig
         'version' => $package->version,
         'description' => $package->description,
       ];
-
-      unset($package);
 
       Loader::add($data['name'], $data['group'] ?: Loader::GROUP_MODULES, $data);
     }
@@ -202,11 +200,11 @@ SQL;
           $requirePath = $this->getRequirePath($rv, $config);
 
           if ($requirePath === 'run') {
-            require($requirePath);
+            require_once($requirePath);
             continue;
           }
 
-          $config['defaults'][$dk][$rk] = require($requirePath);
+          $config['defaults'][$dk][$rk] = require_once($requirePath);
         }
       }
     }

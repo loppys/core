@@ -148,7 +148,7 @@ SQL;
 
   public function setConfig(): void
   {
-    $config = require _File('config', '/../config');
+    $config = require _File('config', '/config');
     $coreConfig = require('config/config.php');
 
     if (empty($config['structure'])) {
@@ -165,8 +165,7 @@ SQL;
       }
     }
 
-    $dir = $_SERVER['DOCUMENT_ROOT'];
-    $projectDir = stristr($dir, 'www', true);
+    $projectDir = $_SERVER['DOCUMENT_ROOT'] . '/';
 
     $path = [
       'ROOT:' => $projectDir

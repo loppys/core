@@ -52,7 +52,7 @@ class Base extends AbstractModule
 
 	public function setVersion(): void
 	{
-		$info = json_decode(file_get_contents($_SERVER['DOCUMENT_ROOT'] . '/../composer.lock'));
+		$info = json_decode(file_get_contents($_SERVER['DOCUMENT_ROOT'] . '/composer.lock'));
 
 		foreach ($info->packages as $key => $value) {
 			if ($value->name === 'vengine/core') {
@@ -177,7 +177,7 @@ class Base extends AbstractModule
 		$dir = dirname(dirname(__FILE__));
 
 		if (!$this->interface->structure['template']) {
-			$templatePath = $this->interface->structure['www'] . '_template/';
+			$templatePath = $this->interface->structure['www'] . 'template/';
 		} else {
 			$templatePath = $this->interface->structure['template'];
 		}

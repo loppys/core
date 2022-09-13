@@ -4,17 +4,22 @@ namespace Vengine;
 
 use Vengine\Base;
 use Vengine\Controllers\Page\LocalPage;
-use Vengine\CRUD\Install;
 use Vengine\Database\Adapter;
 use Vengine\Modules\Api\Route;
+use Vengine\Modules\Settings\Process as Settings;
 
-class Startup extends Base
+class Startup
 {
   private $localPage;
+  private $interface;
+  private $adapter;
 
-  public function __construct(LocalPage $pages)
+  public function __construct(LocalPage $pages, Adapter $adapter, Settings $interface)
   {
     $this->logWriter();
+
+    $this->adapter = $adapter;
+    $this->interface = $interface;
 
     $this->localPage = $pages;
 
@@ -23,8 +28,6 @@ class Startup extends Base
       $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
       $whoops->register();
     }
-
-    parent::__construct();
 
     $this->init();
   }
@@ -41,7 +44,7 @@ class Startup extends Base
 
     \Loader::callModule('migrations');
 
-    $this->run($this->localPage);
+    \Loader::getComponent(Base::class)->run($this->localPage);
   }
 
   public function initModules(): void
@@ -68,13 +71,9 @@ SQL;
 
   public function logWriter(): void
   {
-    require $_SERVER['DOCUMENT_ROOT'].'/../config/config.php';
-
-    if (!isset($config['logs']) || $config['logs'] === true) {
-      error_reporting(E_ALL & ~E_NOTICE);
-      ini_set('display_errors', 'Off');
-      ini_set('log_errors', 'On');
-      ini_set('error_log', $_SERVER['DOCUMENT_ROOT'] . '/../logs/errors.log');
-    }
+    error_reporting(E_ALL & ~E_NOTICE);
+    ini_set('display_errors', 'Off');
+    ini_set('log_errors', 'On');
+    ini_set('error_log', $_SERVER['DOCUMENT_ROOT'] . '/logs/errors.log');
   }
 }

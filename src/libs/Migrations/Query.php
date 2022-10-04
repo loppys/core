@@ -2,7 +2,7 @@
 
 namespace Vengine\libs\Migrations;
 
-use Vengine\Database\Adapter;
+use Vengine\System\Components\Database\Adapter;
 use Vengine\libs\Migrations\Collect;
 
 class Query extends Adapter

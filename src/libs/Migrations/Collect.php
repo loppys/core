@@ -2,7 +2,7 @@
 
 namespace Vengine\libs\Migrations;
 
-use Vengine\Database\Adapter;
+use Vengine\System\Components\Database\Adapter;
 
 class Collect
 {

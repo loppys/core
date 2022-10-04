@@ -5,7 +5,7 @@ namespace Vengine\Controllers\Page;
 use Vengine\Controllers\AbstractController;
 use Vengine\Controllers\PageControllerInterface;
 use Vengine\Controllers\Page\DataPageTransformer;
-use Vengine\Database\Adapter;
+use Vengine\System\Components\Database\Adapter;
 
 class LocalPage extends AbstractController implements PageControllerInterface
 {

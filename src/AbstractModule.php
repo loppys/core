@@ -4,7 +4,7 @@ namespace Vengine;
 
 use Vengine\Injectable;
 use Vengine\LegacyConfig;
-use Vengine\libs\Database\Adapter;
+use Vengine\System\Components\Database\Adapter;
 use Symfony\Component\HttpFoundation\Request;
 use \Loader;
 

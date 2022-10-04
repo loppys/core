@@ -1,6 +1,6 @@
 <?php
 
-namespace Vengine\Modules\Cache;
+namespace Vengine\System;
 
 use Vengine\Packages\Settings\Storages\ConstStorage;
 

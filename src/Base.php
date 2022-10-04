@@ -164,9 +164,9 @@ class Base extends AbstractModule
 	/*
 	* Навигация страниц
 	*/
-	public function pageNavigation()
+	public function pageNavigation(): void
 	{
-		new PageController($this);
+		\Loader::getComponent(PageController::class, 'route');
 	}
 
 	/*

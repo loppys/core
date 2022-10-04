@@ -18,11 +18,6 @@ class PageController extends AbstractPageController
   public $render;
   public $parameters;
 
-  function __construct(Base $base)
-  {
-    parent::__construct($base);
-  }
-
   public function route()
   {
     if (!empty($this->interface->localPages)) {

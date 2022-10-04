@@ -2,7 +2,7 @@
 
 namespace Vengine\Controllers;
 
-use Vengine\Database\Adapter;
+use Vengine\System\Components\Database\Adapter;
 
 abstract class AbstractController
 {

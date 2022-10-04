@@ -4,7 +4,7 @@ namespace Vengine;
 
 use Vengine\Base;
 use Vengine\Controllers\Page\LocalPage;
-use Vengine\Database\Adapter;
+use Vengine\System\Components\Database\Adapter;
 use Vengine\Modules\Api\Route;
 use Vengine\Modules\Settings\Process as Settings;
 
@@ -28,8 +28,6 @@ class Startup
       $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
       $whoops->register();
     }
-
-    $this->init();
   }
 
   public function init(): void

@@ -24,8 +24,6 @@ abstract class AbstractPageController
     $url += ['urlPath' => $this->interface->page];
 
     $this->page = $this->getPage($url['urlPath']);
-
-    $this->route();
   }
 
   public function missingPage()

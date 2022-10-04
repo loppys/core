@@ -2,7 +2,7 @@
 
 namespace Vengine\libs\Exception;
 
-use Vengine\libs\Helpers\Http;
+use Vengine\libs\Exception\Http;
 
 class HttpException extends \Exception
 {

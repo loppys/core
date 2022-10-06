@@ -15,7 +15,7 @@ class Process extends AbstractModule
   {
     parent::__construct();
 
-    $collect = new Collect($this->interface->structure);
+    $collect = new Collect($this->structure);
 
     if (!empty($collect->data)) {
       new Query($collect);

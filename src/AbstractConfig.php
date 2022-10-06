@@ -2,7 +2,7 @@
 
 namespace Vengine;
 
-class LegacyConfig implements Injectable
+abstract class AbstractConfig
 {
    /**
     * @var array

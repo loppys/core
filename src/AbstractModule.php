@@ -2,13 +2,13 @@
 
 namespace Vengine;
 
-use Vengine\Injectable;
-use Vengine\LegacyConfig;
+use Vengine\AbstractConfig;
+use Vengine\System\Settings\Structure;
 use Vengine\System\Components\Database\Adapter;
 use Symfony\Component\HttpFoundation\Request;
 use \Loader;
 
-abstract class AbstractModule extends LegacyConfig
+abstract class AbstractModule extends AbstractConfig
 {
   /**
    * @var object
@@ -48,6 +48,8 @@ abstract class AbstractModule extends LegacyConfig
   function __construct()
   {
     $this->interface = new \stdClass();
+
+    $this->structure = Loader::getComponent(Structure::class);
 
     $this->adapter = $this->getAdapter();
     $this->request = $this->getRequest();
@@ -233,7 +235,7 @@ SQL;
     return $path;
   }
 
-  public function getStandartFolderStructure(): array
+  private function getStandartFolderStructure(): array
   {
     return [
       'project' => 'ROOT:',

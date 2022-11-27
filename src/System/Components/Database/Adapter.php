@@ -6,58 +6,58 @@ use RedBeanPHP\R;
 
 class Adapter extends R
 {
-  /**
-   * @var array
-   */
-  private $param;
+    /**
+     * @var array
+     */
+    private $param;
 
-  public function __construct()
-  {
-    $this->param = require_once($_SERVER['DOCUMENT_ROOT'] . '/config/database.php');
+    public function __construct()
+    {
+        $this->param = require_once($_SERVER['DOCUMENT_ROOT'] . '/config/database.php');
 
-    if (!empty($this->param)) {
-      $type = $this->param['type'];
-      $host = $this->param['host'];
-      $dbname = $this->param['dbname'];
-      $login = $this->param['login'];
-      $password = $this->param['password'];
+        if (!empty($this->param)) {
+            $type = $this->param['type'];
+            $host = $this->param['host'];
+            $dbname = $this->param['dbname'];
+            $login = $this->param['login'];
+            $password = $this->param['password'];
 
-      unset($this->param);
-      $this->param['connect'] = $type . ':' . 'host=' . $host . ';' . 'dbname=' . $dbname;
-      $this->param['login'] = $login;
-      $this->param['password'] = $password;
+            unset($this->param);
+            $this->param['connect'] = $type . ':' . 'host=' . $host . ';' . 'dbname=' . $dbname;
+            $this->param['login'] = $login;
+            $this->param['password'] = $password;
+        }
     }
-  }
 
-  public function connect(): void
-  {
-    $param = $this->param;
+    public function connect(): void
+    {
+        $param = $this->param;
 
-    if (!$this->testConnection()) {
-      parent::setup($param['connect'], $param['login'], $param['password']);
+        if (!$this->testConnection()) {
+            parent::setup($param['connect'], $param['login'], $param['password']);
+        }
     }
-  }
 
-  public function save($table = null, array $fields = []): void
-  {
-    if ($table && $fields) {
-          $db = parent::dispense($table);
+    public function save($table = null, array $fields = []): void
+    {
+        if ($table && $fields) {
+            $db = parent::dispense($table);
 
-          foreach ($fields as $keyField => $fieldValue) {
-            if ($fieldValue) {
-              $db->$keyField = $fieldValue;
+            foreach ($fields as $keyField => $fieldValue) {
+                if ($fieldValue) {
+                    $db->$keyField = $fieldValue;
+                }
+                continue;
             }
-            continue;
-          }
 
-          parent::store($db);
+            parent::store($db);
+        }
     }
-  }
 
-  public function condition($condition)
-  {
-    if ($condition) {
-      parent::exec( $condition );
+    public function condition($condition)
+    {
+        if ($condition) {
+            parent::exec($condition);
+        }
     }
-  }
 }

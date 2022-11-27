@@ -4,32 +4,32 @@ namespace Vengine;
 
 abstract class AbstractConfig
 {
-   /**
-    * @var array
-    */
-   protected $property = array();
+    /**
+     * @var array
+     */
+    protected $property = [];
 
-   public function __get(string $name)
-   {
-     if (array_key_exists($name, $this->property)) {
-         return $this->property[$name];
-     }
+    public function __get(string $name)
+    {
+        if (array_key_exists($name, $this->property)) {
+            return $this->property[$name];
+        }
 
-     return null;
-   }
+        return null;
+    }
 
-   public function __isset($name)
-   {
-       return isset($this->data[$name]);
-   }
+    public function __isset($name)
+    {
+        return isset($this->data[$name]);
+    }
 
-   public function __set(string $name, $value)
-   {
-       $this->property[$name] = $value;
-   }
+    public function __set(string $name, $value)
+    {
+        $this->property[$name] = $value;
+    }
 
-   public function __unset(string $name)
-   {
-       unset($this->property[$name]);
-   }
+    public function __unset(string $name)
+    {
+        unset($this->property[$name]);
+    }
 }

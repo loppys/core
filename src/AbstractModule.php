@@ -3,6 +3,7 @@
 namespace Vengine;
 
 use Vengine\AbstractConfig;
+use Vengine\System\Components\Page\Render;
 use Vengine\System\Settings\Structure;
 use Vengine\System\Components\Database\Adapter;
 use Symfony\Component\HttpFoundation\Request;
@@ -10,251 +11,246 @@ use \Loader;
 
 abstract class AbstractModule extends AbstractConfig
 {
-  /**
-   * @var object
-   */
-  public $interface;
+    /**
+     * @var object
+     */
+    public $interface;
 
-  /**
-   * @var object
-   */
-  public $adapter;
+    /**
+     * @var object
+     */
+    public $adapter;
 
-  /**
-   * @var object
-   */
-  public $request;
+    /**
+     * @var object
+     */
+    public $request;
 
-  /**
-   * @var array
-   */
-  public $session;
+    /**
+     * @var array
+     */
+    public $session;
 
-  /**
-   * @var string
-   */
-  public $module;
+    /**
+     * @var string
+     */
+    public $module;
 
-  /**
-   * @var string
-   */
-  public $version;
+    /**
+     * @var string
+     */
+    public $version;
 
-  /**
-   * @var string
-   */
-  public $url;
+    /**
+     * @var string
+     */
+    public $url;
 
-  function __construct()
-  {
-    $this->interface = new \stdClass();
+    function __construct()
+    {
+        $this->interface = new \stdClass();
 
-    $this->structure = Loader::getComponent(Structure::class);
+        $this->structure = Loader::getComponent(Structure::class);
 
-    $this->adapter = $this->getAdapter();
-    $this->request = $this->getRequest();
+        $this->adapter = $this->getAdapter();
+        $this->request = $this->getRequest();
 
-    $this->setConfig();
-    $this->setConfigVar();
+        $this->setInterface();
+        $this->setConfigVar();
 
-    $defaultConfig = $this->interface->defaults;
+        $defaultConfig = $this->interface->defaults;
 
-    if ($defaultConfig) {
-      if ($defaultConfig[$this->module]) {
-        foreach ($defaultConfig[$this->module] as $key => $value) {
-          $this->interface->$key = $value;
+        if ($defaultConfig) {
+            if ($defaultConfig[$this->module]) {
+                foreach ($defaultConfig[$this->module] as $key => $value) {
+                    $this->interface->$key = $value;
+                }
+            }
+
+            unset($this->interface->defaults);
         }
-      }
 
-      unset($this->interface->defaults);
+        $this->autoload('modules');
     }
 
-    $this->autoload('modules');
-  }
-
-  public function getAdapter(): Adapter
-  {
-    return Loader::getComponent(Adapter::class);
-  }
-
-  public function getRequest(): Request
-  {
-    return Request::createFromGlobals();
-  }
-
-  public function autoload(string $dir): void
-  {
-    $dir = $this->interface->structure[$dir];
-
-    if (!is_dir($dir)) {
-      return;
+    public function getAdapter(): Adapter
+    {
+        return Loader::getComponent(Adapter::class);
     }
 
-    $items = scandir($dir);
-
-    foreach ($items as $item) {
-      $package = $dir . $item . '/Package.php';
-
-      if (!file_exists($package)) {
-        continue;
-      }
-
-      $package = require_once($package);
-
-      if (!is_object($package)) {
-        continue;
-      }
-
-      $data = [
-        'name' => $package->name,
-        'group' => $package->group,
-        'handler' => $package->handler,
-        'param' => $package->param,
-        'path' => $package->path,
-        'call' => $package->call,
-        'version' => $package->version,
-        'description' => $package->description,
-      ];
-
-      Loader::add($data['name'], $data['group'] ?: Loader::GROUP_MODULES, $data);
-    }
-  }
-
-  public function getInterface(): object
-  {
-    if (empty($this->interface)) {
-      $this->interface = new \stdClass();
-      $this->setConfig();
+    public function getRequest(): Request
+    {
+        return Request::createFromGlobals();
     }
 
-    return $this->interface;
-  }
+    public function autoload(string $dir): void
+    {
+        $dir = $this->interface->structure[$dir];
 
-  public function setConfigVar(): void
-  {
-    $query = <<<SQL
+        if (!is_dir($dir)) {
+            return;
+        }
+
+        $items = scandir($dir);
+
+        foreach ($items as $item) {
+            $package = $dir . $item . '/Package.php';
+
+            if (!file_exists($package)) {
+                continue;
+            }
+
+            $package = require_once($package);
+
+            if (!is_object($package)) {
+                continue;
+            }
+
+            $data = [
+                'name' => $package->name,
+                'group' => $package->group,
+                'handler' => $package->handler,
+                'param' => $package->param,
+                'path' => $package->path,
+                'call' => $package->call,
+                'version' => $package->version,
+                'description' => $package->description,
+            ];
+
+            Loader::add($data['name'], $data['group'] ?: Loader::GROUP_MODULES, $data);
+        }
+    }
+
+    public function getInterface(): object
+    {
+        if (empty($this->interface)) {
+            $this->interface = new \stdClass();
+            $this->setInterface();
+        }
+
+        return $this->interface;
+    }
+
+    public function setConfigVar(): void
+    {
+        $query = <<<SQL
 SELECT *
 FROM `cfg`
 SQL;
 
-    $result = $this->adapter->getAll(
-      $query
-    );
+        $result = $this->adapter->getAll(
+            $query
+        );
 
-    foreach ($result as $key => $value) {
-      if (!$this->interface->{$value['cfg_name']}) {
-        $this->interface->{$value['cfg_name']} = $value['cfg_value'];
-      }
-    }
-  }
-
-  public function setConfig(): void
-  {
-    $config = require _File('config', '/config');
-    $coreConfig = require('config/config.php');
-
-    if (empty($config['structure'])) {
-      $config['structure'] = $this->getStandartFolderStructure();
-    }
-
-    foreach ($config as $k => $v) {
-      foreach ($coreConfig as $ck => $cv) {
-        if (array_key_exists($ck, $config)) {
-          $config[$ck] += $cv;
-        } else {
-          $config[$ck] = $coreConfig[$ck];
+        foreach ($result as $key => $value) {
+            if (!$this->interface->{$value['cfg_name']}) {
+                $this->interface->{$value['cfg_name']} = $value['cfg_value'];
+            }
         }
-      }
     }
 
-    $projectDir = $_SERVER['DOCUMENT_ROOT'] . '/';
+    public function setInterface(): void
+    {
+        $config = require _File('config', '/config');
+        $coreConfig = require('config/config.php');
 
-    $path = [
-      'ROOT:' => $projectDir
-    ];
+        if (empty($config['structure'])) {
+            $config['structure'] = $this->structure->getDefaultFolderStructure();
+        }
 
-    foreach ($config['structure'] as $sKey => $sValue) {
-      $name = strtoupper(stristr($sValue, ':', true)) . ':';
-      $tempPath = substr(stristr($sValue, ':'), 1);
+        foreach ($config as $k => $v) {
+            foreach ($coreConfig as $ck => $cv) {
+                if (array_key_exists($ck, $config)) {
+                    $config[$ck] += $cv;
+                } else {
+                    $config[$ck] = $coreConfig[$ck];
+                }
+            }
+        }
 
-      $parent = array_key_exists($name, $path);
+        $projectDir = $_SERVER['DOCUMENT_ROOT'] . '/';
 
-      if ($parent) {
-        $replace = [
-          $name => $path[$name]
+        $path = [
+            'ROOT:' => $projectDir
         ];
 
-        $result = strtr($name, $replace) . $tempPath;
+        foreach ($config['structure'] as $sKey => $sValue) {
+            $name = strtoupper(stristr($sValue, ':', true)) . ':';
+            $tempPath = substr(stristr($sValue, ':'), 1);
 
-        $path[strtoupper($sKey) . ':'] = $result;
-        $config['structure'][$sKey] = $result;
-      }
-    }
+            $parent = array_key_exists($name, $path);
 
-    if ($config['defaults']) {
-      foreach ($config['defaults'] as $dk => $dv) {
-        if (!$dv['require']) {
-          break;
+            if ($parent) {
+                $replace = [
+                    $name => $path[$name]
+                ];
+
+                $result = strtr($name, $replace) . $tempPath;
+
+                $path[strtoupper($sKey) . ':'] = $result;
+                $config['structure'][$sKey] = $result;
+            }
         }
 
-        foreach ($dv['require'] as $rk => $rv) {
-          $requirePath = $this->getRequirePath($rv, $config);
+        if ($config['defaults']) {
+            foreach ($config['defaults'] as $dk => $dv) {
+                if (!$dv['require']) {
+                    break;
+                }
 
-          if ($requirePath === 'run') {
-            require_once($requirePath);
-            continue;
-          }
+                foreach ($dv['require'] as $rk => $rv) {
+                    $requirePath = $this->getRequirePath($rv, $config);
 
-          $config['defaults'][$dk][$rk] = require_once($requirePath);
+                    if ($requirePath === 'run') {
+                        require_once($requirePath);
+                        continue;
+                    }
+
+                    $config['defaults'][$dk][$rk] = require_once($requirePath);
+                }
+            }
         }
-      }
+
+        foreach ($config as $key => $value) {
+            $this->interface->$key = $value;
+        }
     }
 
-    foreach ($config as $key => $value) {
-      $this->interface->$key = $value;
-    }
-  }
+    private function getRequirePath(array $arr, array $config): string
+    {
+        $path = '';
 
-  private function getRequirePath(array $arr, array $config): string
-  {
-    $path = '';
+        foreach ($arr as $key => $value) {
+            if (!$key) {
+                $structure = false;
+                break;
+            }
 
-    foreach ($arr as $key => $value) {
-      if (!$key) {
-        $structure = false;
-        break;
-      }
+            $path = $config['structure'][$key] . $value;
+        }
 
-      $path = $config['structure'][$key] . $value;
-    }
+        if ($structure === false) {
+            return 'run';
+        }
 
-    if ($structure === false) {
-      return 'run';
+        return $path;
     }
 
-    return $path;
-  }
-
-  private function getStandartFolderStructure(): array
-  {
-    return [
-      'project' => 'ROOT:',
-      'tmp' => 'PROJECT:_tmp/',
-      'www' => 'PROJECT:www/',
-      'migrations' => 'PROJECT:Migrations/',
-      'logs' => 'PROJECT:logs/',
-      'config' => 'PROJECT:config/'
-    ];
-  }
-
-  /*
-  * Ошибка 404
-  */
-  public function error404(): void
-  {
-    $code = http_response_code();
-    if ($code === 404) {
-      exit(include 'template/error404.tpl.php');
+    /*
+    * Ошибка 404
+    */
+    public function error404(): void
+    {
+        $code = http_response_code();
+        if ($code === 404) {
+            exit(include 'template/error404.tpl.php');
+        }
     }
-  }
+
+    public function _render(): void
+    {
+        Loader::getComponent(Render::class, 'render');
+    }
+
+//    abstract public function prepareRender(): void;
 }

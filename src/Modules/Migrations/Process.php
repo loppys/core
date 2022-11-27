@@ -8,17 +8,17 @@ use Vengine\libs\Migrations\Collect;
 
 class Process extends AbstractModule
 {
-  public $module = 'Migrations';
-  public $version = '1.0.7';
+    public $module = 'Migrations';
+    public $version = '1.0.7';
 
-  public function __construct()
-  {
-    parent::__construct();
+    public function __construct()
+    {
+        parent::__construct();
 
-    $collect = new Collect($this->structure);
+        $collect = new Collect($this->structure);
 
-    if (!empty($collect->data)) {
-      new Query($collect);
+        if (!empty($collect->data)) {
+            new Query($collect);
+        }
     }
-  }
 }

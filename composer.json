@@ -29,7 +29,6 @@
         "spatie/menu": "^2.10",
         "firebase/php-jwt": "^6.0",
         "symfony/http-foundation": "^5.4",
-        "smarty/smarty": "^4.1",
         "phpfastcache/phpfastcache": "^8.1",
         "vengine/render": "^2.0",
         "vengine/loader": "^2.3"

@@ -15,14 +15,12 @@ class Startup
     private $interface;
     private $adapter;
 
-    public function __construct(LocalPage $pages, Adapter $adapter, Settings $interface)
+    public function __construct(Adapter $adapter, Settings $interface)
     {
         $this->logWriter();
 
         $this->adapter = $adapter;
         $this->interface = $interface;
-
-        $this->localPage = $pages;
 
         if ($_GET['__DEBUG'] === 'INFO') {
             $whoops = new \Whoops\Run;

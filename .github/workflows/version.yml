@@ -50,5 +50,5 @@ jobs:
         uses: negz/create-tag@v1
         
         with:
-          version: ${{ steps.semvers.outputs.patch }}
+          version: ${{ steps.semvers.output.patch }}
           token: ${{ secrets.GITHUB_TOKEN }}

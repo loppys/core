@@ -5,6 +5,6 @@
 
 # Документация
 
-`composer require vengine/composer`
+`composer require vengine/core`
 
 когда нибудь появится

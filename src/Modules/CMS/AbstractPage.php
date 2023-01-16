@@ -4,32 +4,32 @@ namespace Vengine\Modules\CMS;
 
 abstract class AbstractPage
 {
-  protected $url = '';
+    protected $url = '';
 
-  public $content = [];
+    public $content = [];
 
-  public $title;
-  public $access = 'Admin';
+    public $title;
+    public $access = 'Admin';
 
-  public $visible = true;
+    public $visible = true;
 
-  public $data;
+    public $data;
 
-  abstract public function index();
+    abstract public function index();
 
-  public function getRenderData(): array
-  {
-    $this->content[] = $this;
+    public function getRenderData(): array
+    {
+        $this->content[] = $this;
 
-    return $this->content;
-  }
+        return $this->content;
+    }
 
-  public function templateConnect($template)
-  {
-    $dir = dirname(__FILE__);
+    public function templateConnect($template)
+    {
+        $dir = dirname(__FILE__);
 
-    $template = 'file::' . $dir . '/Pages/tpl/' . $template;
+        $template = 'file::' . $dir . '/Pages/tpl/' . $template;
 
-    return $template;
-  }
+        return $template;
+    }
 }

@@ -4,77 +4,73 @@ namespace Vengine;
 
 use Vengine\Base;
 use Vengine\Controllers\Page\LocalPage;
-use Vengine\CRUD\Install;
-use Vengine\Database\Adapter;
+use Vengine\System\Components\Database\Adapter;
 use Vengine\Modules\Api\Route;
+use Vengine\Modules\Settings\Process as Settings;
+use Loader;
 
-class Startup extends Base
+class Startup
 {
-  private $localPage;
+    private $localPage;
+    private $interface;
+    private $adapter;
 
-  public function __construct(LocalPage $pages)
-  {
-    $this->logWriter();
+    public function __construct(Adapter $adapter, Settings $interface)
+    {
+        $this->logWriter();
 
-    $this->localPage = $pages;
+        $this->adapter = $adapter;
+        $this->interface = $interface;
 
-    if ($_GET['__DEBUG'] === 'INFO') {
-      $whoops = new \Whoops\Run;
-      $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
-      $whoops->register();
+        if ($_GET['__DEBUG'] === 'INFO') {
+            $whoops = new \Whoops\Run;
+            $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
+            $whoops->register();
+        }
     }
 
-    parent::__construct();
+    public function init(): void
+    {
+        $uri = explode('/', trim($this->interface->uri['path'], '/'));
 
-    $this->init();
-  }
+        if (array_shift($uri) === 'api') {
+            Route::api($uri, $this->interface->structure);
+        }
 
-  public function init(): void
-  {
-    $uri = explode('/', trim($this->interface->uri['path'], '/'));
+        $this->initModules();
 
-    if (array_shift($uri) === 'api') {
-      Route::api($uri, $this->interface->structure);
+        Loader::callModule('migrations');
+
+        Loader::getComponent(Base::class)->run($this->localPage);
     }
 
-    $this->initModules();
-
-    \Loader::callModule('migrations');
-
-    $this->run($this->localPage);
-  }
-
-  public function initModules(): void
-  {
-    $query = <<<SQL
+    public function initModules(): void
+    {
+        $query = <<<SQL
 SELECT *
 FROM `modules`
 SQL;
 
-    $result = $this->adapter->getAll(
-      $query
-    );
+        $result = $this->adapter->getAll(
+            $query
+        );
 
-    foreach ($result as $key => $value) {
-      $param = explode(', ', $value['module_param']);
-      \Loader::addModule(
-        $value['module_name'],
-        $value['module_type'],
-        $value['handler'],
-        $param,
+        foreach ($result as $key => $value) {
+            $param = explode(', ', $value['module_param']);
+            Loader::addModule(
+                $value['module_name'],
+                $value['module_type'],
+                $value['handler'],
+                $param,
       );
+        }
     }
-  }
 
-  public function logWriter(): void
-  {
-    require $_SERVER['DOCUMENT_ROOT'].'/../config/config.php';
-
-    if (!isset($config['logs']) || $config['logs'] === true) {
-      error_reporting(E_ALL & ~E_NOTICE);
-      ini_set('display_errors', 'Off');
-      ini_set('log_errors', 'On');
-      ini_set('error_log', $_SERVER['DOCUMENT_ROOT'] . '/../logs/errors.log');
+    public function logWriter(): void
+    {
+        error_reporting(E_ALL & ~E_NOTICE);
+        ini_set('display_errors', 'Off');
+        ini_set('log_errors', 'On');
+        ini_set('error_log', $_SERVER['DOCUMENT_ROOT'] . '/logs/errors.log');
     }
-  }
 }

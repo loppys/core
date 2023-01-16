@@ -4,6 +4,9 @@ namespace Vengine\Modules\Api;
 
 use Vengine\AbstractModule;
 
+/**
+ * @deprecated
+ */
 abstract class Process extends AbstractModule
 {
     public $module = 'Api';

@@ -4,6 +4,9 @@ namespace Vengine\Modules\CMS;
 
 use Vengine\AbstractModule;
 
+/**
+ * @deprecated
+ */
 class Main extends AbstractModule
 {
   public $module = 'CMS';

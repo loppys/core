@@ -1,11 +1,8 @@
 <?php
-
-use Vengine\System\Cache;
-use Vengine\Packages\Settings\Storages\ConstStorage;
-use Loader\Builder\Storage;
-use Loader\Process;
-
-class Loader extends Process
+/**
+ * @deprecated
+ */
+class Loader
 {
     public static function getCacheObject(string $name): ?Cache
     {

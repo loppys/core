@@ -7,6 +7,7 @@ return [
         'core' => 'PROJECT:vendor/vengine/core/',
         'modules' => 'CORE:src/Modules/',
         'coreConfig' => 'CORE:src/config/',
+        'userConfig' => 'PROJECT:config/',
         'api' => 'CORE:src/_api/',
         'uApi' => 'WWW:_api/'
     ],

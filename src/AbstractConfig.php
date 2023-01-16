@@ -4,10 +4,7 @@ namespace Vengine;
 
 abstract class AbstractConfig
 {
-    /**
-     * @var array
-     */
-    protected $property = [];
+    private $property = [];
 
     public function __get(string $name)
     {

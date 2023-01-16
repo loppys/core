@@ -6,6 +6,9 @@ use Vengine\AbstractModule;
 use Vengine\libs\Migrations\Query;
 use Vengine\libs\Migrations\Collect;
 
+/**
+ * @deprecated
+ */
 class Process extends AbstractModule
 {
     public $module = 'Migrations';

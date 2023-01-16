@@ -2,75 +2,42 @@
 
 namespace Vengine;
 
-use Vengine\Base;
-use Vengine\Controllers\Page\LocalPage;
+use Vengine\Modules\Migrations\Process;
 use Vengine\System\Components\Database\Adapter;
 use Vengine\Modules\Api\Route;
-use Vengine\Modules\Settings\Process as Settings;
-use Loader;
+use Vengine\System\Traits\ContainerTrait;
+use ReflectionException;
 
-class Startup
+class Startup implements Injection
 {
-    private $localPage;
-    private $interface;
-    private $adapter;
+    use ContainerTrait;
 
-    public function __construct(Adapter $adapter, Settings $interface)
+    public function __construct()
     {
-        $this->logWriter();
-
-        $this->adapter = $adapter;
-        $this->interface = $interface;
-
-        if ($_GET['__DEBUG'] === 'INFO') {
-            $whoops = new \Whoops\Run;
-            $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
-            $whoops->register();
-        }
+        $this->container = $this->getContainer();
     }
 
-    public function init(): void
+    public function run(): void
     {
-        $uri = explode('/', trim($this->interface->uri['path'], '/'));
-
-        if (array_shift($uri) === 'api') {
-            Route::api($uri, $this->interface->structure);
-        }
+        /** @TODO полностью переделать */
+        App::app()->createObject(Process::class);
 
         $this->initModules();
 
-        Loader::callModule('migrations');
-
-        Loader::getComponent(Base::class)->run($this->localPage);
+        $this->base->run();
     }
 
-    public function initModules(): void
+    public function initModules(): bool
     {
         $query = <<<SQL
 SELECT *
 FROM `modules`
 SQL;
 
-        $result = $this->adapter->getAll(
+        $result = $this->adapter::getAll(
             $query
         );
 
-        foreach ($result as $key => $value) {
-            $param = explode(', ', $value['module_param']);
-            Loader::addModule(
-                $value['module_name'],
-                $value['module_type'],
-                $value['handler'],
-                $param,
-      );
-        }
-    }
-
-    public function logWriter(): void
-    {
-        error_reporting(E_ALL & ~E_NOTICE);
-        ini_set('display_errors', 'Off');
-        ini_set('log_errors', 'On');
-        ini_set('error_log', $_SERVER['DOCUMENT_ROOT'] . '/logs/errors.log');
+        return $this->container->packageCollect($result);
     }
 }

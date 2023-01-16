@@ -12,6 +12,9 @@ use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 
+/**
+ * @deprecated
+ */
 class PageController extends AbstractPageController
 {
     public $controller;

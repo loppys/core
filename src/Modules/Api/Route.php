@@ -2,6 +2,9 @@
 
 namespace Vengine\Modules\Api;
 
+/**
+ * @deprecated
+ */
 class Route
 {
     public static function api(array $uri, array $structure): void

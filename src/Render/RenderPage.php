@@ -7,9 +7,6 @@ use Vengine\Controllers\Routing\PageController;
 
 
 /**
- * Class RenderPage
- * @package Vengine\Render
- *
  * @deprecated
  */
 class RenderPage extends Base

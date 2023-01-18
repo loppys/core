@@ -2,11 +2,12 @@
 
 namespace Vengine\System\Components\Page;
 
+use Loader\System\Container;
 use Render\Engine\Data\Manager;
 use Render\Engine\DataStorageInterface;
+use Render\Engine\DefaultManager;
 use Render\Engine\Factory\RenderFactory;
 use Render\Engine\Storage\DataStorage;
-use Vengine\App;
 
 class Render
 {
@@ -43,7 +44,7 @@ class Render
     public static function getInstance(): self
     {
         if (empty(static::$instance)) {
-            static::$instance = App::app()->createObject(static::class);
+            static::$instance = Container::getInstance()->getBuilder()->createObject(static::class);
         }
 
         return static::$instance;
@@ -64,14 +65,24 @@ class Render
         return $this->renderFactory;
     }
 
+    public function getTemplateFolder(): string
+    {
+        return $this->manager->getTemplateFolder();
+    }
+
+    public function setTemplateFolder(string $path): DefaultManager
+    {
+        return $this->manager->setTemplateFolder($path);
+    }
+
     public function getHead(): string
     {
         return $this->manager->getHead();
     }
 
-    public function addMetaData(string $name, string $value): Manager
+    public function addMetaData(string $name, string $value, string $content): Manager
     {
-        return $this->manager->addMetaData($name, $value);
+        return $this->manager->addMetaData($name, $value, $content);
     }
 
     public function setTitle(string $title): Manager

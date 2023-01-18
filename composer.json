@@ -7,9 +7,9 @@
             "Vengine\\": "src/"
         },
         "files": [
-            "src/libs/common/common.php"
-        ],
-        "classmap": ["src/Loader.php"]
+            "src/libs/common/common.php",
+            "install.php"
+        ]
     },
     "license": "MIT",
     "require": {

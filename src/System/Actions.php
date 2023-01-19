@@ -3,7 +3,6 @@
 namespace Vengine\System;
 
 use Vengine\App;
-use Vengine\System\Components\Database\Adapter;
 use Vengine\System\Controllers\Router;
 use Vengine\System\DTO\ActionDTO;
 use Vengine\System\Exceptions\AccessDeniedException;
@@ -19,13 +18,13 @@ class Actions
     public const TYPE_COMMON = 00002;
 
     private $actionList = [
-        'EditDBTable' => [
+        'ExampleAction' => [
             'fn' => [
-                'add',
-                'edit',
-                'delete',
+                'example',
+                'example',
+                'example',
             ],
-            'controller' => Adapter::class,
+            'controller' => 'ExampleController',
             'access' => [
                 PermissionType::USER,
                 PermissionType::ADMIN,

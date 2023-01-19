@@ -4,16 +4,25 @@ namespace Vengine;
 
 use Loader\System\Interfaces\PackageInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Vengine\Packages\Updater\Components\Configurator;
 use Vengine\Packages\Settings\Storage\ConstStorage;
+use Vengine\Packages\Updater\Controllers\UpdaterPageController;
+use Vengine\Packages\User\Factory\UserFactory;
+use Vengine\System\Actions;
 use Vengine\System\Components\Database\Adapter;
 use Vengine\System\Components\Page\Render;
+use Vengine\System\Controllers\Router;
+use Vengine\System\Settings\Storages\AccessLevelStorage;
+use Vengine\System\Settings\Storages\MethodType;
 use Vengine\System\Settings\Structure;
 use Vengine\System\Traits\ContainerTrait;
-use Vengine\Packages\Updater\Components\RenderUpdater;
+use Whoops\Handler\PrettyPageHandler;
 use Loader\System\Container;
+use Whoops\Run;
 use Exception;
 
-class App implements Injection
+final class App implements Injection
 {
     use ContainerTrait;
 
@@ -22,9 +31,22 @@ class App implements Injection
      */
     protected static $instance;
 
-    public function __construct()
+    /**
+     * @var bool
+     */
+    private $debugMode;
+
+    public function __construct(bool $debug = false)
     {
+        $this->debugMode = $debug;
+
         $this->logWriter();
+
+        $session = static::getSession();
+
+        $session->start();
+
+        static::getRequest()->setSession($session);
 
         if (empty(static::$instance)) {
             $this->init();
@@ -35,21 +57,63 @@ class App implements Injection
     {
         $this->container = new Container();
 
-        $this->container->setShared('container', $this->container);
-
-        if (!file_exists($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . ConstStorage::DEFAULT_CONFIG_NAME)) {
-            $this->container->getBuilder()->invoke(
-                $this->createObject(RenderUpdater::class),
-                'process'
-            );
-
-            die();
-        }
+        $this->container->setShared(
+            'container',
+            $this->container
+        );
 
         $this->container->setShared(
             'structure',
             $this->createObject(Structure::class)
         );
+
+        $this->container->setShared(
+            'configurator',
+            $this->createObject(Configurator::class)
+        );
+
+        UserFactory::create();
+
+        $this->container->setShared(
+            'render',
+            $this->createObject(Render::class)
+        );
+
+        $this->render->setTemplateFolder('/www/template/');
+
+        $this->container->setShared(
+            'router',
+            $this->createObject(Router::class)
+        );
+
+        if (!file_exists(Configurator::getConfigPath())) {
+            $this->router->addRouteList(
+                [
+                    [
+                        'route' => '/install/',
+                        'method' => MethodType::GET,
+                        'handler' => [
+                            'controller' => UpdaterPageController::class,
+                            'method' => 'indexAction',
+                            'access' => AccessLevelStorage::ALL
+                        ]
+                    ],
+                    [
+                        'route' => '/install/',
+                        'method' => MethodType::POST,
+                        'handler' => [
+                            'controller' => UpdaterPageController::class,
+                            'method' => 'indexAction',
+                            'access' => AccessLevelStorage::ALL
+                        ]
+                    ],
+                ]
+            );
+
+            $this->router->handle('/install/');
+
+            die();
+        }
 
         $this->container->setShared(
             'adapter',
@@ -59,22 +123,12 @@ class App implements Injection
         $this->adapter->connect();
 
         $this->container->setShared(
-            'base',
-            $this->createObject(Base::class)
-        );
-
-        $this->container->setShared(
-            'render',
-            $this->createObject(Render::class)
-        );
-
-        $this->container->setShared(
             'startup',
             $this->createObject(Startup::class)
         );
 
         $corePackage = $this->structure->coreConfig . ConstStorage::APP_CONFIG_NAME;
-        $userPackage = $this->structure->config . ConstStorage::APP_CONFIG_NAME;
+        $userPackage = $this->structure->userConfig . ConstStorage::APP_CONFIG_NAME;
 
         if (file_exists($corePackage)) {
             $this->container->packageCollect(
@@ -93,6 +147,22 @@ class App implements Injection
 
     public function run(): void
     {
+        $request = static::getRequest();
+
+        $subj = $request->get('subj');
+        $fn = $request->get('fn');
+
+        if ($subj && $fn) {
+            $this->container->getBuilder()->invoke(
+                $this->createObject(Actions::class),
+                'handle',
+                [
+                    $subj,
+                    $fn
+                ]
+            );
+        }
+
         try {
             $this->startup->run();
         } catch (Exception $e) {
@@ -102,18 +172,18 @@ class App implements Injection
         }
     }
 
-    public static function app(): self
+    public static function app(bool $debug = false): self
     {
         if (empty(static::$instance)) {
-            static::$instance = new static();
+            static::$instance = new static($debug);
         }
 
         return static::$instance;
     }
 
-    public function createObject(string $class, array $arguments = []): ?object
+    public function createObject(string $class, array $arguments = []): object
     {
-        return $this->container->getBuilder()->createObject($class, $arguments);
+        return $this->container->createObject($class, $arguments);
     }
 
     public function getPackage(string $name): PackageInterface
@@ -121,9 +191,26 @@ class App implements Injection
         return $this->container->getPackage($name);
     }
 
-    public function getRequest(): Request
+    public static function getRequest(): Request
     {
-        return Request::createFromGlobals();
+        static $request;
+
+        if (!empty($request)) {
+            return $request;
+        }
+
+        return $request = Request::createFromGlobals();
+    }
+
+    public static function getSession(): Session
+    {
+        static $session;
+
+        if (!empty($session)) {
+            return $session;
+        }
+
+        return $session = new Session();
     }
 
     public function logWriter(): void
@@ -133,8 +220,10 @@ class App implements Injection
         ini_set('log_errors', 'On');
         ini_set('error_log', $_SERVER['DOCUMENT_ROOT'] . '/logs/errors.log');
 
-        $whoops = new \Whoops\Run();
-        $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
-        $whoops->register();
+        if (class_exists(Run::class) && $this->debugMode) {
+            $whoops = new Run();
+            $whoops->pushHandler(new PrettyPageHandler);
+            $whoops->register();
+        }
     }
 }

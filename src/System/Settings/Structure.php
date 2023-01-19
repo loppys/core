@@ -6,11 +6,10 @@ use Vengine\AbstractConfig;
 
 /**
  * @property string vendor
- * @property string loader
- * @property string core
+ * @property string container
  * @property string coreConfig
- * @property string config
  * @property string userConfig
+ * @property string core
  * @property string api
  * @property string uApi
  */

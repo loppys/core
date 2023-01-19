@@ -3,20 +3,9 @@
 namespace Vengine;
 
 use Vengine\Modules\Migrations\Process;
-use Vengine\System\Components\Database\Adapter;
-use Vengine\Modules\Api\Route;
-use Vengine\System\Traits\ContainerTrait;
-use ReflectionException;
 
-class Startup implements Injection
+final class Startup extends AbstractModule
 {
-    use ContainerTrait;
-
-    public function __construct()
-    {
-        $this->container = $this->getContainer();
-    }
-
     public function run(): void
     {
         /** @TODO полностью переделать */
@@ -24,10 +13,12 @@ class Startup implements Injection
 
         $this->initModules();
 
-        $this->base->run();
+        $this->collectModuleRoutes();
+
+        $this->router->handle();
     }
 
-    public function initModules(): bool
+    protected function initModules(): bool
     {
         $query = <<<SQL
 SELECT *
@@ -39,5 +30,29 @@ SQL;
         );
 
         return $this->container->packageCollect($result);
+    }
+
+    protected function collectModuleRoutes(): void
+    {
+        $query = <<<SQL
+SELECT *
+FROM `routes`
+SQL;
+
+        $routes = $this->adapter::getAll($query);
+
+        $routes = array_map(static function ($item) {
+            return [
+                'route' => $item['route'],
+                'method' => $item['request_method'],
+                'handler' => [
+                    'controller' => $item['controller'],
+                    'method' => $item['method'],
+                    'access' => (int)$item['access']
+                ]
+            ];
+        }, $routes);
+
+        $this->router->addRouteList($routes);
     }
 }

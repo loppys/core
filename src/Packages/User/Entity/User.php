@@ -9,7 +9,7 @@ class User
     /**
      * @var int
      */
-    private $id;
+    private $id = 0;
 
     /**
      * @var int
@@ -19,12 +19,12 @@ class User
     /**
      * @var string
      */
-    protected $login;
+    protected $login = '';
 
     /**
      * @var string
      */
-    protected $token;
+    protected $token = '';
 
     public function getId(): int
     {

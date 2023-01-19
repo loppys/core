@@ -3,7 +3,7 @@
 return [
     'structure' => [
         'vendor' => 'PROJECT:vendor/',
-        'loader' => 'PROJECT:vendor/vengine/loader/',
+        'loader' => 'PROJECT:vendor/vengine/container/',
         'core' => 'PROJECT:vendor/vengine/core/',
         'modules' => 'CORE:src/Modules/',
         'coreConfig' => 'CORE:src/config/',
@@ -15,8 +15,7 @@ return [
         'Core' => [
             'closed' => false,
             'require' => [
-                'project' => ['coreConfig' => 'project.config.php'],
-                'pages' => ['coreConfig' => 'routes.php']
+                'appConfig' => ['coreConfig' => 'app.config.php']
             ]
         ],
     ]

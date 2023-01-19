@@ -5,12 +5,10 @@ namespace Vengine\System\Controllers;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use Symfony\Component\HttpFoundation\Request;
-use function FastRoute\cachedDispatcher;
 use function FastRoute\simpleDispatcher;
 use Vengine\System\Exceptions\AccessDeniedException;
 use Vengine\System\Exceptions\MethodNotAllowedException;
 use Vengine\System\Exceptions\PageNotFoundException;
-use Vengine\System\Settings\Controllers\AccessController;
 use Vengine\System\Settings\Permissions;
 use Vengine\System\Settings\Storages\MethodType;
 use Vengine\System\Traits\ContainerTrait;
@@ -59,6 +57,11 @@ class Router implements Injection
     protected $permissions;
 
     /**
+     * @var array
+     */
+    protected $routes = [];
+
+    /**
      * @var Dispatcher
      */
     private static $dispatcher;
@@ -78,6 +81,20 @@ class Router implements Injection
         $this->method = $this->request->getMethod();
     }
 
+    public function addRouteList(array $pathList): Router
+    {
+        $this->routes = array_merge($this->routes, $pathList);
+
+        return $this;
+    }
+
+    public function addRoute(array $route): Router
+    {
+        $this->routes[] = $route;
+
+        return $this;
+    }
+
     /**
      * @param string|null $route
      *
@@ -88,18 +105,37 @@ class Router implements Injection
     public function handle(string $route = null): void
     {
         if (empty(static::$dispatcher)) {
-            $this->collectBaseRoutes();
+            $this->collectRoutes();
         }
 
         $this->route($route);
     }
 
-    protected function collectBaseRoutes(): void
+    protected function collectRoutes(): void
     {
-        $dir = dirname(__DIR__, 2);
+        $structure = $this->structure;
 
-        $routes = require $dir . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'routes.php';
-        $routesApi = require $dir . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'routesApi.php';
+        $routes = require $structure->coreConfig . 'routes.php';
+        $routesApi = require $structure->coreConfig . 'routesApi.php';
+
+        $userRoutes = $structure->userConfig . 'routes.php';
+        $userRoutesApi = $structure->userConfig . 'routesApi.php';
+
+        if (!empty($this->routes)) {
+            $routes = array_merge($routes, $this->routes);
+        }
+
+        if (file_exists($userRoutes)) {
+            $userRoutes = require $userRoutes;
+
+            $routes = array_merge($routes, (array)$userRoutes);
+        }
+
+        if (file_exists($userRoutesApi)) {
+            $userRoutesApi = require $userRoutesApi;
+
+            $routesApi = array_merge($routesApi, (array)$userRoutesApi);
+        }
 
         $routeGeneration = static function (RouteCollector $routeCollector, array $routeInfo) {
             switch ($routeInfo['method']) {
@@ -127,10 +163,10 @@ class Router implements Injection
                     $routeGeneration($routeCollector, $route);
                 }
 
-                foreach ($routesApi as $route) {
-                    $route['route'] = self::API_PREFIX . $route['route'];
+                foreach ($routesApi as $routeApi) {
+                    $routeApi['route'] = self::API_PREFIX . $routeApi['route'];
 
-                    $routeGeneration($routeCollector, $route);
+                    $routeGeneration($routeCollector, $routeApi);
                 }
             }
         );
@@ -166,7 +202,7 @@ class Router implements Injection
                 if (is_array($handler)) {
                     $controller = $handler['controller'];
                     $method = $handler['method'];
-                    $access = $handler['access'];
+                    $access = (int)$handler['access'];
 
                     if (!$this->permissions->checkAccess($access)) {
                         throw new AccessDeniedException();

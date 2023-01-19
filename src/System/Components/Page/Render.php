@@ -44,7 +44,7 @@ class Render
     public static function getInstance(): self
     {
         if (empty(static::$instance)) {
-            static::$instance = Container::getInstance()->getBuilder()->createObject(static::class);
+            static::$instance = Container::getInstance()->createObject(static::class);
         }
 
         return static::$instance;

@@ -1,7 +1,7 @@
 <div class="container">
     <div class="row">
         <div class="col-md-6 col-md-offset-3">
-            <form data-toggle="validator" role="form">
+            <form data-toggle="validator" role="form" method="post">
                 <label class="control-label h4">Настройка проекта</label>
                 <hr>
                 <div class="form-group">
@@ -13,7 +13,7 @@
                     <label for="inputName" class="control-label">
                         UUID (<a href="https://vengine.ru/auth/" target="_blank">Регистрация</a>)
                     </label>
-                    <input type="text" class="form-control" id="inputName" name="project"
+                    <input type="text" class="form-control" id="inputName" name="uuid"
                            placeholder="Введите UUID выданный при регистрации" required>
                     <span style="color: rgba(255,5,0,0.64)" class="help-block">
                         без UUID функционал будет сильно ограничен
@@ -84,16 +84,6 @@
                             <input type="checkbox" name="crypt" checked> Зашифровать конфиги
                         </label>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label class="control-label">
-                        Обязательные модули (Рекомендуем обновить до актуальной версии)
-                    </label>
-                    <label><?= $core ?></label>
-                    <br>
-                    <label><?= $render ?></label>
-                    <br>
-                    <label><?= $loader ?></label>
                 </div>
                 <div class="form-group">
                     <button type="submit" class="btn btn-primary">Установить vEngine</button>

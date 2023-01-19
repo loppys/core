@@ -9,7 +9,6 @@ use Vengine\AbstractConfig;
  * @property string loader
  * @property string core
  * @property string coreConfig
- * @property string config
  * @property string userConfig
  * @property string api
  * @property string uApi

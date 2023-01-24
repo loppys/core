@@ -8,16 +8,12 @@ abstract class AbstractConfig
 
     public function __get(string $name)
     {
-        if (array_key_exists($name, $this->property)) {
-            return $this->property[$name];
-        }
-
-        return null;
+        return $this->property[$name] ?? null;
     }
 
     public function __isset($name)
     {
-        return isset($this->data[$name]);
+        return array_key_exists($name, $this->property);
     }
 
     public function __set(string $name, $value)

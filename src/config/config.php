@@ -11,11 +11,8 @@ return [
         'uApi' => 'WWW:_api/'
     ],
     'defaults' => [
-        'Core' => [
-            'closed' => false,
-            'require' => [
-                'appConfig' => ['coreConfig' => 'app.config.php']
-            ]
+        'Startup' => [
+            'closed' => true,
         ],
     ]
 ];

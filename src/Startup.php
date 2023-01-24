@@ -3,11 +3,21 @@
 namespace Vengine;
 
 use Vengine\Modules\Migrations\Process;
+use Vengine\System\Settings\Storages\PermissionType;
 
+/**
+ * @property bool closed
+ */
 final class Startup extends AbstractModule
 {
+    public $module = 'Startup';
+
     public function run(): void
     {
+        if ($this->closed && $this->user->getRole() !== PermissionType::DEVELOPER) {
+            die('На сайте ведутся технические работы, попробуйте вернуться позже!');
+        }
+
         /** @TODO полностью переделать */
         App::app()->createObject(Process::class);
 

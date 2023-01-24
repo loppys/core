@@ -40,7 +40,7 @@ abstract class AbstractModule extends AbstractConfig implements Injection
     {
         $this->container = $this->getContainer();
 
-        $this->interface = new class() extends AbstractConfig {};
+        $this->interface = $this->container->createObject(AppConfig::class);
 
         $this->request = $this->getRequest();
         $this->session = $this->getSession();
@@ -101,16 +101,14 @@ SQL;
 
     public function setInterface(): void
     {
-        $config = require $this->structure->userConfig . 'config.php';
-        $coreConfig = require('config/config.php');
+        $userConfig = require $this->structure->userConfig . 'config.php';
+        $config = require('config/config.php');
 
-        foreach ($config as $k => $v) {
-            foreach ($coreConfig as $ck => $cv) {
-                if (array_key_exists($ck, $config)) {
-                    $config[$ck] += $cv;
-                } else {
-                    $config[$ck] = $coreConfig[$ck];
-                }
+        foreach ((array)$userConfig as $uk => $uv) {
+            if (array_key_exists($uk, $config)) {
+                $config[$uk] += $uv;
+            } else {
+                $config[$uk] = $uv;
             }
         }
 
@@ -121,14 +119,19 @@ SQL;
                 }
 
                 foreach ($dv['require'] as $rk => $rv) {
-                    $requirePath = $this->getRequirePath($rv, $config);
+                    $requirePath = $this->getRequirePath($rv);
 
                     if ($requirePath === 'run') {
-                        require_once($requirePath);
+                        if (file_exists($requirePath)) {
+                            require_once($requirePath);
+                        }
+
                         continue;
                     }
 
-                    $config['defaults'][$dk][$rk] = require_once($requirePath);
+                    if (file_exists($requirePath)) {
+                        $config['defaults'][$dk][$rk] = require_once($requirePath);
+                    }
                 }
             }
         }
@@ -138,17 +141,19 @@ SQL;
         }
     }
 
-    private function getRequirePath(array $arr, array $config): string
+    private function getRequirePath(array $arr): string
     {
+        $structure = true;
         $path = '';
 
         foreach ($arr as $key => $value) {
-            if (!$key) {
+            if (empty($key)) {
                 $structure = false;
+
                 break;
             }
 
-            $path = $config['structure'][$key] . $value;
+            $path = $this->structure->{$key} . $value;
         }
 
         if ($structure === false) {

@@ -33,7 +33,7 @@ if (
     !is_dir($_SERVER['DOCUMENT_ROOT'] . $ds . 'www')
     && !file_exists($_SERVER['DOCUMENT_ROOT'] . $ds . 'config' . $ds . 've.config')
 ) {
-    $dir = dirname(__DIR__) . $ds . 'src' . $ds . 'Packages' . $ds . 'Updater' . $ds . 'BaseStructure' . $ds;
+    $dir = dirname(__DIR__) . $ds . 'core' . $ds . 'src' . $ds . 'Packages' . $ds . 'Updater' . $ds . 'BaseStructure' . $ds;
 
     fullCopy(
         $dir,

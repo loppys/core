@@ -2,32 +2,27 @@
 
 namespace Vengine;
 
-use Vengine\AbstractConfig;
-use Vengine\System\Components\Page\Render;
-use Vengine\System\Settings\Structure;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Vengine\System\Components\Database\Adapter;
 use Symfony\Component\HttpFoundation\Request;
-use \Loader;
+use Vengine\System\Traits\ContainerTrait;
 
-abstract class AbstractModule extends AbstractConfig
+abstract class AbstractModule extends AbstractConfig implements Injection
 {
+    use ContainerTrait;
+
     /**
-     * @var object
+     * @var AppConfig
      */
     public $interface;
 
     /**
-     * @var object
-     */
-    public $adapter;
-
-    /**
-     * @var object
+     * @var Request
      */
     public $request;
 
     /**
-     * @var array
+     * @var Session
      */
     public $session;
 
@@ -41,19 +36,14 @@ abstract class AbstractModule extends AbstractConfig
      */
     public $version;
 
-    /**
-     * @var string
-     */
-    public $url;
-
-    function __construct()
+    public function __construct()
     {
-        $this->interface = new \stdClass();
+        $this->container = $this->getContainer();
 
-        $this->structure = Loader::getComponent(Structure::class);
+        $this->interface = $this->container->createObject(AppConfig::class);
 
-        $this->adapter = $this->getAdapter();
         $this->request = $this->getRequest();
+        $this->session = $this->getSession();
 
         $this->setInterface();
         $this->setConfigVar();
@@ -69,65 +59,25 @@ abstract class AbstractModule extends AbstractConfig
 
             unset($this->interface->defaults);
         }
-
-        $this->autoload('modules');
     }
 
     public function getAdapter(): Adapter
     {
-        return Loader::getComponent(Adapter::class);
+        return $this->adapter;
     }
 
     public function getRequest(): Request
     {
-        return Request::createFromGlobals();
+        return App::getRequest();
     }
 
-    public function autoload(string $dir): void
+    public function getSession(): Session
     {
-        $dir = $this->interface->structure[$dir];
-
-        if (!is_dir($dir)) {
-            return;
-        }
-
-        $items = scandir($dir);
-
-        foreach ($items as $item) {
-            $package = $dir . $item . '/Package.php';
-
-            if (!file_exists($package)) {
-                continue;
-            }
-
-            $package = require_once($package);
-
-            if (!is_object($package)) {
-                continue;
-            }
-
-            $data = [
-                'name' => $package->name,
-                'group' => $package->group,
-                'handler' => $package->handler,
-                'param' => $package->param,
-                'path' => $package->path,
-                'call' => $package->call,
-                'version' => $package->version,
-                'description' => $package->description,
-            ];
-
-            Loader::add($data['name'], $data['group'] ?: Loader::GROUP_MODULES, $data);
-        }
+        return App::getSession();
     }
 
     public function getInterface(): object
     {
-        if (empty($this->interface)) {
-            $this->interface = new \stdClass();
-            $this->setInterface();
-        }
-
         return $this->interface;
     }
 
@@ -138,7 +88,7 @@ SELECT *
 FROM `cfg`
 SQL;
 
-        $result = $this->adapter->getAll(
+        $result = $this->adapter::getAll(
             $query
         );
 
@@ -151,44 +101,14 @@ SQL;
 
     public function setInterface(): void
     {
-        $config = require _File('config', '/config');
-        $coreConfig = require('config/config.php');
+        $userConfig = require $this->structure->userConfig . 'config.php';
+        $config = require('config/config.php');
 
-        if (empty($config['structure'])) {
-            $config['structure'] = $this->structure->getDefaultFolderStructure();
-        }
-
-        foreach ($config as $k => $v) {
-            foreach ($coreConfig as $ck => $cv) {
-                if (array_key_exists($ck, $config)) {
-                    $config[$ck] += $cv;
-                } else {
-                    $config[$ck] = $coreConfig[$ck];
-                }
-            }
-        }
-
-        $projectDir = $_SERVER['DOCUMENT_ROOT'] . '/';
-
-        $path = [
-            'ROOT:' => $projectDir
-        ];
-
-        foreach ($config['structure'] as $sKey => $sValue) {
-            $name = strtoupper(stristr($sValue, ':', true)) . ':';
-            $tempPath = substr(stristr($sValue, ':'), 1);
-
-            $parent = array_key_exists($name, $path);
-
-            if ($parent) {
-                $replace = [
-                    $name => $path[$name]
-                ];
-
-                $result = strtr($name, $replace) . $tempPath;
-
-                $path[strtoupper($sKey) . ':'] = $result;
-                $config['structure'][$sKey] = $result;
+        foreach ((array)$userConfig as $uk => $uv) {
+            if (array_key_exists($uk, $config)) {
+                $config[$uk] += $uv;
+            } else {
+                $config[$uk] = $uv;
             }
         }
 
@@ -199,14 +119,19 @@ SQL;
                 }
 
                 foreach ($dv['require'] as $rk => $rv) {
-                    $requirePath = $this->getRequirePath($rv, $config);
+                    $requirePath = $this->getRequirePath($rv);
 
                     if ($requirePath === 'run') {
-                        require_once($requirePath);
+                        if (file_exists($requirePath)) {
+                            require_once($requirePath);
+                        }
+
                         continue;
                     }
 
-                    $config['defaults'][$dk][$rk] = require_once($requirePath);
+                    if (file_exists($requirePath)) {
+                        $config['defaults'][$dk][$rk] = require_once($requirePath);
+                    }
                 }
             }
         }
@@ -216,17 +141,19 @@ SQL;
         }
     }
 
-    private function getRequirePath(array $arr, array $config): string
+    private function getRequirePath(array $arr): string
     {
+        $structure = true;
         $path = '';
 
         foreach ($arr as $key => $value) {
-            if (!$key) {
+            if (empty($key)) {
                 $structure = false;
+
                 break;
             }
 
-            $path = $config['structure'][$key] . $value;
+            $path = $this->structure->{$key} . $value;
         }
 
         if ($structure === false) {
@@ -235,22 +162,4 @@ SQL;
 
         return $path;
     }
-
-    /*
-    * Ошибка 404
-    */
-    public function error404(): void
-    {
-        $code = http_response_code();
-        if ($code === 404) {
-            exit(include 'template/error404.tpl.php');
-        }
-    }
-
-    public function _render(): void
-    {
-        Loader::getComponent(Render::class, 'render');
-    }
-
-//    abstract public function prepareRender(): void;
 }

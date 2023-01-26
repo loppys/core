@@ -4,9 +4,25 @@ namespace Vengine\System\Settings;
 
 use Vengine\AbstractConfig;
 
+/**
+ * @property string vendor
+ * @property string container
+ * @property string coreConfig
+ * @property string userConfig
+ * @property string core
+ * @property string api
+ * @property string uApi
+ * @property string userMigrations
+ * @property string coreMigrations
+ */
 class Structure extends AbstractConfig
 {
-    public function setDefaultStructure(): self
+    public function __construct()
+    {
+        $this->setDefaultStructure();
+    }
+
+    protected function setDefaultStructure(): self
     {
         $config = require $_SERVER['DOCUMENT_ROOT'] . '/config/config.php';
         $coreConfig = require $_SERVER['DOCUMENT_ROOT'] . '/vendor/vengine/core/src/config/config.php';
@@ -52,7 +68,7 @@ class Structure extends AbstractConfig
         return $this;
     }
 
-    public function getDefaultFolderStructure(): array
+    private function getDefaultFolderStructure(): array
     {
         return [
             'project' => 'ROOT:',

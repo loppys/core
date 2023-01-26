@@ -3,6 +3,8 @@
 namespace Vengine\System\Components\Database;
 
 use RedBeanPHP\R;
+use Vengine\libs\Helpers\Crypt;
+use Vengine\Packages\Updater\Components\Configurator;
 
 class Adapter extends R
 {
@@ -11,19 +13,29 @@ class Adapter extends R
      */
     private $param;
 
-    public function __construct()
+    public function __construct(Configurator $configurator)
     {
-        $this->param = require_once($_SERVER['DOCUMENT_ROOT'] . '/config/database.php');
+        $config = $configurator->getConfig();
+        $database = $config['database'];
+
+        if ($config['app']['crypt'] === true) {
+            $this->param = array_map(static function ($item) {
+                return Crypt::dsDecrypt($item);
+            }, $database);
+        } else {
+            $this->param = $database;
+        }
 
         if (!empty($this->param)) {
-            $type = $this->param['type'];
-            $host = $this->param['host'];
-            $dbname = $this->param['dbname'];
-            $login = $this->param['login'];
-            $password = $this->param['password'];
+            $type = $this->param['dbType'];
+            $host = $this->param['dbHost'];
+            $dbName = $this->param['dbName'];
+            $login = $this->param['dbLogin'];
+            $password = $this->param['dbPassword'];
 
             unset($this->param);
-            $this->param['connect'] = $type . ':' . 'host=' . $host . ';' . 'dbname=' . $dbname;
+
+            $this->param['connect'] = $type . ':' . 'host=' . $host . ';' . 'dbname=' . $dbName;
             $this->param['login'] = $login;
             $this->param['password'] = $password;
         }
@@ -33,15 +45,21 @@ class Adapter extends R
     {
         $param = $this->param;
 
-        if (!$this->testConnection()) {
-            parent::setup($param['connect'], $param['login'], $param['password']);
+        if (!self::testConnection()) {
+            self::setup($param['connect'], $param['login'], $param['password']);
         }
     }
 
+    /**
+     * @param null $table
+     * @param array $fields
+     *
+     * @throws \RedBeanPHP\RedException\SQL
+     */
     public function save($table = null, array $fields = []): void
     {
         if ($table && $fields) {
-            $db = parent::dispense($table);
+            $db = self::dispense($table);
 
             foreach ($fields as $keyField => $fieldValue) {
                 if ($fieldValue) {
@@ -50,14 +68,14 @@ class Adapter extends R
                 continue;
             }
 
-            parent::store($db);
+            self::store($db);
         }
     }
 
     public function condition($condition)
     {
         if ($condition) {
-            parent::exec($condition);
+            self::exec($condition);
         }
     }
 }

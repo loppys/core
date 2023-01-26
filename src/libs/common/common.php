@@ -2,17 +2,14 @@
 
 use Vengine\libs\Dumper;
 
-/**
+/*
  * Все функции, которые нужны и в обычной разметке находятся тут!
  *
  * Актульно с 0.4 версии
  *
  */
 
-/**
- * var_dump
- */
-function d(...$dump)
+function d(...$dump): void
 {
     $debug = debug_backtrace();
 
@@ -37,9 +34,27 @@ function d(...$dump)
 }
 
 /**
- * Переводы))
+ * @param string $login
+ * @return string
+ *
+ * @throws Exception
  */
-function tr($text = '', $translate = '')
+function getGUID(string $login = 'empty'): string
 {
-    return print $text;
+    if (function_exists('com_create_guid') === true) {
+        return trim(com_create_guid(), '{}');
+    }
+
+    return sprintf(
+        '%04X%04X-%04X-%04X-%04X-%04X%04X%04X:%06X',
+        random_int(0, 65535),
+        random_int(0, 65535),
+        random_int(0, 65535),
+        random_int(16384, 20479),
+        random_int(32768, 49151),
+        random_int(0, 65535),
+        random_int(0, 65535),
+        random_int(0, 34234),
+        strlen(md5($login)) + random_int(0, 34234),
+    );
 }

@@ -2,75 +2,67 @@
 
 namespace Vengine;
 
-use Vengine\Base;
-use Vengine\Controllers\Page\LocalPage;
-use Vengine\System\Components\Database\Adapter;
-use Vengine\Modules\Api\Route;
-use Vengine\Modules\Settings\Process as Settings;
-use Loader;
+use Vengine\Modules\Migrations\Process;
+use Vengine\System\Settings\Storages\PermissionType;
 
-class Startup
+/**
+ * @property bool closed
+ */
+final class Startup extends AbstractModule
 {
-    private $localPage;
-    private $interface;
-    private $adapter;
+    public $module = 'Startup';
 
-    public function __construct(Adapter $adapter, Settings $interface)
+    public function run(): void
     {
-        $this->logWriter();
-
-        $this->adapter = $adapter;
-        $this->interface = $interface;
-
-        if ($_GET['__DEBUG'] === 'INFO') {
-            $whoops = new \Whoops\Run;
-            $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
-            $whoops->register();
+        if ($this->closed && $this->user->getRole() !== PermissionType::DEVELOPER) {
+            die('На сайте ведутся технические работы, попробуйте вернуться позже!');
         }
-    }
 
-    public function init(): void
-    {
-        $uri = explode('/', trim($this->interface->uri['path'], '/'));
-
-        if (array_shift($uri) === 'api') {
-            Route::api($uri, $this->interface->structure);
-        }
+        /** @TODO полностью переделать */
+        App::app()->createObject(Process::class);
 
         $this->initModules();
 
-        Loader::callModule('migrations');
+        $this->collectRoutesFromDatabase();
 
-        Loader::getComponent(Base::class)->run($this->localPage);
+        $this->router->handle();
     }
 
-    public function initModules(): void
+    protected function initModules(): bool
     {
         $query = <<<SQL
 SELECT *
 FROM `modules`
 SQL;
 
-        $result = $this->adapter->getAll(
+        $result = $this->adapter::getAll(
             $query
         );
 
-        foreach ($result as $key => $value) {
-            $param = explode(', ', $value['module_param']);
-            Loader::addModule(
-                $value['module_name'],
-                $value['module_type'],
-                $value['handler'],
-                $param,
-      );
-        }
+        return $this->container->packageCollect($result);
     }
 
-    public function logWriter(): void
+    protected function collectRoutesFromDatabase(): void
     {
-        error_reporting(E_ALL & ~E_NOTICE);
-        ini_set('display_errors', 'Off');
-        ini_set('log_errors', 'On');
-        ini_set('error_log', $_SERVER['DOCUMENT_ROOT'] . '/logs/errors.log');
+        $query = <<<SQL
+SELECT *
+FROM `routes`
+SQL;
+
+        $routes = $this->adapter::getAll($query);
+
+        $routes = array_map(static function ($item) {
+            return [
+                'route' => $item['route'],
+                'method' => $item['request_method'],
+                'handler' => [
+                    'controller' => $item['controller'],
+                    'method' => $item['method'],
+                    'access' => (int)$item['access']
+                ]
+            ];
+        }, $routes);
+
+        $this->router->addRouteList($routes);
     }
 }

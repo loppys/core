@@ -2,7 +2,7 @@
 
 namespace Vengine\System;
 
-use Vengine\Packages\Settings\Storages\ConstStorage;
+use Vengine\Packages\Settings\Storage\ConstStorage;
 
 class Cache
 {

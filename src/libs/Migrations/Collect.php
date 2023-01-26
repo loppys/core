@@ -3,18 +3,22 @@
 namespace Vengine\libs\Migrations;
 
 use Vengine\System\Components\Database\Adapter;
+use Vengine\System\Settings\Structure;
 
+/**
+ * @deprecated
+ */
 class Collect
 {
     public array $data;
 
     public $path;
 
-    function __construct($path)
+    public function __construct(Structure $path)
     {
         $this->path = $path;
-        $core = $this->path->core . 'Migrations/';
-        $user = $this->path->migrations;
+        $core = $this->path->coreMigrations;
+        $user = $this->path->userMigrations;
 
         $dir = scandir($core);
         unset($dir[0], $dir[1]);
@@ -24,7 +28,7 @@ class Collect
         unset($dir[0], $dir[1]);
         $this->set($dir, $user);
 
-        $this->unsetСompleted();
+        $this->unsetCompleted();
     }
 
     public function set(array $dir, $path): void
@@ -49,12 +53,12 @@ class Collect
         }
     }
 
-    public function unsetСompleted()
+    public function unsetCompleted(): void
     {
         $load = Adapter::getAll('SELECT * FROM `migration` WHERE `completed` = ?', ['Y']);
         foreach ($load as $find) {
             foreach ($this->data as $key => $data) {
-                if ($data['file'] == $find['file']) {
+                if ($data['file'] === $find['file']) {
                     unset($this->data[$key]);
                 }
             }

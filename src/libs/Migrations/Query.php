@@ -3,22 +3,24 @@
 namespace Vengine\libs\Migrations;
 
 use Vengine\System\Components\Database\Adapter;
-use Vengine\libs\Migrations\Collect;
 
-class Query extends Adapter
+/**
+ * @deprecated
+ */
+class Query
 {
-    public $migration;
-
-    function __construct(Collect $collect)
+    public function __construct(Collect $collect)
     {
-        $this->migration = $collect;
-
-        $this->process();
+        $this->process($collect);
     }
 
-    public function process(): void
+    public function process(Collect $collect): void
     {
-        $data = $this->migration->data;
+        $data = $collect->data;
+
+        if (empty($data)) {
+            return;
+        }
 
         foreach ($data as $key => $value) {
             $type = substr(stristr($value['file'], '.'), 1);
@@ -44,15 +46,13 @@ class Query extends Adapter
     }
 
     private function migrationLog(
-        string $file,
-        string $fullpath,
-        string $version,
-        string $completed,
-        string $query,
-        string $error = ''
-    ): void
-    {
-
+        ?string $file = '',
+        ?string $fullpath = '',
+        ?string $version = '',
+        ?string $completed = '',
+        ?string $query = '',
+        ?string $error = ''
+    ): void {
         $db = Adapter::dispense('migration');
         $db->file = $file;
         $db->version = $version;

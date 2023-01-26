@@ -2,7 +2,6 @@
 
 namespace Vengine;
 
-use Loader\System\Builder;
 use Loader\System\Container;
 use Loader\System\Interfaces\ContainerInjection;
 use Vengine\Packages\Updater\Components\Configurator;
@@ -17,7 +16,6 @@ use Vengine\System\Settings\Structure;
  * @property Startup startup
  * @property Structure structure
  * @property Container container
- * @property Builder builder
  * @property Render render
  * @property Router router
  * @property Configurator configurator

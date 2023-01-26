@@ -12,7 +12,7 @@ abstract class AbstractModule extends AbstractConfig implements Injection
     use ContainerTrait;
 
     /**
-     * @var object
+     * @var AppConfig
      */
     public $interface;
 

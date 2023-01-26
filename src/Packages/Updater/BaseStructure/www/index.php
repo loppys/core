@@ -1,5 +1,7 @@
 <?php
 
+use Vengine\App;
+
 require_once('../vendor/autoload.php');
 
-\Vengine\App::app()->run();
+App::app()->run();

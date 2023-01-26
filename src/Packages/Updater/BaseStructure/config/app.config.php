@@ -1,7 +1,7 @@
 <?php
 
 return [
-	[
-		'name' => 'local-app'
-	]
+    [
+        'name' => 'local-app'
+    ]
 ];

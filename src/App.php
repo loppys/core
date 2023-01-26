@@ -15,6 +15,7 @@ use Vengine\System\Components\Page\Render;
 use Vengine\System\Controllers\Router;
 use Vengine\System\Settings\Storages\AccessLevelStorage;
 use Vengine\System\Settings\Storages\MethodType;
+use Vengine\System\Settings\Storages\PermissionType;
 use Vengine\System\Settings\Structure;
 use Vengine\System\Traits\ContainerTrait;
 use Whoops\Handler\PrettyPageHandler;
@@ -215,7 +216,14 @@ final class App implements Injection
         ini_set('log_errors', 'On');
         ini_set('error_log', $_SERVER['DOCUMENT_ROOT'] . '/logs/errors.log');
 
-        if (class_exists(Run::class) && $this->debugMode) {
+        $developer = false;
+
+        $user = UserFactory::getUser();
+        if ($user !== null) {
+            $developer = $user->getRole() === PermissionType::DEVELOPER;
+        }
+
+        if (class_exists(Run::class) && ($this->debugMode || $developer)) {
             $whoops = new Run();
             $whoops->pushHandler(new PrettyPageHandler);
             $whoops->register();

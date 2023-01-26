@@ -23,7 +23,7 @@ final class Startup extends AbstractModule
 
         $this->initModules();
 
-        $this->collectModuleRoutes();
+        $this->collectRoutesFromDatabase();
 
         $this->router->handle();
     }
@@ -42,7 +42,7 @@ SQL;
         return $this->container->packageCollect($result);
     }
 
-    protected function collectModuleRoutes(): void
+    protected function collectRoutesFromDatabase(): void
     {
         $query = <<<SQL
 SELECT *

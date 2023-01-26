@@ -15,12 +15,15 @@ class Adapter extends R
 
     public function __construct(Configurator $configurator)
     {
-        if ($configurator->getConfig()['app']['crypt'] === true) {
+        $config = $configurator->getConfig();
+        $database = $config['database'];
+
+        if ($config['app']['crypt'] === true) {
             $this->param = array_map(static function ($item) {
                 return Crypt::dsDecrypt($item);
-            }, $configurator->getConfig()['database']);
+            }, $database);
         } else {
-            $this->param = $configurator->getConfig()['database'];
+            $this->param = $database;
         }
 
         if (!empty($this->param)) {

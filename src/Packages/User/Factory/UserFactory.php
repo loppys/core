@@ -31,4 +31,22 @@ class UserFactory
 
         $container->setShared('user', $user);
     }
+
+    public static function getUser(): ?User
+    {
+        $user = null;
+
+        $session = App::getSession();
+
+        if ($session->isStarted() && $session->has('user')) {
+            $userEntity = $session->get('user');
+
+            if ($userEntity instanceof User)
+            {
+                $user = $userEntity;
+            }
+        }
+
+        return $user;
+    }
 }

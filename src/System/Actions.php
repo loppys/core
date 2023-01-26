@@ -126,6 +126,12 @@ class Actions
                 $data['post'] = $post;
             }
 
+            $get = $request->query->all();
+
+            if (!empty($get)) {
+                $data['get'] = $get;
+            }
+
             $this->container->getBuilder()->invoke(
                 $this->container->createObject($action['controller']),
                 $fn,

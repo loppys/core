@@ -43,7 +43,15 @@ class Configurator
 
     public function replaceConfig(array $data): Configurator
     {
-        $result = serialize($data);
+        $config = $this->getConfig();
+
+        foreach ($data as $key => $value) {
+            if (!empty($config[$key])) {
+                $config[$key] = $value;
+            }
+        }
+
+        $result = serialize($config);
 
         if (file_exists($this->config['path'])) {
             file_put_contents($this->config['path'], $result);

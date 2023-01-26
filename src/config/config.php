@@ -12,7 +12,7 @@ return [
     ],
     'defaults' => [
         'Startup' => [
-            'closed' => true,
+            'closed' => false,
         ],
     ]
 ];

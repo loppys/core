@@ -91,30 +91,6 @@ class UpdaterPageController extends AbstractPageController
             }
         }
 
-        $root = $_SERVER['DOCUMENT_ROOT'];
-
-        $packageList = require(
-            $root . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'composer' . DIRECTORY_SEPARATOR . 'installed.php'
-        );
-
-        $versionList = $packageList['versions'];
-
-        $coreInfo = $versionList['vengine/core'];
-        $renderInfo = $versionList['vengine/render'];
-        $loaderInfo = $versionList['vengine/loader'];
-
-        $this->render->setVariableByName(
-            'core', 'core ' . $coreInfo['pretty_version'] . ' - ' . $coreInfo['reference']
-        );
-
-        $this->render->setVariableByName(
-            'render', 'render ' . $renderInfo['pretty_version'] . ' - ' . $renderInfo['reference']
-        );
-
-        $this->render->setVariableByName(
-            'loader', 'loader ' . $loaderInfo['pretty_version'] . ' - ' . $loaderInfo['reference']
-        );
-
         $this->render->setTitle('Базовая установка')
             ->setTemplate('system/' . md5('install') . '.php');
 

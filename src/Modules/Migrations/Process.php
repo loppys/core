@@ -4,7 +4,6 @@ namespace Vengine\Modules\Migrations;
 
 use Vengine\AbstractModule;
 use Vengine\libs\Migrations\Query;
-use Vengine\libs\Migrations\Collect;
 
 /**
  * @deprecated
@@ -18,10 +17,6 @@ class Process extends AbstractModule
     {
         parent::__construct();
 
-        $collect = new Collect($this->structure);
-
-        if (!empty($collect->data)) {
-            new Query($collect);
-        }
+        $this->container->createObject(Query::class);
     }
 }

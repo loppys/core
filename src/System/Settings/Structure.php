@@ -12,6 +12,8 @@ use Vengine\AbstractConfig;
  * @property string core
  * @property string api
  * @property string uApi
+ * @property string userMigrations
+ * @property string coreMigrations
  */
 class Structure extends AbstractConfig
 {

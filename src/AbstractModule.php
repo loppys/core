@@ -76,7 +76,7 @@ abstract class AbstractModule extends AbstractConfig implements Injection
         return App::getSession();
     }
 
-    public function getInterface(): object
+    public function getInterface(): AppConfig
     {
         return $this->interface;
     }

@@ -14,27 +14,27 @@ abstract class AbstractModule extends AbstractConfig implements Injection
     /**
      * @var AppConfig
      */
-    public $interface;
+    protected $interface;
 
     /**
      * @var Request
      */
-    public $request;
+    protected $request;
 
     /**
      * @var Session
      */
-    public $session;
+    protected $session;
 
     /**
      * @var string
      */
-    public $module;
+    protected $module;
 
     /**
      * @var string
      */
-    public $version;
+    protected $version;
 
     public function __construct()
     {

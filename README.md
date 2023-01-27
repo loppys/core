@@ -7,4 +7,4 @@
 
 `composer require vengine/core`
 
-когда нибудь появится
+https://doc.vengine.ru/

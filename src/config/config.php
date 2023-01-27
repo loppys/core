@@ -3,20 +3,18 @@
 return [
     'structure' => [
         'vendor' => 'PROJECT:vendor/',
-        'loader' => 'PROJECT:vendor/vengine/loader/',
+        'userMigrations' => 'PROJECT:Migrations/',
+        'container' => 'PROJECT:vendor/vengine/container/',
         'core' => 'PROJECT:vendor/vengine/core/',
-        'modules' => 'CORE:src/Modules/',
+        'coreMigrations' => 'CORE:Migrations/',
         'coreConfig' => 'CORE:src/config/',
+        'userConfig' => 'PROJECT:config/',
         'api' => 'CORE:src/_api/',
         'uApi' => 'WWW:_api/'
     ],
     'defaults' => [
-        'Core' => [
+        'Startup' => [
             'closed' => false,
-            'require' => [
-                'project' => ['coreConfig' => 'project.config.php'],
-                'pages' => ['coreConfig' => 'routes.php']
-            ]
         ],
     ]
 ];

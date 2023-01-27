@@ -1,0 +1,6 @@
+RewriteEngine on
+  RewriteRule ^img/(.*) www/images/$1 [L]
+  RewriteRule ^tpl/(.*) www/template/$1 [L]
+  RewriteRule ^upload/(.*) www/upload/$1 [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteRule .* www/index.php [L]

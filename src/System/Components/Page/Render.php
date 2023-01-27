@@ -2,38 +2,49 @@
 
 namespace Vengine\System\Components\Page;
 
+use Loader\System\Container;
 use Render\Engine\Data\Manager;
+use Render\Engine\DataStorageInterface;
+use Render\Engine\DefaultManager;
 use Render\Engine\Factory\RenderFactory;
 use Render\Engine\Storage\DataStorage;
-use Loader;
 
 class Render
 {
     /**
      * @var Manager
      */
-    private $manager;
+    protected $manager;
 
     /**
      * @var DataStorage
      */
-    private $dataStorage;
+    protected $dataStorage;
+
+    /**
+     * @var RenderFactory
+     */
+    protected $renderFactory;
 
     /**
      * @var Render
      */
     private static $instance;
 
-    public function __construct()
-    {
-        $this->manager = Loader::getComponent(Manager::class);
-        $this->dataStorage = Loader::getComponent(DataStorage::class);
+    public function __construct(
+        Manager $manager,
+        DataStorage $dataStorage,
+        RenderFactory $renderFactory
+    ) {
+        $this->manager = $manager;
+        $this->dataStorage = $dataStorage;
+        $this->renderFactory = $renderFactory;
     }
 
     public static function getInstance(): self
     {
         if (empty(static::$instance)) {
-            static::$instance = new static();
+            static::$instance = Container::getInstance()->createObject(static::class);
         }
 
         return static::$instance;
@@ -51,7 +62,17 @@ class Render
 
     public function getRenderFactory(): RenderFactory
     {
-        return Loader::getComponent(RenderFactory::class);
+        return $this->renderFactory;
+    }
+
+    public function getTemplateFolder(): string
+    {
+        return $this->manager->getTemplateFolder();
+    }
+
+    public function setTemplateFolder(string $path): DefaultManager
+    {
+        return $this->manager->setTemplateFolder($path);
     }
 
     public function getHead(): string
@@ -59,9 +80,9 @@ class Render
         return $this->manager->getHead();
     }
 
-    public function addMetaData(string $name, string $value): Manager
+    public function addMetaData(string $name, string $value, string $content): Manager
     {
-        return $this->manager->addMetaData($name, $value);
+        return $this->manager->addMetaData($name, $value, $content);
     }
 
     public function setTitle(string $title): Manager
@@ -134,7 +155,7 @@ class Render
         return $this->dataStorage->getVariableList();
     }
 
-    public function deleteVariableByName(string $name): DataStorage
+    public function deleteVariableByName(string $name): DataStorageInterface
     {
         return $this->dataStorage->delete($name);
     }

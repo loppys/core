@@ -9,10 +9,7 @@
         "files": [
             "src/libs/common/common.php"
         ]
-    },
-    "scripts": {
-        "post-package-install": "php -r install.php"
-    },
+    }
     "license": "MIT",
     "require": {
         "php": ">=7.0",

@@ -9,7 +9,7 @@
         "files": [
             "src/libs/common/common.php"
         ]
-    }
+    },
     "license": "MIT",
     "require": {
         "php": ">=7.0",

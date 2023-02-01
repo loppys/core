@@ -7,9 +7,11 @@
             "Vengine\\": "src/"
         },
         "files": [
-            "src/libs/common/common.php",
-            "install.php"
+            "src/libs/common/common.php"
         ]
+    },
+    "scripts": {
+        "v-install": "php install.php"
     },
     "license": "MIT",
     "require": {

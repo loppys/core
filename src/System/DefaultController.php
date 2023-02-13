@@ -31,10 +31,12 @@ abstract class DefaultController
      */
     protected $actions;
 
-    public function __construct(Router $router, Actions $actions)
+    public function __construct()
     {
-        $this->router = $router;
-        $this->actions = $actions;
+        $app = App::app();
+
+        $this->router = $app->router;
+        $this->actions = $app->createObject(Actions::class);
 
         $this->request = App::getRequest();
         $this->session = $this->request->getSession();

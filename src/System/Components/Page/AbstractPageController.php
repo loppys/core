@@ -46,6 +46,11 @@ abstract class AbstractPageController extends DefaultController
 
     public function indexAction(): void
     {
+        $this->render();
+    }
+
+    public function render(): void
+    {
         $this->render->render();
     }
 

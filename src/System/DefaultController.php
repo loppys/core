@@ -12,6 +12,11 @@ use Vengine\App;
 abstract class DefaultController
 {
     /**
+     * @var App
+     */
+    protected $app;
+
+    /**
      * @var Request
      */
     protected $request;
@@ -33,7 +38,7 @@ abstract class DefaultController
 
     public function __construct()
     {
-        $app = App::app();
+        $this->app = $app = App::app();
 
         $this->router = $app->router;
         $this->actions = $app->createObject(Actions::class);

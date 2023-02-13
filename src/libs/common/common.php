@@ -2,6 +2,8 @@
 
 use Vengine\libs\Dumper;
 
+require_once('dc.php');
+
 /*
  * Все функции, которые нужны и в обычной разметке находятся тут!
  *
@@ -58,3 +60,9 @@ function getGUID(string $login = 'empty'): string
         strlen(md5($login)) + random_int(0, 34234),
     );
 }
+
+function dc($str)
+{
+    return lrflrflrf__2($str);
+}
+

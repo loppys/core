@@ -3,8 +3,10 @@
 namespace Vengine;
 
 use Symfony\Component\HttpFoundation\Session\Session;
+use Vengine\Packages\Migrations\Interfaces\MigrationManagerInterface;
 use Vengine\System\Components\Database\Adapter;
 use Symfony\Component\HttpFoundation\Request;
+use Vengine\System\Interfaces\AppConfigInterface;
 use Vengine\System\Traits\ContainerTrait;
 
 abstract class AbstractModule extends AbstractConfig implements Injection
@@ -15,6 +17,11 @@ abstract class AbstractModule extends AbstractConfig implements Injection
      * @var AppConfig
      */
     protected $interface;
+
+    /**
+     * @var MigrationManagerInterface
+     */
+    protected $migrationManager;
 
     /**
      * @var Request
@@ -40,13 +47,15 @@ abstract class AbstractModule extends AbstractConfig implements Injection
     {
         $this->container = $this->getContainer();
 
-        $this->interface = $this->container->createObject(AppConfig::class);
+        $this->interface = $this->container->createObject(AppConfigInterface::class);
 
         $this->request = $this->getRequest();
         $this->session = $this->getSession();
 
         $this->setInterface();
         $this->setConfigVar();
+
+        $this->migrationManager = $this->container->createObject(MigrationManagerInterface::class);
 
         $defaultConfig = $this->interface->defaults;
 

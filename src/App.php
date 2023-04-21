@@ -63,6 +63,30 @@ final class App implements Injection
             $this->createObject(Structure::class)
         );
 
+        $corePackage = $this->structure->coreConfig . ConstStorage::APP_CONFIG_NAME;
+        $userPackage = $this->structure->userConfig . ConstStorage::APP_CONFIG_NAME;
+
+        if (file_exists($corePackage)) {
+            $corePackage = require($corePackage);
+
+
+            if (is_array($corePackage)) {
+                $this->container->packageCollect(
+                    $corePackage
+                );
+            }
+        }
+
+        if (file_exists($userPackage)) {
+            $userPackage = require($userPackage);
+
+            if (is_array($corePackage)) {
+                $this->container->packageCollect(
+                    $userPackage
+                );
+            }
+        }
+
         $this->container->setShared(
             'configurator',
             $this->createObject(Configurator::class)
@@ -118,31 +142,16 @@ final class App implements Injection
 
         $this->adapter->connect();
 
-        $this->container->setShared(
-            'startup',
-            $this->createObject(Startup::class)
-        );
-
-        $corePackage = $this->structure->coreConfig . ConstStorage::APP_CONFIG_NAME;
-        $userPackage = $this->structure->userConfig . ConstStorage::APP_CONFIG_NAME;
-
-        if (file_exists($corePackage)) {
-            $this->container->packageCollect(
-                require($corePackage)
-            );
-        }
-
-        if (file_exists($userPackage)) {
-            $this->container->packageCollect(
-                require($userPackage)
-            );
-        }
-
         static::$instance = $this;
     }
 
     public function run(): void
     {
+        $this->container->setShared(
+            'startup',
+            $this->createObject(Startup::class)
+        );
+
         $request = static::getRequest();
 
         $subj = $request->get('subj');

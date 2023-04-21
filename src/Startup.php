@@ -18,6 +18,8 @@ final class Startup extends AbstractModule
             die('На сайте ведутся технические работы, попробуйте вернуться позже!');
         }
 
+        $this->migrationManager->run();
+
         /** @TODO полностью переделать */
         App::app()->createObject(Process::class);
 

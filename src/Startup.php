@@ -2,7 +2,6 @@
 
 namespace Vengine;
 
-use Vengine\Modules\Migrations\Process;
 use Vengine\System\Settings\Storages\PermissionType;
 
 /**
@@ -19,9 +18,6 @@ final class Startup extends AbstractModule
         }
 
         $this->migrationManager->run();
-
-        /** @TODO полностью переделать */
-        App::app()->createObject(Process::class);
 
         $this->initModules();
 

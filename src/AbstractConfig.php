@@ -2,7 +2,9 @@
 
 namespace Vengine;
 
-abstract class AbstractConfig
+use Vengine\System\Interfaces\AbstractPropertyInterface;
+
+class AbstractConfig implements AbstractPropertyInterface
 {
     private $property = [];
 
@@ -24,5 +26,10 @@ abstract class AbstractConfig
     public function __unset(string $name)
     {
         unset($this->property[$name]);
+    }
+
+    public function getPropertyList(): array
+    {
+        return $this->property;
     }
 }

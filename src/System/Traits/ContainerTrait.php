@@ -3,6 +3,7 @@
 namespace Vengine\System\Traits;
 
 use Vengine\AppConfig;
+use Vengine\System\Interfaces\AppConfigInterface;
 
 trait ContainerTrait
 {
@@ -13,7 +14,7 @@ trait ContainerTrait
     {
         if (property_exists(AppConfig::class, $name)) {
             /** @var AppConfig $config */
-            $config = $this->getContainer()->createObject(AppConfig::class);
+            $config = $this->getContainer()->createObject(AppConfigInterface::class);
 
             return $config->{$name};
         }

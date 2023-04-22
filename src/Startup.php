@@ -2,7 +2,6 @@
 
 namespace Vengine;
 
-use Vengine\Modules\Migrations\Process;
 use Vengine\System\Settings\Storages\PermissionType;
 
 /**
@@ -18,8 +17,7 @@ final class Startup extends AbstractModule
             die('На сайте ведутся технические работы, попробуйте вернуться позже!');
         }
 
-        /** @TODO полностью переделать */
-        App::app()->createObject(Process::class);
+        $this->migrationManager->run();
 
         $this->initModules();
 

@@ -30,12 +30,14 @@ if (!function_exists('fullCopy')) {
 }
 
 if (
-    !is_dir($_SERVER['DOCUMENT_ROOT'] . $ds . 'www')
+!is_dir('./www')
 ) {
     $dir = dirname(__DIR__) . $ds . 'core' . $ds . 'src' . $ds . 'Packages' . $ds . 'Updater' . $ds . 'BaseStructure' . $ds;
 
     fullCopy(
         $dir,
-        $_SERVER['DOCUMENT_ROOT'] . $ds
+        './'
     );
+
+    print 'install!';
 }

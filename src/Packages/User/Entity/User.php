@@ -26,6 +26,23 @@ class User
      */
     protected $token = '';
 
+    /**
+     * @var string
+     */
+    protected $uuid = '';
+
+    public function getUuid(): string
+    {
+        return $this->uuid;
+    }
+
+    public function setUuid(string $uuid): User
+    {
+        $this->uuid = $uuid;
+
+        return $this;
+    }
+
     public function getId(): int
     {
         return $this->id;

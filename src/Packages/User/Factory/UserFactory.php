@@ -13,21 +13,27 @@ class UserFactory
         $container = Container::getInstance();
         $session = App::getSession();
 
-        /** @var User $user */
-        $user = $container->createObject(User::class);
-
         if ($session->isStarted() && $session->has('user')) {
             $userInfo = $session->get('user');
+
+            /** @var User $user */
+            $user = $container->createObject(User::class);
 
             if ($userInfo instanceof User) {
                 $user->setRole($userInfo->getRole())
                     ->setLogin($userInfo->getLogin())
                     ->setToken($userInfo->getToken())
+                    ->setUuid($userInfo->getUuid())
                     ->setId($userInfo->getId());
             }
-        }
 
-        $session->set('user', $user);
+            $session->set('user', $user);
+        } else {
+            /** @var User $user */
+            $user = $container->createObject(User::class);
+
+            $session->set('user', $user);
+        }
 
         $container->setShared('user', $user);
     }
@@ -48,5 +54,10 @@ class UserFactory
         }
 
         return $user;
+    }
+
+    public static function saveUser(User $user): void
+    {
+        App::getSession()->set('user', $user);
     }
 }

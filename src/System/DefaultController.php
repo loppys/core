@@ -12,6 +12,11 @@ use Vengine\App;
 abstract class DefaultController
 {
     /**
+     * @var App
+     */
+    protected $app;
+
+    /**
      * @var Request
      */
     protected $request;
@@ -31,10 +36,12 @@ abstract class DefaultController
      */
     protected $actions;
 
-    public function __construct(Router $router, Actions $actions)
+    public function __construct()
     {
-        $this->router = $router;
-        $this->actions = $actions;
+        $this->app = $app = App::app();
+
+        $this->router = $app->router;
+        $this->actions = $app->createObject(Actions::class);
 
         $this->request = App::getRequest();
         $this->session = $this->request->getSession();

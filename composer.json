@@ -32,7 +32,8 @@
         "nikic/fast-route": "^1.3",
         "filp/whoops": "^2.14",
         "vengine/render": "*",
-        "vengine/container": "*"
+        "vengine/container": "*",
+        "ext-json": "*"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.5"

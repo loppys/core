@@ -1,6 +1,7 @@
 <?php
 
 use Vengine\libs\Dumper;
+use Vengine\System\Settings\Structure;
 
 require_once('dc.php');
 
@@ -61,8 +62,48 @@ function getGUID(string $login = 'empty'): string
     );
 }
 
-function dc($str)
+/**
+ * @param string $path
+ *
+ * @return string
+ */
+function __magicPath(string $path): string
 {
-    return lrflrflrf__2($str);
+    if (preg_match('/^[a-z]:/i', $path)) {
+        return $path;
+    }
+
+    if (strpos($path, ':') !== false) {
+        [$prefix, $pathRelative] = explode(':', $path, 2);
+
+        $pathList = getMagicPathList();
+
+        if (isset($pathList[$prefix])) {
+            return $pathList[$prefix] . $pathRelative;
+        }
+    }
+
+    return $_SERVER['base_path'] . $path;
 }
 
+function getMagicPathList(): array
+{
+    /** @var Structure $structure */
+    static $structure;
+
+    // Сделано на случай, когда функционал будет использоваться без инициализации container
+    if ($structure === null) {
+        $structure = new Structure();
+    }
+
+    return [
+        'ROOT' => $structure->project,
+        'CACHE' => "{$structure->project}_cache/",
+        'USER_MIGRATIONS' => $structure->userMigrations,
+        'CORE_MIGRATIONS' => $structure->coreMigrations,
+        'CORE_CONFIG' => $structure->coreConfig,
+        'USER_CONFIG' => $structure->userConfig,
+        'CORE' => $structure->core,
+        'LOGS' => $structure->logs,
+    ];
+}

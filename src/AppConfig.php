@@ -2,9 +2,14 @@
 
 namespace Vengine;
 
-class AppConfig extends AbstractConfig
+use Vengine\System\Interfaces\AppConfigInterface;
+
+class AppConfig extends AbstractConfig implements AppConfigInterface
 {
     public $closed = false;
 
-    public $engineMeta;
+    public function getAllProperty(): array
+    {
+        return get_object_vars($this) + $this->getPropertyList();
+    }
 }

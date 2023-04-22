@@ -1,0 +1,74 @@
+<?php
+
+namespace Vengine\Packages\Migrations\DTO;
+
+class MigrationResult
+{
+    /**
+     * @var string
+     */
+    protected $file = '';
+
+    /**
+     * @var string
+     */
+    protected $error = '';
+
+    /**
+     * @var string
+     */
+    protected $version = '';
+
+    /**
+     * @var string
+     */
+    protected $description = '';
+
+    public function getFile(): string
+    {
+        return $this->file;
+    }
+
+    public function setFile(string $file): MigrationResult
+    {
+        $this->file = $file;
+
+        return $this;
+    }
+
+    public function getError(): string
+    {
+        return $this->error;
+    }
+
+    public function setError(string $error): MigrationResult
+    {
+        $this->error = $error;
+
+        return $this;
+    }
+
+    public function getVersion(): string
+    {
+        return $this->version;
+    }
+
+    public function setVersion(string $version): MigrationResult
+    {
+        $this->version = $version;
+
+        return $this;
+    }
+
+    public function getDescription(): string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(string $description): MigrationResult
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+}

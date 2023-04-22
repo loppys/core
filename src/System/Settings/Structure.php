@@ -6,9 +6,11 @@ use Vengine\AbstractConfig;
 
 /**
  * @property string vendor
+ * @property string project
  * @property string container
  * @property string coreConfig
  * @property string userConfig
+ * @property string logs
  * @property string core
  * @property string api
  * @property string uApi

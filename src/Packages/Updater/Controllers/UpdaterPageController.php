@@ -2,6 +2,7 @@
 
 namespace Vengine\Packages\Updater\Controllers;
 
+use Vengine\App;
 use Vengine\libs\Helpers\Crypt;
 use Vengine\Packages\Updater\Components\Configurator;
 use Vengine\System\Actions;

@@ -53,14 +53,6 @@ class Render
 
     public function render(): void
     {
-        if (App::app()->{dc('(k4mgn(ZW5naW5:8jgKlTW&85kmnV0YQ==J5k)')} !== false) {
-            $this->{dc('YWRkTWV0&85kmnYURhdGE:8jgK=')}(
-                dc('bmFtZQ&85kmn=:8jgK='),
-                dc('a&85kmn2V5d29y:8jgKZH8H4mfjM='),
-                dc('dkVuZ(k4mgn(2luZSBwaHAsIJ5k)HZlbmdpbmUsIHBocCB3ZWIgZW5naWJ5k)5lLCB3ZWIgZW5&85kmnnaW5lLCByZW5k:8jgKZXIgcGFnZQ==')
-            );
-        }
-
         $this->getRenderFactory()->render();
     }
 

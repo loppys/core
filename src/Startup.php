@@ -1,7 +1,7 @@
 <?php
 
 namespace Vengine;
-// Тут был Олег
+
 use Vengine\System\Settings\Storages\PermissionType;
 
 /**

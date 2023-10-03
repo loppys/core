@@ -177,10 +177,10 @@ final class App implements Injection
         }
     }
 
-    public static function app(bool $debug = false): self
+    public static function app(): self
     {
         if (empty(static::$instance)) {
-            static::$instance = new static($debug);
+            throw new AppException('App not init');
         }
 
         return static::$instance;

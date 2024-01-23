@@ -6,7 +6,6 @@ use Vengine\App;
 use Vengine\libs\Helpers\Crypt;
 use Vengine\Packages\Updater\Components\Configurator;
 use Vengine\System\Actions;
-use Vengine\System\Components\Database\Adapter;
 use Vengine\System\Components\Page\AbstractPageController;
 use Vengine\System\Components\Page\Render;
 use Vengine\System\Controllers\Router;
@@ -16,13 +15,11 @@ class UpdaterPageController extends AbstractPageController
     protected Configurator $configurator;
 
     public function __construct(
-        Adapter $adapter,
         Render $render,
         Router $router,
         Actions $actions,
         Configurator $configurator
     ) {
-        $this->adapter = $adapter;
         $this->render = $render;
         $this->router = $router;
         $this->actions = $actions;

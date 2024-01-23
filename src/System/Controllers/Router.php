@@ -154,7 +154,7 @@ class Router implements Injection
      */
     protected function route(string $route = null): void
     {
-        $routeInfo = static::$dispatcher->dispatch($this->method, $route ?: $this->requestUri);
+        $routeInfo = static::$dispatcher->dispatch($this->method, $route ?: $this->path);
 
         if (!empty($routeInfo[0])) {
             $method = array_shift($routeInfo);

@@ -54,6 +54,11 @@ final class App implements Injection
         $this->container = new Container();
 
         $this->container->setShared(
+            'container',
+            $this->container
+        );
+
+        $this->container->setShared(
             'structure',
             $this->container->createObject(Structure::class)
         );

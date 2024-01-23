@@ -22,10 +22,8 @@ abstract class AbstractPageController extends DefaultController
     {
         parent::__construct();
 
-        $app = App::app();
-
-        $this->adapter = $app->adapter;
-        $this->render = $app->render;
+        $this->adapter = $this->app->adapter;
+        $this->render = $this->app->render;
 
         $this->render->setTitle($this->title ?: 'Default Title');
 

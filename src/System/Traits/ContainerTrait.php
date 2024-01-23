@@ -10,7 +10,7 @@ trait ContainerTrait
     use \Loader\System\ContainerTrait;
 
     /** @noinspection MagicMethodsValidityInspection */
-    public function __get($name)
+    public function __get($name): mixed
     {
         if (property_exists(AppConfig::class, $name)) {
             /** @var AppConfig $config */

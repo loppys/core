@@ -13,6 +13,7 @@ use Vengine\System\Actions;
 use Vengine\System\Components\Database\Adapter;
 use Vengine\System\Components\Page\Render;
 use Vengine\System\Controllers\Router;
+use Vengine\System\Exceptions\AppException;
 use Vengine\System\Settings\Storages\AccessLevelStorage;
 use Vengine\System\Settings\Storages\MethodType;
 use Vengine\System\Settings\Storages\PermissionType;
@@ -27,15 +28,9 @@ final class App implements Injection
 {
     use ContainerTrait;
 
-    /**
-     * @var App
-     */
-    protected static $instance;
+    protected static App $instance;
 
-    /**
-     * @var bool
-     */
-    private $debugMode;
+    private bool $debugMode;
 
     public function __construct(bool $debug = false)
     {
@@ -43,13 +38,13 @@ final class App implements Injection
 
         $this->logWriter();
 
-        $session = static::getSession();
+        $session = self::getSession();
 
         $session->start();
 
-        static::getRequest()->setSession($session);
+        self::getRequest()->setSession($session);
 
-        if (empty(static::$instance)) {
+        if (empty(self::$instance)) {
             $this->init();
         }
     }
@@ -60,7 +55,7 @@ final class App implements Injection
 
         $this->container->setShared(
             'structure',
-            $this->createObject(Structure::class)
+            $this->container->createObject(Structure::class)
         );
 
         $corePackage = $this->structure->coreConfig . ConstStorage::APP_CONFIG_NAME;
@@ -89,21 +84,21 @@ final class App implements Injection
 
         $this->container->setShared(
             'configurator',
-            $this->createObject(Configurator::class)
+            $this->container->createObject(Configurator::class)
         );
 
         UserFactory::create();
 
         $this->container->setShared(
             'render',
-            $this->createObject(Render::class)
+            $this->container->createObject(Render::class)
         );
 
         $this->render->setTemplateFolder('/www/template/');
 
         $this->container->setShared(
             'router',
-            $this->createObject(Router::class)
+            $this->container->createObject(Router::class)
         );
 
         if (!file_exists(Configurator::getConfigPath())) {
@@ -137,29 +132,29 @@ final class App implements Injection
 
         $this->container->setShared(
             'adapter',
-            $this->createObject(Adapter::class)
+            $this->container->createObject(Adapter::class)
         );
 
         $this->adapter->connect();
 
-        static::$instance = $this;
+        self::$instance = $this;
     }
 
     public function run(): void
     {
         $this->container->setShared(
             'startup',
-            $this->createObject(Startup::class)
+            $this->container->createObject(Startup::class)
         );
 
-        $request = static::getRequest();
+        $request = self::getRequest();
 
         $subj = $request->get('subj');
         $fn = $request->get('fn');
 
         if ($subj && $fn) {
             $this->container->getBuilder()->invoke(
-                $this->createObject(Actions::class),
+                $this->container->createObject(Actions::class),
                 'handle',
                 [
                     $subj,
@@ -177,20 +172,31 @@ final class App implements Injection
         }
     }
 
+    /**
+     * @throws AppException
+     */
     public static function app(): self
     {
-        if (empty(static::$instance)) {
+        if (empty(self::$instance)) {
             throw new AppException('App not init');
         }
 
-        return static::$instance;
+        return self::$instance;
     }
 
+    /**
+     * @deprecated
+     * @see Container::createObject()
+     */
     public function createObject(string $class, array $arguments = []): object
     {
         return $this->container->createObject($class, $arguments);
     }
 
+    /**
+     * @deprecated
+     * @see Container::getPackage()
+     */
     public function getPackage(string $name): PackageInterface
     {
         return $this->container->getPackage($name);

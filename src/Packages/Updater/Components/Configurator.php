@@ -7,15 +7,9 @@ use Vengine\System\Settings\Structure;
 
 class Configurator
 {
-    /**
-     * @var array
-     */
-    protected $config = [];
+    protected array $config = [];
 
-    /**
-     * @var string
-     */
-    protected static $path;
+    protected static string $path;
 
     public function __construct(Structure $structure)
     {

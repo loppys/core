@@ -8,15 +8,9 @@ use Vengine\System\Components\Database\Adapter;
 
 abstract class Migration
 {
-    /**
-     * @var Adapter
-     */
-    protected $databaseAdapter;
+    protected Adapter $databaseAdapter;
 
-    /**
-     * @var MigrationResult
-     */
-    protected $result;
+    protected MigrationResult $result;
 
     public function __construct()
     {

@@ -10,25 +10,13 @@ use Vengine\System\DefaultController;
 
 abstract class AbstractPageController extends DefaultController
 {
-    /**
-     * @var Adapter
-     */
-    protected $adapter;
+    protected Adapter $adapter;
 
-    /**
-     * @var Render
-     */
-    protected $render;
+    protected Render $render;
 
-    /**
-     * @var string
-     */
-    protected $title;
+    protected string $title;
 
-    /**
-     * @var string
-     */
-    public static $route;
+    public static string $route;
 
     public function __construct()
     {

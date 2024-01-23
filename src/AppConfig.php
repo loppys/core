@@ -6,7 +6,7 @@ use Vengine\System\Interfaces\AppConfigInterface;
 
 class AppConfig extends AbstractConfig implements AppConfigInterface
 {
-    public $closed = false;
+    public bool $closed = false;
 
     public function getAllProperty(): array
     {

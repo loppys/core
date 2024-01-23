@@ -12,7 +12,7 @@
     },
     "license": "MIT",
     "require": {
-        "php": ">=7.4",
+        "php": ">=8.0",
         "symfony/routing": "^5.4",
         "doctrine/annotations": "^1.13",
         "gabordemooij/redbean": "^5.7",

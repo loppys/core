@@ -10,10 +10,7 @@ use Vengine\Packages\Migrations\Interfaces\MigrationAdapterInterface;
 
 class AdapterSQL implements MigrationAdapterInterface, AdapterSQLInterface
 {
-    /**
-     * @var array
-     */
-    protected $result = [];
+    protected array $result = [];
 
     public function run(array $fileList): MigrationAdapterInterface
     {

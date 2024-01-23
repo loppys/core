@@ -13,7 +13,7 @@ use Vengine\System\Controllers\Router;
 
 class UpdaterPageController extends AbstractPageController
 {
-    protected $configurator;
+    protected Configurator $configurator;
 
     public function __construct(
         Adapter $adapter,

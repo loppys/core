@@ -2,6 +2,7 @@
 
 namespace Vengine\Packages\Migrations;
 
+use Loader\System\Container;
 use Vengine\App;
 use Vengine\Packages\Migrations\DTO\MigrationResult;
 use Vengine\Packages\Migrations\Interfaces\AdapterPHPInterface;
@@ -10,44 +11,41 @@ use Vengine\Packages\Migrations\Interfaces\MigrationAdapterInterface;
 use Vengine\Packages\Migrations\Interfaces\MigrationManagerInterface;
 use Vengine\System\Components\Database\Adapter;
 use Vengine\System\Settings\Structure;
+use ReflectionException;
 
 class MigrationManager implements MigrationManagerInterface
 {
     /**
      * AdapterPHPInterface и AdapterSQLInterface - алиасы для di
-     *
-     * @var MigrationAdapterInterface|AdapterPHPInterface|AdapterSQLInterface
      */
-    protected $adapter;
+    protected MigrationAdapterInterface|AdapterPHPInterface|AdapterSQLInterface $adapter;
 
-    /**
-     * @var Adapter
-     */
-    protected $databaseAdapter;
+    protected Adapter $databaseAdapter;
 
-    /**
-     * @var Structure
-     */
-    protected $structure;
+    protected Structure $structure;
 
-    /**
-     * @var bool
-     */
-    private $checked = false;
+    private bool $checked = false;
 
-    /**
-     * @var array
-     */
-    private $fileList = [];
+    private array $fileList = [];
+
+    private Container $container;
 
     public function __construct(AdapterPHPInterface $adapter, Structure $structure)
     {
         $this->adapter = $adapter;
         $this->structure = $structure;
 
-        $this->databaseAdapter = App::app()->adapter;
+        $app = App::app();
+
+        $this->databaseAdapter = $app->adapter;
+        $this->container = $app->container;
     }
 
+    /**
+     * @return void
+     *
+     * @throws ReflectionException
+     */
     public function run(): void
     {
         if (!$this->checked) {
@@ -60,8 +58,9 @@ class MigrationManager implements MigrationManagerInterface
         ];
 
         foreach ($adapterList as $adapter) {
+            $adapter = $this->container->createObject($adapter);
+
             /** @var MigrationAdapterInterface $adapter */
-            $adapter = App::app()->createObject($adapter);
             $adapter->run($this->fileList);
 
             $result = $adapter->getResult();
@@ -145,7 +144,7 @@ class MigrationManager implements MigrationManagerInterface
             $this->fileList[] = [
                 'file' => $value,
                 'path' => $path . $value,
-                'version' => $version ?? 'undefined'
+                'version' => $version ?: 'undefined'
             ];
         }
     }

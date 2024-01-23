@@ -13,35 +13,17 @@ abstract class AbstractModule extends AbstractConfig implements Injection
 {
     use ContainerTrait;
 
-    /**
-     * @var AppConfig
-     */
-    protected $interface;
+    protected AppConfig $interface;
 
-    /**
-     * @var MigrationManagerInterface
-     */
-    protected $migrationManager;
+    protected MigrationManagerInterface $migrationManager;
 
-    /**
-     * @var Request
-     */
-    protected $request;
+    protected Request $request;
 
-    /**
-     * @var Session
-     */
-    protected $session;
+    protected Session $session;
 
-    /**
-     * @var string
-     */
-    protected $module;
+    protected string $module;
 
-    /**
-     * @var string
-     */
-    protected $version;
+    protected string $version;
 
     public function __construct()
     {
@@ -101,7 +83,7 @@ SQL;
             $query
         );
 
-        foreach ($result as $key => $value) {
+        foreach ($result as $value) {
             if (!$this->interface->{$value['cfg_name']}) {
                 $this->interface->{$value['cfg_name']} = $value['cfg_value'];
             }

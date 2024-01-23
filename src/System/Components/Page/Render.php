@@ -12,25 +12,13 @@ use Vengine\App;
 
 class Render
 {
-    /**
-     * @var Manager
-     */
-    protected $manager;
+    protected Manager $manager;
 
-    /**
-     * @var DataStorage
-     */
-    protected $dataStorage;
+    protected DataStorage $dataStorage;
 
-    /**
-     * @var RenderFactory
-     */
-    protected $renderFactory;
+    protected RenderFactory $renderFactory;
 
-    /**
-     * @var Render
-     */
-    private static $instance;
+    private static Render $instance;
 
     public function __construct(
         Manager $manager,
@@ -42,7 +30,7 @@ class Render
         $this->renderFactory = $renderFactory;
     }
 
-    public static function getInstance(): self
+    public static function getInstance(): static
     {
         if (empty(static::$instance)) {
             static::$instance = Container::getInstance()->createObject(static::class);

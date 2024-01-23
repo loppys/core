@@ -21,50 +21,23 @@ class Router implements Injection
 
     protected const API_PREFIX = '/api/v1';
 
-    /**
-     * @var Request
-     */
-    protected $request;
+    protected Request $request;
 
-    /**
-     * @var string
-     */
-    protected $requestUri;
+    protected string $requestUri;
 
-    /**
-     * @var string
-     */
-    protected $path;
+    protected string $path;
 
-    /**
-     * @var string
-     */
-    protected $scheme;
+    protected string $scheme;
 
-    /**
-     * @var string
-     */
-    protected $host;
+    protected string $host;
 
-    /**
-     * @var string
-     */
-    protected $method;
+    protected string $method;
 
-    /**
-     * @var Permissions
-     */
-    protected $permissions;
+    protected Permissions $permissions;
 
-    /**
-     * @var array
-     */
-    protected $routes = [];
+    protected array $routes = [];
 
-    /**
-     * @var Dispatcher
-     */
-    private static $dispatcher;
+    private static Dispatcher $dispatcher;
 
     public function __construct(Permissions $permissions)
     {

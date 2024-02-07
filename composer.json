@@ -11,7 +11,7 @@
         ]
     },
     "scripts": {
-        "post-package-update": [
+        "post-autoload-dump": [
             "php vendor/vengine/core/install.php"
         ]
     },

@@ -5,6 +5,23 @@
 
 # Документация
 
-`composer require vengine/core`
-
 https://doc.vengine.ru/
+
+# Установка
+
+composer.json
+```
+{
+    "scripts": {
+        "post-update-cmd": [
+            "php vendor/vengine/core/install.php"
+        ]
+    },
+    "require": {
+        "vengine/core": "*"
+    }
+}
+
+```
+
+`composer require vengine/core` - если нужен только функционал

@@ -11,7 +11,7 @@
         ]
     },
     "scripts": {
-        "post-update-cmd": [
+        "post-package-install": [
             "php vendor/vengine/core/install.php"
         ]
     },

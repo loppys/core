@@ -10,6 +10,11 @@
             "src/libs/common/common.php"
         ]
     },
+    "scripts": {
+        "post-update-cmd": [
+            "php vendor/vengine/core/install.php"
+        ]
+    },
     "license": "MIT",
     "require": {
         "php": ">=7.4",

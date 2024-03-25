@@ -8,10 +8,7 @@ use Vengine\System\Settings\Storages\PermissionType;
 
 class Permissions
 {
-    /**
-     * @var User
-     */
-    protected $user;
+    protected User $user;
 
     public function __construct(User $user)
     {
@@ -20,28 +17,15 @@ class Permissions
 
     public function checkAccess(int $accessLevel): bool
     {
-        switch (true) {
-            case $accessLevel === AccessLevelStorage::ALL:
-                return true;
-                break;
-            case $accessLevel === AccessLevelStorage::GUEST && $this->userIsGuest():
-                return true;
-                break;
-            case $accessLevel === AccessLevelStorage::USER && $this->isUser():
-                return true;
-                break;
-            case $accessLevel === AccessLevelStorage::ADMIN && $this->userIsAdmin():
-                return true;
-                break;
-            case $accessLevel === AccessLevelStorage::ROOT && $this->userIsRoot():
-                return true;
-                break;
-            case $accessLevel === AccessLevelStorage::API && $this->defaultSystemCheck():
-                return true;
-                break;
-        }
-
-        return false;
+        return match (true) {
+            $accessLevel === AccessLevelStorage::ALL => true,
+            $accessLevel === AccessLevelStorage::GUEST && $this->userIsGuest() => true,
+            $accessLevel === AccessLevelStorage::USER && $this->isUser() => true,
+            $accessLevel === AccessLevelStorage::ADMIN && $this->userIsAdmin() => true,
+            $accessLevel === AccessLevelStorage::ROOT && $this->userIsRoot() => true,
+            $accessLevel === AccessLevelStorage::API && $this->defaultSystemCheck() => true,
+            default => false,
+        };
     }
 
     public function getUserEntity(): User

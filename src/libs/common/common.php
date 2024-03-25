@@ -1,15 +1,10 @@
 <?php
 
+use JetBrains\PhpStorm\NoReturn;
 use Vengine\libs\Dumper;
 use Vengine\System\Settings\Structure;
 
-/*
- * Все функции, которые нужны и в обычной разметке находятся тут!
- *
- * Актульно с 0.4 версии
- *
- */
-
+#[NoReturn]
 function d(...$dump): void
 {
     $debug = debug_backtrace();

@@ -9,8 +9,15 @@ use Vengine\System\Settings\Storages\PermissionType;
  */
 final class Startup extends AbstractModule
 {
-    public $module = 'Startup';
+    public string $module = 'Startup';
 
+    /**
+     * @return void
+     *
+     * @throws System\Exceptions\AccessDeniedException
+     * @throws System\Exceptions\MethodNotAllowedException
+     * @throws System\Exceptions\PageNotFoundException
+     */
     public function run(): void
     {
         if ($this->closed && $this->user->getRole() !== PermissionType::DEVELOPER) {

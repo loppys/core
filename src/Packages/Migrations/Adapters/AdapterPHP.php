@@ -8,10 +8,7 @@ use Vengine\Packages\Migrations\Parts\Migration;
 
 class AdapterPHP implements MigrationAdapterInterface, AdapterPHPInterface
 {
-    /**
-     * @var array
-     */
-    protected $result = [];
+    protected array $result = [];
 
     public function run(array $fileList): MigrationAdapterInterface
     {

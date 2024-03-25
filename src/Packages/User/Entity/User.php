@@ -6,30 +6,15 @@ use Vengine\System\Settings\Storages\PermissionType;
 
 class User
 {
-    /**
-     * @var int
-     */
-    private $id = 0;
+    private int $id = 0;
 
-    /**
-     * @var int
-     */
-    protected $role = PermissionType::GUEST;
+    protected int $role = PermissionType::GUEST;
 
-    /**
-     * @var string
-     */
-    protected $login = '';
+    protected string $login = '';
 
-    /**
-     * @var string
-     */
-    protected $token = '';
+    protected string $token = '';
 
-    /**
-     * @var string
-     */
-    protected $uuid = '';
+    protected string $uuid = '';
 
     public function getUuid(): string
     {

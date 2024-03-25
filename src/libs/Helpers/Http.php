@@ -4,7 +4,7 @@ namespace Vengine\libs\Helpers;
 
 class Http
 {
-    public static $codes = [
+    public static array $codes = [
         100 => 'Continue',
         101 => 'Switching Protocols',
         102 => 'Processing',

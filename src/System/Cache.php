@@ -6,14 +6,21 @@ use Vengine\Packages\Settings\Storage\ConstStorage;
 
 class Cache
 {
-    private $cache;
-    private $cacheFileName;
-    private $cacheFolder;
-    private $cacheFullFileName;
-    private $cacheFullFilePath;
-    private $cacheEnabled;
-    private $cacheTime;
-    private $dataName;
+    private string $cache;
+
+    private string $cacheFileName;
+
+    private string $cacheFolder;
+
+    private string $cacheFullFileName;
+
+    private string $cacheFullFilePath;
+
+    private bool $cacheEnabled;
+
+    private int $cacheTime;
+
+    private string $dataName;
 
     public function __construct($dataName)
     {

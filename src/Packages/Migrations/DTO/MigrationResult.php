@@ -4,25 +4,13 @@ namespace Vengine\Packages\Migrations\DTO;
 
 class MigrationResult
 {
-    /**
-     * @var string
-     */
-    protected $file = '';
+    protected string $file = '';
 
-    /**
-     * @var string
-     */
-    protected $error = '';
+    protected string $error = '';
 
-    /**
-     * @var string
-     */
-    protected $version = '';
+    protected string $version = '';
 
-    /**
-     * @var string
-     */
-    protected $description = '';
+    protected string $description = '';
 
     public function getFile(): string
     {

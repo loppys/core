@@ -17,7 +17,7 @@ class Actions
     public const TYPE_SYSTEM = 00001;
     public const TYPE_COMMON = 00002;
 
-    private $actionList = [
+    private array $actionList = [
         'ExampleAction' => [
             'fn' => [
                 'example',
@@ -36,10 +36,7 @@ class Actions
         ],
     ];
 
-    /**
-     * @var Permissions
-     */
-    private $permissions;
+    private Permissions $permissions;
 
     public function __construct(Permissions $permissions)
     {

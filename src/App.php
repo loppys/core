@@ -13,6 +13,7 @@ use Vengine\System\Actions;
 use Vengine\System\Components\Database\Adapter;
 use Vengine\System\Components\Page\Render;
 use Vengine\System\Controllers\Router;
+use Vengine\System\Database\SystemAdapter;
 use Vengine\System\Exceptions\AppException;
 use Vengine\System\Settings\Storages\AccessLevelStorage;
 use Vengine\System\Settings\Storages\MethodType;
@@ -141,6 +142,11 @@ final class App implements Injection
         );
 
         $this->adapter->connect();
+
+        $this->container->setShared(
+            'db',
+            $this->container->createObject(SystemAdapter::class)
+        );
 
         $this->container->setShared(
             'actions',

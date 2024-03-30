@@ -5,6 +5,7 @@ namespace Vengine;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Vengine\Packages\Migrations\Interfaces\MigrationManagerInterface;
 use Vengine\System\Components\Database\Adapter;
+use Vengine\System\Database\SystemAdapter;
 use Symfony\Component\HttpFoundation\Request;
 use Vengine\System\Interfaces\AppConfigInterface;
 use Vengine\System\Traits\ContainerTrait;
@@ -53,6 +54,14 @@ abstract class AbstractModule extends AbstractConfig implements Injection
         }
     }
 
+    public function getDatabaseAdapter(): SystemAdapter
+    {
+        return $this->db;
+    }
+
+    /**
+     * @deprecated
+     */
     public function getAdapter(): Adapter
     {
         return $this->adapter;

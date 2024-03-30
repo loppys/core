@@ -9,6 +9,9 @@ use RedBeanPHP\RedException\SQL as SQLException;
 use RedBeanPHP\Cursor;
 use RedBeanPHP\OODBBean;
 
+/**
+ * @deprecated
+ */
 class Adapter extends R
 {
     private array $param;

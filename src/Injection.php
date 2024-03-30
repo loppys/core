@@ -11,6 +11,7 @@ use Vengine\System\Components\Database\Adapter;
 use Vengine\System\Components\Page\Render;
 use Vengine\System\Config\AppConfig;
 use Vengine\System\Controllers\Router;
+use Vengine\System\Database\SystemAdapter;
 use Vengine\System\Settings\Structure;
 
 /**
@@ -24,6 +25,7 @@ use Vengine\System\Settings\Structure;
  * @property-read User user
  * @property-read AppConfig config
  * @property-read Actions $actions
+ * @property-read SystemAdapter $db
  */
 interface Injection extends ContainerInjection
 {

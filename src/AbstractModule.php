@@ -8,6 +8,7 @@ use Vengine\System\Components\Database\Adapter;
 use Symfony\Component\HttpFoundation\Request;
 use Vengine\System\Interfaces\AppConfigInterface;
 use Vengine\System\Traits\ContainerTrait;
+use Vengine\System\Config\AppConfig;
 
 abstract class AbstractModule extends AbstractConfig implements Injection
 {

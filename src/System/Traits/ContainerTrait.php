@@ -2,7 +2,7 @@
 
 namespace Vengine\System\Traits;
 
-use Vengine\AppConfig;
+use Vengine\System\Config\AppConfig;
 use Vengine\System\Interfaces\AppConfigInterface;
 
 trait ContainerTrait

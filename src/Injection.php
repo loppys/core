@@ -8,6 +8,7 @@ use Vengine\Packages\Updater\Components\Configurator;
 use Vengine\Packages\User\Entity\User;
 use Vengine\System\Components\Database\Adapter;
 use Vengine\System\Components\Page\Render;
+use Vengine\System\Config\AppConfig;
 use Vengine\System\Controllers\Router;
 use Vengine\System\Settings\Structure;
 
@@ -20,6 +21,7 @@ use Vengine\System\Settings\Structure;
  * @property Router router
  * @property Configurator configurator
  * @property User user
+ * @property AppConfig config
  */
 interface Injection extends ContainerInjection
 {

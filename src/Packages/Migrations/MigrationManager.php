@@ -142,7 +142,7 @@ class MigrationManager implements MigrationManagerInterface
                 'version' => $this->db->escapeValue($this->getVersion()),
                 'query' => $this->db->escapeValue($migrationResult->getDescription()),
                 'fail' => $this->db->escapeValue($migrationResult->getError()),
-                'path' => $this->db->escapeValue('@deprecated'),
+                'fullPath' => $this->db->escapeValue('@deprecated'),
                 'completed' => $this->db->escapeValue('Y')
             ])
             ->executeStatement()

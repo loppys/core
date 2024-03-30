@@ -40,11 +40,9 @@ SELECT *
 FROM `modules`
 SQL;
 
-        $result = $this->adapter::getAll(
-            $query
+        return $this->container->packageCollect(
+            $this->db->getConnection()->executeQuery($query)->fetchAllAssociative()
         );
-
-        return $this->container->packageCollect($result);
     }
 
     protected function collectRoutesFromDatabase(): void
@@ -54,7 +52,7 @@ SELECT *
 FROM `routes`
 SQL;
 
-        $routes = $this->adapter::getAll($query);
+        $routes = $this->db->getConnection()->executeQuery($query)->fetchAllAssociative();
 
         $routes = array_map(static function ($item) {
             return [

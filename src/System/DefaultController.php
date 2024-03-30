@@ -5,6 +5,7 @@ namespace Vengine\System;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Vengine\System\Exceptions\AccessDeniedException;
+use Vengine\System\Exceptions\AppException;
 use Vengine\System\Settings\Storages\PermissionType;
 use Vengine\System\Controllers\Router;
 use Vengine\App;
@@ -21,12 +22,15 @@ abstract class DefaultController
 
     protected Actions $actions;
 
+    /**
+     * @throws AppException
+     */
     public function __construct()
     {
         $this->app = $app = App::app();
 
         $this->router = $app->router;
-        $this->actions = $app->container->createObject(Actions::class);
+        $this->actions = $app->actions;
 
         $this->request = App::getRequest();
         $this->session = $this->request->getSession();

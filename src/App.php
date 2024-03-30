@@ -142,6 +142,11 @@ final class App implements Injection
 
         $this->adapter->connect();
 
+        $this->container->setShared(
+            'actions',
+            $this->container->createObject(Actions::class)
+        );
+
         self::$instance = $this;
     }
 
@@ -159,7 +164,7 @@ final class App implements Injection
 
         if ($subj && $fn) {
             $this->container->getBuilder()->invoke(
-                $this->container->createObject(Actions::class),
+                $this->actions,
                 'handle',
                 [
                     $subj,

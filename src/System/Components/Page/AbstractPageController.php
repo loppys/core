@@ -40,5 +40,8 @@ abstract class AbstractPageController extends DefaultController
         $this->render->render();
     }
 
-    abstract public function prepareData(): void;
+    public function prepareData(): void
+    {
+
+    }
 }

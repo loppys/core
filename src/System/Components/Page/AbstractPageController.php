@@ -2,15 +2,12 @@
 
 namespace Vengine\System\Components\Page;
 
-use Vengine\App;
-use Vengine\System\Actions;
-use Vengine\System\Components\Database\Adapter;
-use Vengine\System\Controllers\Router;
+use Vengine\System\Database\SystemAdapter;
 use Vengine\System\DefaultController;
 
 abstract class AbstractPageController extends DefaultController
 {
-    protected Adapter $adapter;
+    protected SystemAdapter $adapter;
 
     protected Render $render;
 

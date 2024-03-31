@@ -2,6 +2,7 @@
 
 namespace Vengine;
 
+use Doctrine\DBAL\Connection;
 use Loader\System\Interfaces\PackageInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -10,9 +11,9 @@ use Vengine\Packages\Settings\Storage\ConstStorage;
 use Vengine\Packages\Updater\Controllers\UpdaterPageController;
 use Vengine\Packages\User\Factory\UserFactory;
 use Vengine\System\Actions;
-use Vengine\System\Components\Database\Adapter;
 use Vengine\System\Components\Page\Render;
 use Vengine\System\Controllers\Router;
+use Vengine\System\Database\SystemAdapter;
 use Vengine\System\Exceptions\AppException;
 use Vengine\System\Settings\Storages\AccessLevelStorage;
 use Vengine\System\Settings\Storages\MethodType;
@@ -137,10 +138,17 @@ final class App implements Injection
 
         $this->container->setShared(
             'adapter',
-            $this->container->createObject(Adapter::class)
+            $this->container->createObject(SystemAdapter::class)
         );
 
-        $this->adapter->connect();
+        $this->container->setShared(
+            'db',
+            $this->adapter->getConnection()
+        );
+
+        if (!$this->db instanceof Connection) {
+            throw new AppException('fail create db');
+        }
 
         $this->container->setShared(
             'actions',

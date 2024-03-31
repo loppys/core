@@ -75,4 +75,24 @@ class User
 
         return $this;
     }
+
+    public function isDeveloper(): bool
+    {
+        return $this->role === PermissionType::DEVELOPER;
+    }
+
+    public function isRoot(): bool
+    {
+        return $this->role === PermissionType::ROOT;
+    }
+
+    public function isGuest(): bool
+    {
+        return $this->role === PermissionType::GUEST;
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === PermissionType::ADMIN;
+    }
 }

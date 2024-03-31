@@ -50,10 +50,19 @@
                     <label for="inputPassword" class="control-label h5">Настройка базы данных</label>
                     <br>
                     <label for="inputDBType" class="control-label">
-                        Тип базы данных (mysql - стандартное значение)
+                        Тип базы данных:
                     </label>
-                    <input type="text" class="form-control" id="inputDBType" name="dbType"
-                           placeholder="Тип базы данных" value="mysql">
+                    <select name="dbType" id="inputDBType">
+                        <option value="pdo_mysql" selected>pdo_mysql</option>
+                        <option value="pdo_sqlite">pdo_sqlite</option>
+                        <option value="pdo_oci">pdo_oci</option>
+                        <option value="oci8">oci8</option>
+                        <option value="ibm_db2">ibm_db2</option>
+                        <option value="mysqli">mysqli</option>
+                        <option value="pgsql">pgsql</option>
+                        <option value="sqlsrv">sqlsrv</option>
+                        <option value="sqlite3">sqlite3</option>
+                    </select>
                     <br>
                     <label for="inputDBHost" class="control-label">
                         Хост (localhost - стандартное значение)

@@ -4,11 +4,11 @@ namespace Vengine\Packages\Migrations\Parts;
 
 use Vengine\App;
 use Vengine\Packages\Migrations\DTO\MigrationResult;
-use Vengine\System\Components\Database\Adapter;
+use Vengine\System\Database\SystemAdapter;
 
 abstract class Migration
 {
-    protected Adapter $databaseAdapter;
+    protected SystemAdapter $databaseAdapter;
 
     protected MigrationResult $result;
 

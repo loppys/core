@@ -45,7 +45,7 @@ class SystemAdapter
                 'user' => $login,
                 'password' => $password,
                 'host' => $host,
-                'driver' => "pdo_{$type}",
+                'driver' => $type,
             ]
         );
     }

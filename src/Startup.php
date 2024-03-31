@@ -2,8 +2,6 @@
 
 namespace Vengine;
 
-use Vengine\System\Settings\Storages\PermissionType;
-
 /**
  * @property bool closed
  */
@@ -20,7 +18,7 @@ final class Startup extends AbstractModule
      */
     public function run(): void
     {
-        if ($this->closed && $this->user->getRole() !== PermissionType::DEVELOPER) {
+        if ($this->closed && $this->user->isDeveloper()) {
             die('На сайте ведутся технические работы, попробуйте вернуться позже!');
         }
 
@@ -41,7 +39,7 @@ FROM `modules`
 SQL;
 
         return $this->container->packageCollect(
-            $this->db->getConnection()->executeQuery($query)->fetchAllAssociative()
+            $this->db->executeQuery($query)->fetchAllAssociative()
         );
     }
 
@@ -52,7 +50,7 @@ SELECT *
 FROM `routes`
 SQL;
 
-        $routes = $this->db->getConnection()->executeQuery($query)->fetchAllAssociative();
+        $routes = $this->db->executeQuery($query)->fetchAllAssociative();
 
         $routes = array_map(static function ($item) {
             return [

@@ -9,7 +9,6 @@ use Vengine\Packages\Migrations\Interfaces\AdapterPHPInterface;
 use Vengine\Packages\Migrations\Interfaces\AdapterSQLInterface;
 use Vengine\Packages\Migrations\Interfaces\MigrationAdapterInterface;
 use Vengine\Packages\Migrations\Interfaces\MigrationManagerInterface;
-use Vengine\System\Components\Database\Adapter;
 use Vengine\System\Database\SystemAdapter;
 use Vengine\System\Settings\Structure;
 use ReflectionException;
@@ -22,8 +21,6 @@ class MigrationManager implements MigrationManagerInterface
      * AdapterPHPInterface и AdapterSQLInterface - алиасы для di
      */
     protected MigrationAdapterInterface|AdapterPHPInterface|AdapterSQLInterface $adapter;
-
-    protected Adapter $databaseAdapter;
 
     protected SystemAdapter $db;
 
@@ -46,7 +43,6 @@ class MigrationManager implements MigrationManagerInterface
 
         $app = App::app();
 
-        $this->databaseAdapter = $app->adapter;
         $this->container = $app->container;
     }
 
@@ -164,7 +160,12 @@ class MigrationManager implements MigrationManagerInterface
 
     private function unsetCompleted(): void
     {
-        $migrationList = Adapter::getAll('SELECT * FROM `migration` WHERE `completed` = ?', ['Y']);
+        $migrationList = $this->db->getConnection()->createQueryBuilder()
+            ->select('*')
+            ->from('migration', 'm')
+            ->where('m.completed = "Y"')
+            ->executeQuery()
+            ->fetchAllAssociative();
 
         foreach ($migrationList as $migration) {
             foreach ($this->fileList as $key => $data) {

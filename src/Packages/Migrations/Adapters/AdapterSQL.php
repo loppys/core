@@ -30,7 +30,7 @@ class AdapterSQL implements MigrationAdapterInterface, AdapterSQLInterface
                 $result = new MigrationResult();
                 $result->setFile($pathInfo['basename']);
 
-                App::app()->db->getConnection()->executeQuery($query);
+                App::app()->db->executeQuery($query);
 
                 $this->result[] = $result;
             }

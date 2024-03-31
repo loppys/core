@@ -4,9 +4,9 @@ namespace Vengine;
 
 use Symfony\Component\HttpFoundation\Session\Session;
 use Vengine\Packages\Migrations\Interfaces\MigrationManagerInterface;
-use Vengine\System\Components\Database\Adapter;
 use Vengine\System\Database\SystemAdapter;
 use Symfony\Component\HttpFoundation\Request;
+use Vengine\System\Exceptions\AppException;
 use Vengine\System\Interfaces\AppConfigInterface;
 use Vengine\System\Traits\ContainerTrait;
 use Vengine\System\Config\AppConfig;
@@ -56,15 +56,15 @@ abstract class AbstractModule extends AbstractConfig implements Injection
 
     public function getDatabaseAdapter(): SystemAdapter
     {
-        return $this->db;
+        return $this->adapter;
     }
 
     /**
      * @deprecated
      */
-    public function getAdapter(): Adapter
+    public function getAdapter(): void
     {
-        return $this->adapter;
+        throw new AppException('getAdapter() deprecated. Use getDatabaseAdapter()');
     }
 
     public function getRequest(): Request
@@ -89,9 +89,7 @@ SELECT *
 FROM `cfg`
 SQL;
 
-        $result = $this->adapter::getAll(
-            $query
-        );
+        $result = $this->db->executeQuery($query)->fetchAllAssociative();
 
         foreach ($result as $value) {
             if (!$this->interface->{$value['cfg_name']}) {

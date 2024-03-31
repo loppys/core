@@ -10,6 +10,10 @@ class HomePageController extends AbstractPageController
 
     public function prepareData(): void
     {
-
+        print <<<HTML
+vEngine установлен! 
+<br>
+<a href="https://doc.vengine.ru/" target="_blank">Документация</a>
+HTML;
     }
 }

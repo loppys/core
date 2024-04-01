@@ -13,6 +13,7 @@ use Vengine\System\Exceptions\PageNotFoundException;
 use Vengine\System\Settings\Permissions;
 use Vengine\System\Settings\Storages\MethodType;
 use Vengine\System\Traits\ContainerTrait;
+use Vengine\Cache\CacheManager;
 use Vengine\Injection;
 use Vengine\App;
 
@@ -40,6 +41,8 @@ class Router implements Injection
 
     private static Dispatcher $dispatcher;
 
+    private CacheManager $cacheManager;
+
     public function __construct(Permissions $permissions)
     {
         $this->request = App::getRequest();
@@ -53,6 +56,13 @@ class Router implements Injection
         $this->scheme = $this->request->getScheme();
         $this->host = $this->request->getHttpHost();
         $this->method = $this->request->getMethod();
+
+        $this->cacheManager = $this->container->createObject(
+            CacheManager::class,
+            [
+                $this->container->createObject(Configurator::class)
+            ]
+        );
     }
 
     public function addRouteList(array $pathList): Router

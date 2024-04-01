@@ -64,6 +64,11 @@ final class App implements Injection
             $this->container->createObject(Structure::class)
         );
 
+        $cacheDir = $this->structure->project . '/_cache/';
+        if (!is_dir($cacheDir) && !mkdir($cacheDir) && !is_dir($cacheDir)) {
+            throw new RuntimeException('Directory "/_cache/" was not created');
+        }
+
         $corePackage = $this->structure->coreConfig . ConstStorage::APP_CONFIG_NAME;
         $userPackage = $this->structure->userConfig . ConstStorage::APP_CONFIG_NAME;
 

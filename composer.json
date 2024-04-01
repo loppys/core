@@ -31,6 +31,7 @@
         "filp/whoops": "^2.14",
         "vengine/render": "*",
         "vengine/container": "*",
+        "vengine/cache": "^1.0",
         "ext-json": "*"
     },
     "require-dev": {

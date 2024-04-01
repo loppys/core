@@ -8,16 +8,13 @@ use Vengine\App;
 
 abstract class ApiController
 {
-    protected $data = [];
+    protected array $data = [];
 
-    protected $status = 200;
+    protected int $status = 200;
 
-    protected $errorList = [];
+    protected array $errorList = [];
 
-    /**
-     * @var Request
-     */
-    protected $request;
+    protected Request $request;
 
     public function __construct()
     {

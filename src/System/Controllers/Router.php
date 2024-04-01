@@ -5,6 +5,7 @@ namespace Vengine\System\Controllers;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use Symfony\Component\HttpFoundation\Request;
+use Vengine\System\Settings\Storages\AccessLevelStorage;
 use function FastRoute\simpleDispatcher;
 use Vengine\System\Exceptions\AccessDeniedException;
 use Vengine\System\Exceptions\MethodNotAllowedException;
@@ -21,50 +22,23 @@ class Router implements Injection
 
     protected const API_PREFIX = '/api/v1';
 
-    /**
-     * @var Request
-     */
-    protected $request;
+    protected Request $request;
 
-    /**
-     * @var string
-     */
-    protected $requestUri;
+    protected string $requestUri;
 
-    /**
-     * @var string
-     */
-    protected $path;
+    protected string $path;
 
-    /**
-     * @var string
-     */
-    protected $scheme;
+    protected string $scheme;
 
-    /**
-     * @var string
-     */
-    protected $host;
+    protected string $host;
 
-    /**
-     * @var string
-     */
-    protected $method;
+    protected string $method;
 
-    /**
-     * @var Permissions
-     */
-    protected $permissions;
+    protected Permissions $permissions;
 
-    /**
-     * @var array
-     */
-    protected $routes = [];
+    protected array $routes = [];
 
-    /**
-     * @var Dispatcher
-     */
-    private static $dispatcher;
+    private static Dispatcher $dispatcher;
 
     public function __construct(Permissions $permissions)
     {
@@ -154,6 +128,13 @@ class Router implements Injection
                 case MethodType::DELETE:
                     $routeCollector->delete($routeInfo['route'], $routeInfo['handler']);
                     break;
+                default:
+                    $routeCollector->get($routeInfo['route'], $routeInfo['handler']);
+                    $routeCollector->post($routeInfo['route'], $routeInfo['handler']);
+                    $routeCollector->patch($routeInfo['route'], $routeInfo['handler']);
+                    $routeCollector->put($routeInfo['route'], $routeInfo['handler']);
+                    $routeCollector->delete($routeInfo['route'], $routeInfo['handler']);
+                    break;
             }
         };
 
@@ -181,7 +162,7 @@ class Router implements Injection
      */
     protected function route(string $route = null): void
     {
-        $routeInfo = static::$dispatcher->dispatch($this->method, $route ?: $this->requestUri);
+        $routeInfo = static::$dispatcher->dispatch($this->method, $route ?: $this->path);
 
         if (!empty($routeInfo[0])) {
             $method = array_shift($routeInfo);
@@ -192,10 +173,8 @@ class Router implements Injection
         switch ($method) {
             case Dispatcher::NOT_FOUND:
                 static::pageNotFound();
-                break;
             case Dispatcher::METHOD_NOT_ALLOWED:
                 throw new MethodNotAllowedException();
-                break;
             case Dispatcher::FOUND:
                 [$handler, $argumentList] = $routeInfo;
 
@@ -204,8 +183,30 @@ class Router implements Injection
                     $method = $handler['method'];
                     $access = (int)$handler['access'];
 
-                    if (!$this->permissions->checkAccess($access)) {
-                        throw new AccessDeniedException();
+                    $apiTypeList = [
+                        AccessLevelStorage::API,
+                        AccessLevelStorage::ROOT
+                    ];
+
+                    $typeView = !in_array($access, $apiTypeList, true) ? 'default' : 'api';
+
+                    if ($typeView === 'api') {
+                        $token = $this->request->get('token');
+                        $server = $_SERVER['SERVER_ADDR'];
+
+                        if ($this->request->getClientIp() === $server) {
+                            $token = $this->config->token;
+                        }
+
+                        if (empty($token)) {
+                            throw new AccessDeniedException('token not found', 401);
+                        }
+
+                        if ($token !== $this->config->token) {
+                            throw new AccessDeniedException('invalid token', 401);
+                        }
+                    } elseif (!$this->permissions->checkAccess($access)) {
+                        throw new AccessDeniedException('Нет прав для просмотра страницы.');
                     }
 
                     $this->container->getBuilder()->invoke(

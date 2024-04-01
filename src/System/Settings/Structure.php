@@ -24,7 +24,7 @@ class Structure extends AbstractConfig
         $this->setDefaultStructure();
     }
 
-    protected function setDefaultStructure(): self
+    protected function setDefaultStructure(): static
     {
         $config = require $_SERVER['DOCUMENT_ROOT'] . '/config/config.php';
         $coreConfig = require $_SERVER['DOCUMENT_ROOT'] . '/vendor/vengine/core/src/config/config.php';
@@ -38,7 +38,7 @@ class Structure extends AbstractConfig
                 if (array_key_exists($ck, $config)) {
                     $config[$ck] += $cv;
                 } else {
-                    $config[$ck] = $coreConfig[$ck];
+                    $config[$ck] = $cv;
                 }
             }
         }

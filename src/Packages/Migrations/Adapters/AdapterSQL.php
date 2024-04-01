@@ -3,17 +3,13 @@
 namespace Vengine\Packages\Migrations\Adapters;
 
 use Vengine\App;
-use RuntimeException;
 use Vengine\Packages\Migrations\DTO\MigrationResult;
 use Vengine\Packages\Migrations\Interfaces\AdapterSQLInterface;
 use Vengine\Packages\Migrations\Interfaces\MigrationAdapterInterface;
 
 class AdapterSQL implements MigrationAdapterInterface, AdapterSQLInterface
 {
-    /**
-     * @var array
-     */
-    protected $result = [];
+    protected array $result = [];
 
     public function run(array $fileList): MigrationAdapterInterface
     {
@@ -34,11 +30,7 @@ class AdapterSQL implements MigrationAdapterInterface, AdapterSQLInterface
                 $result = new MigrationResult();
                 $result->setFile($pathInfo['basename']);
 
-                try {
-                    App::app()->adapter::exec($query);
-                } catch (RuntimeException $e) {
-                    $result->setError($e->getMessage());
-                }
+                App::app()->db->executeQuery($query);
 
                 $this->result[] = $result;
             }

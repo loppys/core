@@ -4,44 +4,28 @@ namespace Vengine;
 
 use Symfony\Component\HttpFoundation\Session\Session;
 use Vengine\Packages\Migrations\Interfaces\MigrationManagerInterface;
-use Vengine\System\Components\Database\Adapter;
+use Vengine\System\Database\SystemAdapter;
 use Symfony\Component\HttpFoundation\Request;
+use Vengine\System\Exceptions\AppException;
 use Vengine\System\Interfaces\AppConfigInterface;
 use Vengine\System\Traits\ContainerTrait;
+use Vengine\System\Config\AppConfig;
 
 abstract class AbstractModule extends AbstractConfig implements Injection
 {
     use ContainerTrait;
 
-    /**
-     * @var AppConfig
-     */
-    protected $interface;
+    protected AppConfig $interface;
 
-    /**
-     * @var MigrationManagerInterface
-     */
-    protected $migrationManager;
+    protected MigrationManagerInterface $migrationManager;
 
-    /**
-     * @var Request
-     */
-    protected $request;
+    protected Request $request;
 
-    /**
-     * @var Session
-     */
-    protected $session;
+    protected Session $session;
 
-    /**
-     * @var string
-     */
-    protected $module;
+    protected string $module;
 
-    /**
-     * @var string
-     */
-    protected $version;
+    protected string $version;
 
     public function __construct()
     {
@@ -70,9 +54,17 @@ abstract class AbstractModule extends AbstractConfig implements Injection
         }
     }
 
-    public function getAdapter(): Adapter
+    public function getDatabaseAdapter(): SystemAdapter
     {
         return $this->adapter;
+    }
+
+    /**
+     * @deprecated
+     */
+    public function getAdapter(): void
+    {
+        throw new AppException('getAdapter() deprecated. Use getDatabaseAdapter()');
     }
 
     public function getRequest(): Request
@@ -97,11 +89,9 @@ SELECT *
 FROM `cfg`
 SQL;
 
-        $result = $this->adapter::getAll(
-            $query
-        );
+        $result = $this->db->executeQuery($query)->fetchAllAssociative();
 
-        foreach ($result as $key => $value) {
+        foreach ($result as $value) {
             if (!$this->interface->{$value['cfg_name']}) {
                 $this->interface->{$value['cfg_name']} = $value['cfg_value'];
             }

@@ -1,7 +1,7 @@
 <?php
 
 use Vengine\App;
-use Vengine\AppConfig;
+use Vengine\System\Config\AppConfig;
 use Vengine\System\Interfaces\AppConfigInterface;
 use Vengine\System\Controllers\Router;
 use Vengine\AbstractConfig;

@@ -2,42 +2,25 @@
 
 namespace Vengine\System\Components\Page;
 
-use Vengine\App;
-use Vengine\System\Actions;
-use Vengine\System\Components\Database\Adapter;
-use Vengine\System\Controllers\Router;
+use Vengine\System\Database\SystemAdapter;
 use Vengine\System\DefaultController;
 
 abstract class AbstractPageController extends DefaultController
 {
-    /**
-     * @var Adapter
-     */
-    protected $adapter;
+    protected SystemAdapter $adapter;
 
-    /**
-     * @var Render
-     */
-    protected $render;
+    protected Render $render;
 
-    /**
-     * @var string
-     */
-    protected $title;
+    protected string $title;
 
-    /**
-     * @var string
-     */
-    public static $route;
+    public static string $route;
 
     public function __construct()
     {
         parent::__construct();
 
-        $app = App::app();
-
-        $this->adapter = $app->adapter;
-        $this->render = $app->render;
+        $this->adapter = $this->app->adapter;
+        $this->render = $this->app->render;
 
         $this->render->setTitle($this->title ?: 'Default Title');
 
@@ -54,5 +37,8 @@ abstract class AbstractPageController extends DefaultController
         $this->render->render();
     }
 
-    abstract public function prepareData(): void;
+    public function prepareData(): void
+    {
+
+    }
 }

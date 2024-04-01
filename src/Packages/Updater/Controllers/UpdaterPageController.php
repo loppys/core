@@ -2,6 +2,7 @@
 
 namespace Vengine\Packages\Updater\Controllers;
 
+use Vengine\App;
 use Vengine\libs\Helpers\Crypt;
 use Vengine\Packages\Updater\Components\Configurator;
 use Vengine\System\Actions;
@@ -21,9 +22,16 @@ class UpdaterPageController extends AbstractPageController
         Actions $actions,
         Configurator $configurator
     ) {
+        $this->adapter = $adapter;
+        $this->render = $render;
+        $this->router = $router;
+        $this->actions = $actions;
         $this->configurator = $configurator;
 
-        parent::__construct($adapter, $render, $router, $actions);
+        $this->request = App::getRequest();
+        $this->session = $this->request->getSession();
+
+        $this->prepareData();
     }
 
     public function prepareData(): void

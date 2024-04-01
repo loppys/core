@@ -3,8 +3,6 @@
 use Vengine\libs\Dumper;
 use Vengine\System\Settings\Structure;
 
-require_once('dc.php');
-
 /*
  * Все функции, которые нужны и в обычной разметке находятся тут!
  *

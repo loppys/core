@@ -54,22 +54,21 @@ class MigrationManager implements MigrationManagerInterface
             $this->check();
         }
 
-        /** @var MigrationAdapterInterface $sqlAdapter */
-        $sqlAdapter = App::app()->createObject(AdapterSQLInterface::class);
-        $sqlAdapter->run($this->fileList);
+        $adapterList = [
+            AdapterSQLInterface::class,
+            AdapterPHPInterface::class
+        ];
 
-        $sqlResult = $sqlAdapter->getResult();
+        foreach ($adapterList as $adapter) {
+            /** @var MigrationAdapterInterface $adapter */
+            $adapter = App::app()->createObject($adapter);
+            $adapter->run($this->fileList);
 
-        if (!empty($sqlResult)) {
-            $this->writeResult($sqlResult);
-        }
+            $result = $adapter->getResult();
 
-        $this->adapter->run($this->fileList);
-
-        $phpResult = $this->adapter->getResult();
-
-        if (!empty($phpResult)) {
-            $this->writeResult($phpResult);
+            if (!empty($result)) {
+                $this->writeResult($result);
+            }
         }
     }
 

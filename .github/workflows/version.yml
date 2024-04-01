@@ -6,7 +6,6 @@ on:
     - master
     - develop
     paths-ignore:
-    - '**.md'
     - '**.yml'
 
 jobs:

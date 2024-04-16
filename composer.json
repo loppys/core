@@ -24,7 +24,7 @@
         "swiftmailer/swiftmailer": "^6.3",
         "mjaschen/phpgeo": "^4.0",
         "devster/ubench": "^2.1",
-        "spatie/menu": "^2.10",
+        "spatie/menu": "^2.10 || ^3.0",
         "firebase/php-jwt": "^6.0",
         "symfony/http-foundation": "^5.4 || ^6.0",
         "nikic/fast-route": "^1.3",

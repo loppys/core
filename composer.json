@@ -22,7 +22,7 @@
         "gregwar/captcha": "^1.1",
         "teamtnt/tntsearch": "^2.9 || ^4.0",
         "swiftmailer/swiftmailer": "^6.3",
-        "mjaschen/phpgeo": "^4.0",
+        "mjaschen/phpgeo": "^4.0 || ^5.0",
         "devster/ubench": "^2.1",
         "spatie/menu": "^2.10 || ^3.0",
         "firebase/php-jwt": "^6.0",

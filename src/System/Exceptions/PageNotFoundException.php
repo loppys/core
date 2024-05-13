@@ -20,12 +20,12 @@ class PageNotFoundException extends AppException
         }
 
         if (is_dir($tplFolder)) {
-            if (!file_exists($tplFolder . md5('404') . '.php')) {
-                copy($tpl, $tplFolder . md5('404') . '.php');
+            if (!file_exists($tplFolder . '404.php')) {
+                copy($tpl, $tplFolder . '404.php');
             }
 
-            if (!file_exists($tplFolder . md5('404') . '.css')) {
-                copy($tplStyle, $tplFolder . md5('404') . '.css');
+            if (!file_exists($tplFolder . '404.css')) {
+                copy($tplStyle, $tplFolder . '404.css');
             }
         }
 
@@ -38,11 +38,11 @@ class PageNotFoundException extends AppException
             ->setVariableByName('textLink', 'Вернуться на главную')
         ;
 
-        $render->addStyle('/www/template/system/' . md5('404') . '.css')
+        $render->addStyle('/www/template/system/404.css')
             ->addStyle('https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css')
             ->addMetaData('name', 'viewport', 'width=device-width, initial-scale=1');
 
-        $render->runTemplate('system/' . md5('404') . '.php');
+        $render->runTemplate('system/404.php');
 
         parent::__construct($message, $code, $previous);
     }

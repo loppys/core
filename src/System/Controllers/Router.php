@@ -5,6 +5,8 @@ namespace Vengine\System\Controllers;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use Symfony\Component\HttpFoundation\Request;
+use Vengine\AbstractModule;
+use Vengine\Cache\Drivers\RoutesCacheDriver;
 use Vengine\System\Settings\Storages\AccessLevelStorage;
 use function FastRoute\simpleDispatcher;
 use Vengine\System\Exceptions\AccessDeniedException;
@@ -13,7 +15,6 @@ use Vengine\System\Exceptions\PageNotFoundException;
 use Vengine\System\Settings\Permissions;
 use Vengine\System\Settings\Storages\MethodType;
 use Vengine\System\Traits\ContainerTrait;
-use Vengine\Cache\CacheManager;
 use Vengine\Injection;
 use Vengine\App;
 
@@ -41,7 +42,7 @@ class Router implements Injection
 
     private static Dispatcher $dispatcher;
 
-    private CacheManager $cacheManager;
+    private RoutesCacheDriver $cacheDriver;
 
     public function __construct(Permissions $permissions)
     {
@@ -57,12 +58,7 @@ class Router implements Injection
         $this->host = $this->request->getHttpHost();
         $this->method = $this->request->getMethod();
 
-        $this->cacheManager = $this->container->createObject(
-            CacheManager::class,
-            [
-                $this->container->createObject(Configurator::class)
-            ]
-        );
+        $this->cacheDriver = $this->cache->routes;
     }
 
     public function addRouteList(array $pathList): Router
@@ -89,7 +85,11 @@ class Router implements Injection
     public function handle(string $route = null): void
     {
         if (empty(static::$dispatcher)) {
-            $this->collectRoutes();
+            if ($this->hasCachedRoutes()) {
+                static::$dispatcher = $this->getCachedRoutes();
+            } else {
+                $this->collectRoutes();
+            }
         }
 
         $this->route($route);
@@ -161,6 +161,8 @@ class Router implements Injection
                 }
             }
         );
+
+        $this->setRoutesCache(static::$dispatcher);
     }
 
     /**
@@ -193,12 +195,7 @@ class Router implements Injection
                     $method = $handler['method'];
                     $access = (int)$handler['access'];
 
-                    $apiTypeList = [
-                        AccessLevelStorage::API,
-                        AccessLevelStorage::ROOT
-                    ];
-
-                    $typeView = !in_array($access, $apiTypeList, true) ? 'default' : 'api';
+                    $typeView = $access !== AccessLevelStorage::API ? 'default' : 'api';
 
                     if ($typeView === 'api') {
                         $token = $this->request->get('token');
@@ -219,8 +216,16 @@ class Router implements Injection
                         throw new AccessDeniedException('Нет прав для просмотра страницы.');
                     }
 
+                    $controller = $this->container->getBuilder()->createObject($controller);
+
+                    if ($controller instanceof AbstractModule) {
+                        $controller->process()->render();
+
+                        break;
+                    }
+
                     $this->container->getBuilder()->invoke(
-                        $this->container->getBuilder()->createObject($controller),
+                        $controller,
                         $method,
                         $argumentList
                     );
@@ -242,5 +247,22 @@ class Router implements Injection
     public static function redirect(string $path = '/'): void
     {
         header("Location: {$path}");
+    }
+
+    protected function hasCachedRoutes(string $key = 'sys.routes'): bool
+    {
+        return $this->cacheDriver->has($key);
+    }
+
+    protected function getCachedRoutes(string $key = 'sys.routes'): ?Dispatcher
+    {
+        return $this->cacheDriver->get($key);
+    }
+
+    protected function setRoutesCache(?Dispatcher $routes, string $key = 'sys.routes'): static
+    {
+        $this->cacheDriver->set($key, $routes);
+
+        return $this;
     }
 }

@@ -6,15 +6,20 @@ use Doctrine\DBAL\Connection;
 use Loader\System\Interfaces\PackageInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Vengine\Modules\Debug\Main;
 use Vengine\Packages\Updater\Components\Configurator;
 use Vengine\Packages\Settings\Storage\ConstStorage;
 use Vengine\Packages\Updater\Controllers\UpdaterPageController;
 use Vengine\Packages\User\Factory\UserFactory;
 use Vengine\System\Actions;
 use Vengine\System\Components\Page\Render;
+use Vengine\System\Config\AppConfig;
 use Vengine\System\Controllers\Router;
 use Vengine\System\Database\SystemAdapter;
+use Vengine\System\Exceptions\AccessDeniedException;
 use Vengine\System\Exceptions\AppException;
+use Vengine\System\Exceptions\MethodNotAllowedException;
+use Vengine\System\Exceptions\PageNotFoundException;
 use Vengine\System\Settings\Storages\AccessLevelStorage;
 use Vengine\System\Settings\Storages\MethodType;
 use Vengine\System\Settings\Storages\PermissionType;
@@ -22,8 +27,10 @@ use Vengine\System\Settings\Structure;
 use Vengine\System\Traits\ContainerTrait;
 use Whoops\Handler\PrettyPageHandler;
 use Loader\System\Container;
+use Vengine\libs\Cache;
+use ReflectionException;
+use RuntimeException;
 use Whoops\Run;
-use Exception;
 
 final class App implements Injection
 {
@@ -39,6 +46,11 @@ final class App implements Injection
 
         $this->logWriter();
 
+        if (empty($_SERVER['engine.name']) && empty($_SERVER['engine.site'])) {
+            $_SERVER['engine.name'] = 'vEngine';
+            $_SERVER['engine.site'] = 'https://vengine.ru/';
+        }
+
         $session = self::getSession();
 
         $session->start();
@@ -50,9 +62,14 @@ final class App implements Injection
         }
     }
 
-    public function init(): void
+    protected function init(): void
     {
         $this->container = new Container();
+
+        $this->container->setShared(
+            'config',
+            $this->container->createObject(AppConfig::class)
+        );
 
         $this->container->setShared(
             'container',
@@ -68,6 +85,13 @@ final class App implements Injection
         if (!is_dir($cacheDir) && !mkdir($cacheDir) && !is_dir($cacheDir)) {
             throw new RuntimeException('Directory "/_cache/" was not created');
         }
+
+        $this->container->setShared(
+            'cache',
+            $this->container->createObject(Cache::class, [
+                $this->container
+            ])?->getCacheManager()
+        );
 
         $corePackage = $this->structure->coreConfig . ConstStorage::APP_CONFIG_NAME;
         $userPackage = $this->structure->userConfig . ConstStorage::APP_CONFIG_NAME;
@@ -163,8 +187,17 @@ final class App implements Injection
         self::$instance = $this;
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws PageNotFoundException
+     * @throws AccessDeniedException
+     * @throws MethodNotAllowedException
+     * @throws AppException
+     */
     public function run(): void
     {
+        $this->initModule('_debug_', Main::class);
+
         $this->container->setShared(
             'startup',
             $this->container->createObject(Startup::class)
@@ -186,13 +219,7 @@ final class App implements Injection
             );
         }
 
-        try {
-            $this->startup->run();
-        } catch (Exception $e) {
-            http_response_code($e->getCode());
-
-            print $e->getMessage();
-        }
+        $this->startup->run();
     }
 
     /**
@@ -249,7 +276,7 @@ final class App implements Injection
 
     public function logWriter(): void
     {
-        error_reporting(E_ALL & ~E_NOTICE);
+        error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
         ini_set('display_errors', 'Off');
         ini_set('log_errors', 'On');
         ini_set('error_log', $_SERVER['DOCUMENT_ROOT'] . '/logs/errors.log');
@@ -266,5 +293,51 @@ final class App implements Injection
             $whoops->pushHandler(new PrettyPageHandler);
             $whoops->register();
         }
+    }
+
+    /**
+     * @throws AppException
+     * @throws ReflectionException
+     */
+    public function initModule(string $name, string $class): void
+    {
+        $object = $this->container->createObject($class);
+
+        if (!$object instanceof AbstractModule) {
+            throw new AppException('incorrect module');
+        }
+
+        $this->container->setShared(
+            $name . '_module',
+            $object
+        );
+    }
+
+    public function getModule(string $name): AbstractModule
+    {
+        $name .= '_module';
+
+        return $this->{$name};
+    }
+
+    public function callModule(string $name, bool $render = false): AbstractModule
+    {
+        $module = $this->getModule($name)->process();
+
+        if ($render) {
+            $module->render();
+        }
+
+        return $module;
+    }
+
+    public function cacheDisable(): void
+    {
+        $this->container->createObject(Cache::class)?->disable();
+    }
+
+    public function cacheEnable(): void
+    {
+        $this->container->createObject(Cache::class)?->enable();
     }
 }

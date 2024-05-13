@@ -14,6 +14,8 @@ class UpdaterPageController extends AbstractPageController
 {
     protected Configurator $configurator;
 
+    protected const INSTALL_VERSION = 'install_2.php';
+
     public function __construct(
         Render $render,
         Router $router,
@@ -41,7 +43,10 @@ class UpdaterPageController extends AbstractPageController
                     'project' => $post['project'],
                     'uuid' => $post['uuid'],
                     'key' => $post['key'],
-                    'root' => password_hash($post['root'], PASSWORD_DEFAULT),
+                    'root' => password_hash(
+                        $post['root'] ?: uniqid('root~pass', true),
+                        PASSWORD_DEFAULT
+                    ),
                     'crypt' => $post['crypt'] === 'on',
                 ],
                 'database' => [
@@ -63,7 +68,7 @@ class UpdaterPageController extends AbstractPageController
 
                 $data['app']['uuid'] = Crypt::dsEncrypt($data['app']['uuid']);
                 $data['app']['key'] = Crypt::dsEncrypt($data['app']['key']);
-                $data['services']['token'] = Crypt::dsEncrypt($data['app']['key']);
+                $data['services']['token'] = Crypt::dsEncrypt($data['services']['token']);
             }
 
             $this->configurator->setConfig($data);
@@ -86,18 +91,19 @@ class UpdaterPageController extends AbstractPageController
 
         $tpl .= DIRECTORY_SEPARATOR . 'tpl' . DIRECTORY_SEPARATOR . 'forms' . DIRECTORY_SEPARATOR;
 
+        $installFile = self::INSTALL_VERSION;
         if (is_dir($templateFolder)) {
             if (!file_exists($templateFolder . 'update.php')) {
-                copy($tpl . 'update.php', $templateFolder . md5('update') . '.php');
+                copy($tpl . 'update.php', $templateFolder . 'update.php');
             }
 
-            if (!file_exists($templateFolder . 'install.php')) {
-                copy($tpl . 'install.php', $templateFolder . md5('install') . '.php');
+            if (!file_exists($templateFolder . $installFile)) {
+                copy($tpl . 'install.php', $templateFolder . $installFile);
             }
         }
 
         $this->render->setTitle('Базовая установка')
-            ->setTemplate('system/' . md5('install') . '.php');
+            ->setTemplate('system/' . $installFile);
 
         $this->render->addStyle('https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css');
 

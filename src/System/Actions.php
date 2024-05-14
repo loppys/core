@@ -40,8 +40,6 @@ class Actions implements Injection
 
     private Permissions $permissions;
 
-    private FileDriver $fileDriver;
-
     public function __construct(Permissions $permissions)
     {
         $this->permissions = $permissions;

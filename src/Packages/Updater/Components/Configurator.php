@@ -2,12 +2,15 @@
 
 namespace Vengine\Packages\Updater\Components;
 
+use Vengine\libs\Helpers\Crypt;
 use Vengine\Packages\Settings\Storage\ConstStorage;
 use Vengine\System\Settings\Structure;
 
 class Configurator
 {
     protected array $config = [];
+
+    private bool $decrypted = false;
 
     protected static string $path;
 
@@ -69,6 +72,22 @@ class Configurator
 
     public function getConfig(): array
     {
+        if ($this->config['data']['app']['crypt'] && !$this->decrypted) {
+            $this->config['data'] = array_map(static function ($item) {
+                foreach ($item as $key => $value) {
+                    if ($key === 'project' || $key === 'crypt' || $key === 'root') {
+                        continue;
+                    }
+
+                    $item[$key] = Crypt::dsDecrypt($value);
+                }
+
+                return $item;
+            }, $this->config['data']);
+
+            $this->decrypted = true;
+        }
+
         return $this->config['data'] ?: [];
     }
 }

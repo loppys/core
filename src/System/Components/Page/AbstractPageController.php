@@ -22,7 +22,7 @@ abstract class AbstractPageController extends DefaultController
         $this->adapter = $this->app->adapter;
         $this->render = $this->app->render;
 
-        $this->render->setTitle($this->title ?: 'Default Title');
+        $this->render->setTitle($this->title ?? 'Default Title');
 
         $this->prepareData();
     }

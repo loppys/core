@@ -3,6 +3,8 @@
 namespace Vengine\System;
 
 use Vengine\App;
+use Vengine\Cache\Drivers\FileDriver;
+use Vengine\Injection;
 use Vengine\System\Controllers\Router;
 use Vengine\System\DTO\ActionDTO;
 use Vengine\System\Exceptions\AccessDeniedException;
@@ -10,7 +12,7 @@ use Vengine\System\Settings\Permissions;
 use Vengine\System\Settings\Storages\PermissionType;
 use Vengine\System\Traits\ContainerTrait;
 
-class Actions
+class Actions implements Injection
 {
     use ContainerTrait;
 
@@ -41,7 +43,6 @@ class Actions
     public function __construct(Permissions $permissions)
     {
         $this->permissions = $permissions;
-
         $this->container = $this->getContainer();
     }
 

@@ -5,6 +5,7 @@ namespace Vengine;
 use Doctrine\DBAL\Connection;
 use Loader\System\Container;
 use Loader\System\Interfaces\ContainerInjection;
+use Vengine\Cache\CacheManager;
 use Vengine\Packages\Updater\Components\Configurator;
 use Vengine\Packages\User\Entity\User;
 use Vengine\System\Actions;
@@ -26,6 +27,7 @@ use Vengine\System\Settings\Structure;
  * @property-read AppConfig config
  * @property-read Actions $actions
  * @property-read Connection $db
+ * @property-read CacheManager $cache
  */
 interface Injection extends ContainerInjection
 {

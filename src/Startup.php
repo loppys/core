@@ -2,12 +2,17 @@
 
 namespace Vengine;
 
+use Vengine\Packages\Modules\Interfaces\InfoInterface;
+use Vengine\Packages\Modules\Storage\TypeStorage;
+
 /**
  * @property bool closed
  */
 final class Startup extends AbstractModule
 {
-    public string $module = 'Startup';
+    protected string $module = 'Startup';
+
+    protected string $version = '3FPR';
 
     /**
      * @return void
@@ -65,5 +70,14 @@ SQL;
         }, $routes);
 
         $this->router->addRouteList($routes);
+    }
+
+    public function changeModuleInfo(InfoInterface $info): void
+    {
+        $info
+            ->setDeveloper('<a href="https://vengine.ru/">loppys</a>')
+            ->setDescription('Модуль запуска приложения')
+            ->setType(TypeStorage::SYSTEM)
+        ;
     }
 }

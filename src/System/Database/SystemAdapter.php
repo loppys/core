@@ -18,13 +18,7 @@ class SystemAdapter
         $config = $configurator->getConfig();
         $database = $config['database'];
 
-        if ($config['app']['crypt'] === true) {
-            $this->param = array_map(static function ($item) {
-                return Crypt::dsDecrypt($item);
-            }, $database);
-        } else {
-            $this->param = $database;
-        }
+        $this->param = $database;
 
         if (!empty($this->param)) {
             $this->connect();
@@ -81,5 +75,10 @@ class SystemAdapter
 
                 return '"' . addslashes($value) . '"';
         }
+    }
+
+    public function getParam(): array
+    {
+        return $this->param;
     }
 }

@@ -4,6 +4,10 @@ namespace Vengine\System;
 
 use Vengine\Packages\Settings\Storage\ConstStorage;
 
+/**
+ * @deprecated
+ * @see \Vengine\libs\Cache
+ */
 class Cache
 {
     private string $cache;

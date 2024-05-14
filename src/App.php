@@ -2,6 +2,7 @@
 
 namespace Vengine;
 
+use Doctrine\DBAL\Connection;
 use Loader\System\Interfaces\PackageInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -10,9 +11,10 @@ use Vengine\Packages\Settings\Storage\ConstStorage;
 use Vengine\Packages\Updater\Controllers\UpdaterPageController;
 use Vengine\Packages\User\Factory\UserFactory;
 use Vengine\System\Actions;
-use Vengine\System\Components\Database\Adapter;
 use Vengine\System\Components\Page\Render;
 use Vengine\System\Controllers\Router;
+use Vengine\System\Database\SystemAdapter;
+use Vengine\System\Exceptions\AppException;
 use Vengine\System\Settings\Storages\AccessLevelStorage;
 use Vengine\System\Settings\Storages\MethodType;
 use Vengine\System\Settings\Storages\PermissionType;
@@ -27,15 +29,9 @@ final class App implements Injection
 {
     use ContainerTrait;
 
-    /**
-     * @var App
-     */
-    protected static $instance;
+    protected static App $instance;
 
-    /**
-     * @var bool
-     */
-    private $debugMode;
+    private bool $debugMode;
 
     public function __construct(bool $debug = false)
     {
@@ -43,13 +39,13 @@ final class App implements Injection
 
         $this->logWriter();
 
-        $session = static::getSession();
+        $session = self::getSession();
 
         $session->start();
 
-        static::getRequest()->setSession($session);
+        self::getRequest()->setSession($session);
 
-        if (empty(static::$instance)) {
+        if (empty(self::$instance)) {
             $this->init();
         }
     }
@@ -59,9 +55,19 @@ final class App implements Injection
         $this->container = new Container();
 
         $this->container->setShared(
-            'structure',
-            $this->createObject(Structure::class)
+            'container',
+            $this->container
         );
+
+        $this->container->setShared(
+            'structure',
+            $this->container->createObject(Structure::class)
+        );
+
+        $cacheDir = $this->structure->project . '/_cache/';
+        if (!is_dir($cacheDir) && !mkdir($cacheDir) && !is_dir($cacheDir)) {
+            throw new RuntimeException('Directory "/_cache/" was not created');
+        }
 
         $corePackage = $this->structure->coreConfig . ConstStorage::APP_CONFIG_NAME;
         $userPackage = $this->structure->userConfig . ConstStorage::APP_CONFIG_NAME;
@@ -89,21 +95,21 @@ final class App implements Injection
 
         $this->container->setShared(
             'configurator',
-            $this->createObject(Configurator::class)
+            $this->container->createObject(Configurator::class)
         );
 
         UserFactory::create();
 
         $this->container->setShared(
             'render',
-            $this->createObject(Render::class)
+            $this->container->createObject(Render::class)
         );
 
         $this->render->setTemplateFolder('/www/template/');
 
         $this->container->setShared(
             'router',
-            $this->createObject(Router::class)
+            $this->container->createObject(Router::class)
         );
 
         if (!file_exists(Configurator::getConfigPath())) {
@@ -137,29 +143,41 @@ final class App implements Injection
 
         $this->container->setShared(
             'adapter',
-            $this->createObject(Adapter::class)
+            $this->container->createObject(SystemAdapter::class)
         );
 
-        $this->adapter->connect();
+        $this->container->setShared(
+            'db',
+            $this->adapter->getConnection()
+        );
 
-        static::$instance = $this;
+        if (!$this->db instanceof Connection) {
+            throw new AppException('fail create db');
+        }
+
+        $this->container->setShared(
+            'actions',
+            $this->container->createObject(Actions::class)
+        );
+
+        self::$instance = $this;
     }
 
     public function run(): void
     {
         $this->container->setShared(
             'startup',
-            $this->createObject(Startup::class)
+            $this->container->createObject(Startup::class)
         );
 
-        $request = static::getRequest();
+        $request = self::getRequest();
 
         $subj = $request->get('subj');
         $fn = $request->get('fn');
 
         if ($subj && $fn) {
             $this->container->getBuilder()->invoke(
-                $this->createObject(Actions::class),
+                $this->actions,
                 'handle',
                 [
                     $subj,
@@ -177,20 +195,31 @@ final class App implements Injection
         }
     }
 
+    /**
+     * @throws AppException
+     */
     public static function app(): self
     {
-        if (empty(static::$instance)) {
+        if (empty(self::$instance)) {
             throw new AppException('App not init');
         }
 
-        return static::$instance;
+        return self::$instance;
     }
 
+    /**
+     * @deprecated
+     * @see Container::createObject()
+     */
     public function createObject(string $class, array $arguments = []): object
     {
         return $this->container->createObject($class, $arguments);
     }
 
+    /**
+     * @deprecated
+     * @see Container::getPackage()
+     */
     public function getPackage(string $name): PackageInterface
     {
         return $this->container->getPackage($name);

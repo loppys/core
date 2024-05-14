@@ -2,52 +2,55 @@
 
 namespace Vengine\Packages\Migrations;
 
+use Loader\System\Container;
 use Vengine\App;
 use Vengine\Packages\Migrations\DTO\MigrationResult;
 use Vengine\Packages\Migrations\Interfaces\AdapterPHPInterface;
 use Vengine\Packages\Migrations\Interfaces\AdapterSQLInterface;
 use Vengine\Packages\Migrations\Interfaces\MigrationAdapterInterface;
 use Vengine\Packages\Migrations\Interfaces\MigrationManagerInterface;
-use Vengine\System\Components\Database\Adapter;
+use Vengine\System\Database\SystemAdapter;
 use Vengine\System\Settings\Structure;
+use ReflectionException;
 
 class MigrationManager implements MigrationManagerInterface
 {
+    public const TABLE = 'migration';
+
     /**
      * AdapterPHPInterface и AdapterSQLInterface - алиасы для di
-     *
-     * @var MigrationAdapterInterface|AdapterPHPInterface|AdapterSQLInterface
      */
-    protected $adapter;
+    protected MigrationAdapterInterface|AdapterPHPInterface|AdapterSQLInterface $adapter;
 
-    /**
-     * @var Adapter
-     */
-    protected $databaseAdapter;
+    protected SystemAdapter $db;
 
-    /**
-     * @var Structure
-     */
-    protected $structure;
+    protected Structure $structure;
 
-    /**
-     * @var bool
-     */
-    private $checked = false;
+    private bool $checked = false;
 
-    /**
-     * @var array
-     */
-    private $fileList = [];
+    private array $fileList = [];
 
-    public function __construct(AdapterPHPInterface $adapter, Structure $structure)
-    {
+    private Container $container;
+
+    public function __construct(
+        AdapterPHPInterface $adapter,
+        Structure $structure,
+        SystemAdapter $db
+    ) {
         $this->adapter = $adapter;
         $this->structure = $structure;
+        $this->db = $db;
 
-        $this->databaseAdapter = App::app()->adapter;
+        $app = App::app();
+
+        $this->container = $app->container;
     }
 
+    /**
+     * @return void
+     *
+     * @throws ReflectionException
+     */
     public function run(): void
     {
         if (!$this->checked) {
@@ -60,8 +63,9 @@ class MigrationManager implements MigrationManagerInterface
         ];
 
         foreach ($adapterList as $adapter) {
+            $adapter = $this->container->createObject($adapter);
+
             /** @var MigrationAdapterInterface $adapter */
-            $adapter = App::app()->createObject($adapter);
             $adapter->run($this->fileList);
 
             $result = $adapter->getResult();
@@ -125,16 +129,20 @@ class MigrationManager implements MigrationManagerInterface
 
     protected function writeLog(MigrationResult $migrationResult): void
     {
-        $table = $this->databaseAdapter::dispense('migration');
+        $table = self::TABLE;
 
-        $table->file = $migrationResult->getFile();
-        $table->version = $this->getVersion();
-        $table->query = $migrationResult->getDescription();
-        $table->fail = $migrationResult->getError();
-        $table->fullpath = '@deprecated';
-        $table->completed = 'Y';
-
-        $this->databaseAdapter::store($table);
+        $this->db->getConnection()->createQueryBuilder()
+            ->insert($table)
+            ->values([
+                'file' => $this->db->escapeValue($migrationResult->getFile()),
+                'version' => $this->db->escapeValue($this->getVersion()),
+                'query' => $this->db->escapeValue($migrationResult->getDescription()),
+                'fail' => $this->db->escapeValue($migrationResult->getError()),
+                'fullPath' => $this->db->escapeValue('@deprecated'),
+                'completed' => $this->db->escapeValue('Y')
+            ])
+            ->executeStatement()
+        ;
     }
 
     private function addFilePath(array $dir, string $path): void
@@ -145,14 +153,19 @@ class MigrationManager implements MigrationManagerInterface
             $this->fileList[] = [
                 'file' => $value,
                 'path' => $path . $value,
-                'version' => $version ?? 'undefined'
+                'version' => $version ?: 'undefined'
             ];
         }
     }
 
     private function unsetCompleted(): void
     {
-        $migrationList = Adapter::getAll('SELECT * FROM `migration` WHERE `completed` = ?', ['Y']);
+        $migrationList = $this->db->getConnection()->createQueryBuilder()
+            ->select('*')
+            ->from('migration', 'm')
+            ->where('m.completed = "Y"')
+            ->executeQuery()
+            ->fetchAllAssociative();
 
         foreach ($migrationList as $migration) {
             foreach ($this->fileList as $key => $data) {

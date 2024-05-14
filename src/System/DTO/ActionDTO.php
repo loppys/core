@@ -6,30 +6,15 @@ use Vengine\System\Actions;
 
 class ActionDTO
 {
-    /**
-     * @var string
-     */
-    protected $name;
+    protected string $name;
 
-    /**
-     * @var array
-     */
-    protected $functionList = [];
+    protected array $functionList = [];
 
-    /**
-     * @var string
-     */
-    protected $controller = '';
+    protected string $controller = '';
 
-    /**
-     * @var array
-     */
-    protected $accessList = [];
+    protected array $accessList = [];
 
-    /**
-     * @var int
-     */
-    protected $type = Actions::TYPE_COMMON;
+    protected int $type = Actions::TYPE_COMMON;
 
     public function __construct(string $name)
     {

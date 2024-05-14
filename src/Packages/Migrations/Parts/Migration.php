@@ -4,19 +4,13 @@ namespace Vengine\Packages\Migrations\Parts;
 
 use Vengine\App;
 use Vengine\Packages\Migrations\DTO\MigrationResult;
-use Vengine\System\Components\Database\Adapter;
+use Vengine\System\Database\SystemAdapter;
 
 abstract class Migration
 {
-    /**
-     * @var Adapter
-     */
-    protected $databaseAdapter;
+    protected SystemAdapter $databaseAdapter;
 
-    /**
-     * @var MigrationResult
-     */
-    protected $result;
+    protected MigrationResult $result;
 
     public function __construct()
     {

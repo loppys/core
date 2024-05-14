@@ -4,25 +4,23 @@ namespace Vengine\Api\GUID;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Vengine\System\Controllers\ApiController;
+use Exception;
 
 class GuidController extends ApiController
 {
-    /**
-     * @var string
-     */
-    private $login;
+    private string $login;
 
-    public function indexAction($login = null): JsonResponse
+    public function indexAction($slug = null): JsonResponse
     {
-        $this->login = (string)$login;
+        $this->login = (string)$slug;
 
-        return parent::indexAction($login);
+        return parent::indexAction($slug);
     }
 
     /**
      * @return array
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function prepareData(): array
     {

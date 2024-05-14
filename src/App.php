@@ -313,13 +313,25 @@ final class App implements Injection
         );
     }
 
+    /**
+     * @throws AppException
+     */
     public function getModule(string $name): AbstractModule
     {
         $name .= '_module';
 
-        return $this->{$name};
+        $module = $this->container->getShared($name);
+
+        if (!empty($module) && $module instanceof AbstractModule) {
+            return $module;
+        }
+
+        throw new AppException('Module not init.');
     }
 
+    /**
+     * @throws AppException
+     */
     public function callModule(string $name, bool $render = false): AbstractModule
     {
         $module = $this->getModule($name)->process();

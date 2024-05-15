@@ -40,6 +40,10 @@ final class App implements Injection
 
     private bool $debugMode;
 
+    /**
+     * @throws AppException
+     * @throws ReflectionException
+     */
     public function __construct(bool $debug = false)
     {
         $this->debugMode = $debug;
@@ -62,6 +66,13 @@ final class App implements Injection
         }
     }
 
+    /**
+     * @throws AppException
+     * @throws ReflectionException
+     * @throws PageNotFoundException
+     * @throws AccessDeniedException
+     * @throws MethodNotAllowedException
+     */
     protected function init(): void
     {
         $this->container = new Container();

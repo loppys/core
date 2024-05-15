@@ -9,7 +9,12 @@ use Render\Engine\DefaultManager;
 use Render\Engine\Factory\RenderFactory;
 use Render\Engine\Storage\DataStorage;
 use Vengine\App;
+use Vengine\System\Render\RenderAdapter;
 
+/**
+ * @deprecated
+ * @see RenderAdapter (до v1.8 можно без проблем использовать этот класс, после 1.8 будет удален)
+ */
 class Render
 {
     protected Manager $manager;

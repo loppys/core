@@ -4,6 +4,10 @@ namespace Vengine\Packages\User\Entity;
 
 use Vengine\System\Settings\Storages\PermissionType;
 
+/**
+ * @deprecated
+ * @see В разработке отдельный модуль
+ */
 class User
 {
     private int $id = 0;

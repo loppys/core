@@ -5,6 +5,9 @@ namespace Vengine\System\Components\Page;
 use Vengine\System\Database\SystemAdapter;
 use Vengine\System\DefaultController;
 
+/**
+ * @TODO перенести в Controllers
+ */
 abstract class AbstractPageController extends DefaultController
 {
     protected SystemAdapter $adapter;
@@ -23,8 +26,6 @@ abstract class AbstractPageController extends DefaultController
         $this->render = $this->app->render;
 
         $this->render->setTitle($this->title ?? 'Default Title');
-
-        $this->prepareData();
     }
 
     public function indexAction(): void
@@ -37,6 +38,10 @@ abstract class AbstractPageController extends DefaultController
         $this->render->render();
     }
 
+    /**
+     * @deprecated
+     * @see use other methods
+     */
     public function prepareData(): void
     {
 

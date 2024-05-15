@@ -6,6 +6,10 @@ use Loader\System\Container;
 use Vengine\App;
 use Vengine\Packages\User\Entity\User;
 
+/**
+ * @deprecated
+ * @see В разработке отдельный модуль
+ */
 class UserFactory
 {
     public static function create(): void

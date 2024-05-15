@@ -5,6 +5,7 @@ namespace Vengine\Packages\Migrations\Parts;
 use Vengine\App;
 use Vengine\Packages\Migrations\DTO\MigrationResult;
 use Vengine\System\Database\SystemAdapter;
+use Vengine\System\Exceptions\AppException;
 
 abstract class Migration
 {
@@ -12,6 +13,9 @@ abstract class Migration
 
     protected MigrationResult $result;
 
+    /**
+     * @throws AppException
+     */
     public function __construct()
     {
         $this->databaseAdapter = App::app()->adapter;

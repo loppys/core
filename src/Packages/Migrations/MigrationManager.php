@@ -2,6 +2,7 @@
 
 namespace Vengine\Packages\Migrations;
 
+use Doctrine\DBAL\Exception;
 use Loader\System\Container;
 use Vengine\App;
 use Vengine\Packages\Migrations\DTO\MigrationResult;
@@ -10,6 +11,7 @@ use Vengine\Packages\Migrations\Interfaces\AdapterSQLInterface;
 use Vengine\Packages\Migrations\Interfaces\MigrationAdapterInterface;
 use Vengine\Packages\Migrations\Interfaces\MigrationManagerInterface;
 use Vengine\System\Database\SystemAdapter;
+use Vengine\System\Exceptions\AppException;
 use Vengine\System\Settings\Structure;
 use ReflectionException;
 
@@ -32,6 +34,9 @@ class MigrationManager implements MigrationManagerInterface
 
     private Container $container;
 
+    /**
+     * @throws AppException
+     */
     public function __construct(
         AdapterPHPInterface $adapter,
         Structure $structure,
@@ -127,6 +132,9 @@ class MigrationManager implements MigrationManagerInterface
         }
     }
 
+    /**
+     * @throws Exception
+     */
     protected function writeLog(MigrationResult $migrationResult): void
     {
         $table = self::TABLE;
@@ -158,6 +166,9 @@ class MigrationManager implements MigrationManagerInterface
         }
     }
 
+    /**
+     * @throws Exception
+     */
     private function unsetCompleted(): void
     {
         $migrationList = $this->db->getConnection()->createQueryBuilder()

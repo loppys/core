@@ -10,6 +10,7 @@ use Vengine\Modules\Debug\Main;
 use Vengine\Packages\Updater\Components\Configurator;
 use Vengine\Packages\Settings\Storage\ConstStorage;
 use Vengine\Packages\Updater\Controllers\UpdaterPageController;
+use Vengine\Packages\Migrations\Interfaces\MigrationManagerInterface;
 use Vengine\Packages\User\Factory\UserFactory;
 use Vengine\System\Actions;
 use Vengine\System\Components\Page\Render;

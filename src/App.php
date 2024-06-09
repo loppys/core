@@ -207,6 +207,8 @@ final class App implements Injection
      */
     public function run(): void
     {
+        $this->container->createObject(MigrationManagerInterface::class)->run();
+        
         $this->container->setShared(
             'startup',
             $this->container->createObject(Startup::class)

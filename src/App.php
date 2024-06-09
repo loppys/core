@@ -207,8 +207,6 @@ final class App implements Injection
      */
     public function run(): void
     {
-        $this->initModule('_debug_', Main::class);
-
         $this->container->setShared(
             'startup',
             $this->container->createObject(Startup::class)

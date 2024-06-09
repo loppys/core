@@ -33,6 +33,8 @@ final class Startup extends AbstractModule
 
         $this->collectRoutesFromDatabase();
 
+        $this->initModule('_debug_', Main::class);
+
         $this->router->handle();
     }
 

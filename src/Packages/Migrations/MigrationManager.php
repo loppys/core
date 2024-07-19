@@ -87,6 +87,25 @@ class MigrationManager implements MigrationManagerInterface
             return $this;
         }
 
+        if (!$this->db->getConnection()->createSchemaManager()->tableExists(self::TABLE)) {
+            // переделать через SchemaManager
+            $createTableQuery = <<<SQL
+CREATE TABLE IF NOT EXISTS `migration` (
+    `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+    `file` LONGTEXT DEFAULT NULL,
+    `version` varchar(60) DEFAULT NULL,
+    `completed` varchar(1) DEFAULT NULL,
+    `fail` LONGTEXT DEFAULT NULL,
+    `query` LONGTEXT DEFAULT NULL,
+    `date` timestamp NULL DEFAULT current_timestamp(),
+    `fullpath` LONGTEXT DEFAULT NULL,
+    PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+SQL;
+
+            $this->db->getConnection()->executeQuery($createTableQuery);
+        }
+
         $core = $this->structure->coreMigrations;
         $user = $this->structure->userMigrations;
 

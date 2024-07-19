@@ -7,18 +7,6 @@ CREATE TABLE IF NOT EXISTS `cfg` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `migration` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `file` LONGTEXT DEFAULT NULL,
-  `version` varchar(60) DEFAULT NULL,
-  `completed` varchar(1) DEFAULT NULL,
-  `fail` LONGTEXT DEFAULT NULL,
-  `query` LONGTEXT DEFAULT NULL,
-  `date` timestamp NULL DEFAULT current_timestamp(),
-  `fullpath` LONGTEXT DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
-
 CREATE TABLE IF NOT EXISTS `modules` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `module_name` varchar(50) DEFAULT NULL,

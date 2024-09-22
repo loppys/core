@@ -67,7 +67,7 @@ $currentTime = time();
             <td><?php print date_default_timezone_get(); ?></td>
         </tr>
         <tr>
-            <td>Virtual engine</td>
+            <td>Engine</td>
             <td><a href="<?php print $_SERVER['engine.site']; ?>"><?php print $_SERVER['engine.name']; ?></a></td>
         </tr>
         <tr><td></td><td></td></tr>

@@ -119,6 +119,11 @@ class Router implements Injection
             $userRoutesApi = require $userRoutesApi;
 
             $routesApi = array_merge($routesApi, (array)$userRoutesApi);
+            foreach ($routesApi as $apiRoute) {
+                $apiRoute['route'] = self::API_PREFIX . $routeApi['route'];
+
+                $routes[] = $apiRoute;
+            }
         }
 
         $routeGeneration = static function (RouteCollector $routeCollector, array $routeInfo) {
@@ -150,15 +155,21 @@ class Router implements Injection
 
         static::$dispatcher = simpleDispatcher(
             static function (RouteCollector $routeCollector) use ($routes, $routesApi, $routeGeneration) {
+                $tmpRoutes = [];
+
                 foreach ($routes as $route) {
-                    $routeGeneration($routeCollector, $route);
+                    if (!empty($route['method'])) {
+                        $tmpRoutes[$route['method'] . $route['route']] = $route;
+                    } else {
+                        $tmpRoutes[$route['route']] = $route;
+                    }
                 }
 
-                foreach ($routesApi as $routeApi) {
-                    $routeApi['route'] = self::API_PREFIX . $routeApi['route'];
-
-                    $routeGeneration($routeCollector, $routeApi);
+                foreach ($tmpRoutes as $routeInfo) {
+                    $routeGeneration($routeCollector, $routeInfo);
                 }
+
+                unset($tmpRoutes);
             }
         );
 

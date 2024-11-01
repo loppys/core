@@ -251,6 +251,8 @@ SQL;
 
     public function render(): void
     {
+        $this->prepareRender();
+        
         $this->render->runTemplate("{$this->module}/{$this->template}");
     }
 

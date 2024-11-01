@@ -253,4 +253,9 @@ SQL;
     {
         $this->render->runTemplate("{$this->module}/{$this->template}");
     }
+
+    protected function prepareRender(): void
+    {
+
+    }
 }

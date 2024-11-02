@@ -120,7 +120,7 @@ class Router implements Injection
 
             $routesApi = array_merge($routesApi, (array)$userRoutesApi);
             foreach ($routesApi as $apiRoute) {
-                $apiRoute['route'] = self::API_PREFIX . $routeApi['route'];
+                $apiRoute['route'] = self::API_PREFIX . $apiRoute['route'];
 
                 $routes[] = $apiRoute;
             }

@@ -260,4 +260,13 @@ SQL;
     {
 
     }
+        
+    protected function getToken(): ?string
+    {
+        return (string)$this->request->get('token')
+            ?? (json_decode((string)$this->request->getContent())?->token ?? null)
+            ?? $this->user->getToken()
+            ?: null
+        ;
+    }
 }

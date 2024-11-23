@@ -16,9 +16,13 @@ abstract class ApiController
 
     protected Request $request;
 
+    protected array $postData = [];
+
     public function __construct()
     {
         $this->request = App::getRequest();
+        
+        $this->postData = json_decode($this->request->getContent());
     }
 
     public function indexAction($slug = null): JsonResponse

@@ -25,10 +25,6 @@ abstract class ApiController
     {
         $this->setData($this->prepareData());
 
-        if (empty($this->data)) {
-            $this->addError('empty_data');
-        }
-
         return $this->getJsonResponse()->prepare($this->request)->send();
     }
 

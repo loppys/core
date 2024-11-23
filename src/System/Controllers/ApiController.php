@@ -5,6 +5,7 @@ namespace Vengine\System\Controllers;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Vengine\App;
+use stdClass;
 
 abstract class ApiController
 {
@@ -16,13 +17,13 @@ abstract class ApiController
 
     protected Request $request;
 
-    protected array $postData = [];
+    protected ?stdClass $postData;
 
     public function __construct()
     {
         $this->request = App::getRequest();
         
-        $this->postData = json_decode($this->request->getContent());
+        $this->postData = json_decode($this->request->getContent() ?: '');
     }
 
     public function indexAction($slug = null): JsonResponse

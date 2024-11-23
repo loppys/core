@@ -209,7 +209,12 @@ class Router implements Injection
                     $typeView = $access !== AccessLevelStorage::API ? 'default' : 'api';
 
                     if ($typeView === 'api') {
-                        $token = $this->request->get('token');
+                        $token = $this->request->get('token')
+                            ?? (json_decode($this->request->getContent())->token ?? null)
+                            ?? $this->user->getToken()
+                            ?: null
+                        ;
+                        
                         $server = $_SERVER['SERVER_ADDR'];
 
                         if ($this->request->getClientIp() === $server) {

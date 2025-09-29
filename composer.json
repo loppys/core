@@ -30,7 +30,7 @@
         "nikic/fast-route": "^1.3",
         "filp/whoops": "^2.14",
         "vengine/render": "^2.2",
-        "vengine/container": "^3.3",
+        "vengine/container": "^3.3 || ^4.0",
         "vengine/cache": "^1.0",
         "ext-json": "*"
     },
